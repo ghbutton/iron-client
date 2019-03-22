@@ -1,0 +1,4 @@
+.chatsMenu {
+  display: flex;
+  justify-content: flex-end;
+}
