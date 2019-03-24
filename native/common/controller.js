@@ -3,6 +3,7 @@ import api from "./api.js";
 import signal from "./signal.js";
 import storage from "./storage.js";
 import logger from "./logger.js";
+import fileSystem from "./file_system.js";
 
 let applicationState = (function() {
   let state = {connectedUsers: [], messages: []}
@@ -92,6 +93,27 @@ let controller = (function() {
     callbacks.newMessage();
   };
 
+  async function _uploadFile(filename, recipientUserId) {
+    logger.info(`Sending file ${filename} to ${recipientUserId}`);
+    let basename = await fileSystem.basename(filename);
+    let bytes = await fileSystem.readBytes(filename);
+    let {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
+    logger.info(`Encrypted`);
+
+    let fileUpload = await api.uploadFile({encrypted, deviceId});
+    logger.info(`Uploaded`);
+
+    // Save a local version to memory and storage
+    let localFileMessage = await signal.localFileMessage(basename, userId, recipientUserId, deviceId)
+    await applicationState.addMessage(localFileMessage);
+    await storage.saveMessages(deviceId, await applicationState.messages());
+
+    // TODO use a queue system to send messages to the server
+    const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+    let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
+    await api.sendEncryptedMessages(encryptedMessages, preKeyBundleId);
+  }
+
   return {
     init: async function(){
       logger.info("Async init");
@@ -107,7 +129,6 @@ let controller = (function() {
     },
     connectToServer: async function() {
       logger.info("Connect to server");
-      await signal.aesEncrypt("ABC");
       await api.connect(userId, userSessionToken, clientVersion, deviceId);
       await api.joinLoginChannel(_loginChannelCallback);
 
@@ -136,6 +157,8 @@ let controller = (function() {
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
       }
     },
+    showOpenDialog: async function() {
+    },
     inspectStore: async function() {
       return signal.inspectStore();
     },
@@ -147,7 +170,7 @@ let controller = (function() {
 
       for (let i = 0; i < messages.length; i++) {
         let message = messages[i];
-        if(message.attributes.decryptedBody.type === signal.syncLocalMessageType()) {
+        if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
           if (message.relationships.receiver.data.id === connectedUserId.toString()) {
             connectedMessages.push(message);
           }
@@ -167,7 +190,7 @@ let controller = (function() {
     },
     // TODO make async
     currentUsersMessage: function(message) {
-      if(message.attributes.decryptedBody.type === signal.syncLocalMessageType()) {
+      if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
         return (message.relationships.sender.data.id === userId.toString());
       } else {
         return (preKeyBundleId === message.relationships.sender_pre_key_bundle.data.id);
@@ -240,6 +263,31 @@ let controller = (function() {
     },
     createNewInvitation: async function(name, email) {
       return api.sendInvitation(name, email, 2000);
+    },
+    uploadFiles: async function(recipientUserId) {
+      let fileNames = await fileSystem.showOpenDialog();
+      if (fileNames === undefined) return;
+
+      for(let i = 0; i < fileNames.length; i++) {
+        _uploadFile(fileNames[i], recipientUserId);
+      }
+
+
+    },
+    downloadFile: async function(message) {
+      console.log("Downloading file");
+      console.log(message);
+
+      let {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
+      let fileUpload = await api.downloadFile(fileUploadId);
+
+      let decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
+      let path = await fileSystem.showSaveDialog(basename);
+
+      if (path === undefined) return;
+
+      console.log(decrypted);
+      return fileSystem.writeBytes(path, decrypted);
     },
     sendMessage: async function(messageString, recipientUserId){
       logger.info(`Sending message ${messageString} to ${recipientUserId}`);

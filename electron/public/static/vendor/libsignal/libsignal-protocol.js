@@ -33062,7 +33062,8 @@ Curve25519Worker.prototype = {
                     break;
                 }
                 if (!(field = this._fieldsById[id])) {
-                    // "messages created by your new code can be parsed by your old code: old binaries simply ignore the new field when parsing."
+                  // "messages created by your new code can be parsed by your old code: old binaries simply ignore the new field when parsing."
+                  console.log(wireType);
                     switch (wireType) {
                         case ProtoBuf.WIRE_TYPES.VARINT:
                             buffer.readVarint32();
@@ -36109,6 +36110,7 @@ SessionCipher.prototype = {
               }.bind(this));
           }.bind(this));
       }.bind(this)).then(function(message) {
+        console.log(session);
           if (session.pendingPreKey !== undefined) {
               var preKeyMsg = new Internal.protobuf.PreKeyWhisperMessage();
               preKeyMsg.identityKey = util.toArrayBuffer(ourIdentityKey.pubKey);

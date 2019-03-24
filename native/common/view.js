@@ -8,6 +8,20 @@ let view = (function() {
       } else {
         return name
       }
+    },
+    messageDisplay: function(message) {
+      if (message.attributes.decryptedBody.type === "fm") {
+        return message.attributes.decryptedBody.data.basename
+      } else {
+        return message.attributes.decryptedBody.data
+      }
+    },
+    messageHasLink: function(message) {
+      if (message.attributes.decryptedBody.type === "fm") {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 })()

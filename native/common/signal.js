@@ -25,12 +25,53 @@ let signal = (function() {
     }
   }
 
-  async function _encryptMessage(store, address, messageString) {
-    let object = JSON.stringify({"type": "m", "version": "1", "data": messageString});
-    let messageBuffer = window.util.toArrayBuffer(object);
+  async function _messagePayload(messageString) {
+    return JSON.stringify({"type": "m", "version": "1", "data": messageString});
+  }
 
+  async function _fileMessagePayload({hmacExported, sIv, signature, aesExported, fileUploadId, basename}) {
+    return JSON.stringify({"type": "fm", "version": "1", "data": {hmacExported, sIv, signature, aesExported, fileUploadId, basename}});
+  }
+
+  async function _sendPayload(preKeyBundles, payload, deviceId) {
+    let encryptedMessages = [];
+
+    for (let preKeyBundle of preKeyBundles) {
+      const bundleDeviceId = preKeyBundle.relationships.device.data.id
+      const addressString = await _addressString(bundleDeviceId)
+      const address = new window.libsignal.SignalProtocolAddress(addressString, bundleDeviceId);
+      if (!await _storeHasSession(store, addressString, bundleDeviceId)) {
+        let sessionBuilder = new window.libsignal.SessionBuilder(store, address);
+        await sessionBuilder.processPreKey({
+          registrationId: preKeyBundle.attributes.registration_id,
+          identityKey: await _sToB(preKeyBundle.attributes.identity_key),
+          signedPreKey: {
+            keyId     : preKeyBundle.attributes.signed_pre_key_id,
+            publicKey : await _sToB(preKeyBundle.attributes.signed_pre_key_public_key),
+            signature : await _sToB(preKeyBundle.attributes.signed_pre_key_signature)
+          },
+          preKey: {
+            keyId     : preKeyBundle.attributes.pre_key_id,
+            publicKey : await _sToB(preKeyBundle.attributes.pre_key_public_key)
+          }
+        });
+
+      }
+
+      let message = await _encryptMessage(store, address, payload);
+      let encryptedPayload = {message: message, preKeyBundleId: preKeyBundle.id};
+      encryptedMessages.push(encryptedPayload);
+    }
+
+    await _saveState(deviceId);
+    return encryptedMessages;
+  }
+
+  async function _encryptMessage(store, address, messagePayload) {
+    // Encode using UTF8
+    let buffer = await _sToUtf8(messagePayload);
     let sessionCipher = await _getCipher(store, address);
-    let message = await sessionCipher.encrypt(messageBuffer);
+    let message = await sessionCipher.encrypt(buffer);
     return message;
   }
 
@@ -49,6 +90,14 @@ let signal = (function() {
 
   async function _sToB(string) {
     return window.util.toArrayBuffer(string);
+  }
+
+  async function _sToUtf8(string) {
+    return new TextEncoder("utf-8").encode(string);
+  }
+
+  async function _utf8ToS(buffer) {
+    return new TextDecoder().decode(buffer);
   }
 
   async function _saveState(deviceId) {
@@ -104,8 +153,7 @@ let signal = (function() {
 
   return {
     aesEncrypt: async function(data) {
-      let bData = await _sToB(data);
-      let key = await window.crypto.subtle.generateKey(
+      let aesKey = await window.crypto.subtle.generateKey(
         {
           name: "AES-CBC",
           length: 256, //can be  128, 192, or 256
@@ -113,32 +161,32 @@ let signal = (function() {
         true, //whether the key is extractable (i.e. can be used in exportKey)
         ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
       )
-      let exported = await _bToS(await window.crypto.subtle.exportKey("raw", key));
+      let aesExported = await _bToS(await window.crypto.subtle.exportKey("raw", aesKey));
       let iv = window.crypto.getRandomValues(new Uint8Array(16));
       let sIv = await _bToS(iv);
-      let bEncrypted = await window.crypto.subtle.encrypt( { name: "AES-CBC", iv: iv},key, bData);
+      let bEncrypted = await window.crypto.subtle.encrypt( { name: "AES-CBC", iv: iv}, aesKey, await _sToB(data));
       let encrypted = await _bToS(bEncrypted);
-      console.log(sIv);
-      console.log(exported);
-      console.log(encrypted);
 
-      console.log("HMAC");
       let hmacKey = await window.crypto.subtle.generateKey({name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
       let hmacExported = await _bToS(await window.crypto.subtle.exportKey("raw", hmacKey));
-      console.log(hmacExported);
       let signature = await _bToS(await window.crypto.subtle.sign({name: "HMAC"}, hmacKey, bEncrypted));
-      console.log(signature);
 
+      return {encrypted, hmacExported, sIv, signature, aesExported}
+
+    },
+    aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
+      let hmacKey = await window.crypto.subtle.importKey("raw", await _sToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
+      let verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _sToB(signature), await _sToB(encrypted));
 
-      let key2 = await window.crypto.subtle.importKey("raw", await _sToB(exported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
-      let decrypted = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: await _sToB(sIv)}, key2, await _sToB(encrypted));
+      if (!verified) {
+        throw "Error, file not verified."
+      }
+
+      let aesKey = await window.crypto.subtle.importKey("raw", await _sToB(aesExported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
+      let decrypted = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: await _sToB(sIv)}, aesKey, await _sToB(encrypted));
       let sDecrypted = await _bToS(decrypted);
-
-      let hmacKey2 = await window.crypto.subtle.importKey("raw", await _sToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
-      let verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey2, await _sToB(signature), await _sToB(encrypted));
-      console.log(sDecrypted);
-      console.log(verified);
+      return sDecrypted;
     },
     inspectStore: async function() {
       return store;
@@ -178,8 +226,11 @@ let signal = (function() {
       }
     },
     decryptMessage: async function(deviceId, senderDeviceId, payload){
-      let addressString = await utility.addressString(deviceId);
-      let address = new window.libsignal.SignalProtocolAddress(addressString, deviceId);
+      if (deviceId === senderDeviceId) {
+        throw "We should never send a message the same device"
+      }
+      let addressString = await utility.addressString(senderDeviceId);
+      let address = new window.libsignal.SignalProtocolAddress(addressString, senderDeviceId);
       let sessionCipher = new window.libsignal.SessionCipher(store, address);
       let encryptedMessage = payload.data[0];
 
@@ -193,7 +244,8 @@ let signal = (function() {
         message = await sessionCipher.decryptWhisperMessage(encryptedMessage.attributes.body, "binary")
       }
 
-      message = JSON.parse(await _bToS(message));
+      // Decode using UTF8
+      message = JSON.parse(await _utf8ToS(message));
       delete encryptedMessage.attributes.body
 
       encryptedMessage.attributes.decryptedBody = message;
@@ -238,6 +290,33 @@ let signal = (function() {
     syncLocalMessageType: function() {
       return "local_message_v1";
     },
+    syncLocalFileMessageType: function() {
+      return "local_file_message_v1";
+    },
+    localFileMessage: async function(basename, userId, recipientUserId, deviceId) {
+      let object = {"type": "local_file_message_v1", "data": basename};
+
+      return {
+        id: `local_${Date.now()}`,
+        attributes: {
+          decryptedBody: object
+        },
+        relationships: {
+          sender: {
+            data: {
+              type: "user",
+              id: userId
+            }
+          },
+          receiver: {
+            data: {
+              type: "user",
+              id: recipientUserId
+            }
+          }
+        }
+      }
+    },
     localMessage: async function(messageString, userId, recipientUserId, deviceId) {
       let object = {"type": "local_message_v1", "data": messageString};
 
@@ -262,38 +341,13 @@ let signal = (function() {
         }
       }
     },
+    encryptFileMessages: async function(preKeyBundles, params, deviceId) {
+      let fileMessagePayload = await _fileMessagePayload(params);
+      return _sendPayload(preKeyBundles, fileMessagePayload, deviceId);
+    },
     encryptMessages: async function(preKeyBundles, messageString, deviceId) {
-      let encryptedMessages = [];
-
-      for (let preKeyBundle of preKeyBundles) {
-        const bundleDeviceId = preKeyBundle.relationships.device.data.id
-        const addressString = await _addressString(bundleDeviceId)
-        const address = new window.libsignal.SignalProtocolAddress(addressString, bundleDeviceId);
-        if (!await _storeHasSession(store, addressString, bundleDeviceId)) {
-          let sessionBuilder = new window.libsignal.SessionBuilder(store, address);
-          await sessionBuilder.processPreKey({
-            registrationId: preKeyBundle.attributes.registration_id,
-            identityKey: await _sToB(preKeyBundle.attributes.identity_key),
-            signedPreKey: {
-                keyId     : preKeyBundle.attributes.signed_pre_key_id,
-                publicKey : await _sToB(preKeyBundle.attributes.signed_pre_key_public_key),
-                signature : await _sToB(preKeyBundle.attributes.signed_pre_key_signature)
-            },
-            preKey: {
-                keyId     : preKeyBundle.attributes.pre_key_id,
-                publicKey : await _sToB(preKeyBundle.attributes.pre_key_public_key)
-            }
-          });
-
-        }
-
-        let message = await _encryptMessage(store, address, messageString);
-        let payload = {message: message, preKeyBundleId: preKeyBundle.id};
-        encryptedMessages.push(payload);
-      }
-
-      await _saveState(deviceId);
-      return encryptedMessages;
+      let messagePayload = await _messagePayload(messageString);
+      return _sendPayload(preKeyBundles, messagePayload, deviceId);
     }
   }
 })()

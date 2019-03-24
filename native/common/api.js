@@ -220,6 +220,26 @@ let api = (function() {
         await _sendPush(apiChannel, "POST:messages", payload);
       }
     },
+    uploadFile: async function({encrypted, deviceId}) {
+      let payload = {
+        "payload" : {
+          "data": {
+            "type": "file_upload",
+            "attributes": {
+              "device_id": deviceId,
+              "data": encrypted
+            }
+          }
+        }
+      }
+
+      let resp = await _sendPush(apiChannel, "POST:file_uploads", payload);
+      return resp.payload.data[0];
+    },
+    downloadFile: async function(fileUploadId) {
+      const resp = await _sendPush(apiChannel, "GET:file_uploads", {"id": fileUploadId});
+      return resp.payload.data[0];
+    },
     connectedUsers: async function(timeout, userId){
       await _waitForApiChannel(timeout);
       let connections = [];
