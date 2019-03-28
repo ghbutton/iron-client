@@ -15,7 +15,6 @@ let signal = (function() {
   }
 
   async function _getCipher(store, address) {
-    // TODO figure why we aren't sending any messages of type 1
     if (ciphers[address.toString()]) {
       return ciphers[address.toString()];
     } else {
@@ -180,7 +179,7 @@ let signal = (function() {
       let verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _sToB(signature), await _sToB(encrypted));
 
       if (!verified) {
-        throw "Error, file not verified."
+        throw new Error("Error, file not verified.");
       }
 
       let aesKey = await window.crypto.subtle.importKey("raw", await _sToB(aesExported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
@@ -227,7 +226,7 @@ let signal = (function() {
     },
     decryptMessage: async function(deviceId, senderDeviceId, payload){
       if (deviceId === senderDeviceId) {
-        throw "We should never send a message the same device"
+        throw new Error("We should never send a message the same device");
       }
       let addressString = await utility.addressString(senderDeviceId);
       let address = new window.libsignal.SignalProtocolAddress(addressString, senderDeviceId);
@@ -268,7 +267,6 @@ let signal = (function() {
       return true
     },
     getPreKeyBundle: async function() {
-      // TODO pass an object here and serialize it in api.js
       let payload = {
         "payload" : {
           "data": {

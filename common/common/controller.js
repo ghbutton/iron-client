@@ -49,7 +49,7 @@ let applicationState = (function() {
 window.applicationState = applicationState;
 
 let controller = (function() {
-  let [userId, userSessionToken, preKeyBundleId, deviceId] = [null, null, null, null];
+  let [userId, userSessionToken, preKeyBundleId, deviceId, deviceSecret] = [null, null, null, null, null];
   const clientVersion = "0.0.1"
 
   async function _searchIncludes(baseString, searchString) {
@@ -119,7 +119,12 @@ let controller = (function() {
       logger.info("Async init");
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
-      deviceId = await storage.getDeviceId(userId);
+      let device = await storage.getDevice(userId);
+
+      if (device) {
+        deviceId = device.id;
+        deviceSecret = device.secret;
+      }
 
       if (deviceId !== null) {
         applicationState.initMessages(await storage.loadMessages(deviceId));
@@ -129,19 +134,15 @@ let controller = (function() {
     },
     connectToServer: async function() {
       logger.info("Connect to server");
-      await api.connect(userId, userSessionToken, clientVersion, deviceId);
+      await api.connect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
       await api.joinLoginChannel(_loginChannelCallback);
 
       if (userId && deviceId === null) {
         if (deviceId === null) {
-          let device = await api.getDeviceId(userId, userSessionToken, 2000);
-          // TODO additional security around device id?
-          // So that a device can only get the messages for the device it is on
-          // EG some kind of device secret that can be passed to the server when
-          // connecting
-          await storage.saveDeviceId(userId, device.id);
+          let device = await api.getDevice(userId, userSessionToken, 2000);
+          await storage.saveDevice(userId, device);
           deviceId = device.id;
-          // TODO reconnect to socket if you get a new device id
+          await api.reconnect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
         }
       }
 
@@ -163,10 +164,11 @@ let controller = (function() {
       return signal.inspectStore();
     },
     getMessages: async function(connectedUserId) {
-      // TODO keep track of which message we are on.
-      // Dedup messages
       let messages = await applicationState.messages();
       let connectedMessages = [];
+
+      // This should probably be done in application state with some kind of caching
+      let usersByBundle = {};
 
       for (let i = 0; i < messages.length; i++) {
         let message = messages[i];
@@ -178,8 +180,17 @@ let controller = (function() {
           let senderPreKeyBundleId = message.relationships.sender_pre_key_bundle.data.id;
           let receiverPreKeyBundleId = message.relationships.pre_key_bundle.data.id;
 
-          let senderUser = await api.getUserByPreKeyBundleId(senderPreKeyBundleId);
-          let receiverUser = await api.getUserByPreKeyBundleId(receiverPreKeyBundleId);
+          let senderUser = usersByBundle[senderPreKeyBundleId];
+          if (!senderUser) {
+            senderUser = await api.getUserByPreKeyBundleId(senderPreKeyBundleId);
+            usersByBundle[senderPreKeyBundleId] = senderUser;
+          }
+
+          let receiverUser = usersByBundle[receiverPreKeyBundleId];
+          if (!receiverUser) {
+            receiverUser = await api.getUserByPreKeyBundleId(receiverPreKeyBundleId);
+            usersByBundle[receiverPreKeyBundleId] = receiverUser;
+          }
 
           if (senderUser.id === connectedUserId.toString() || (senderUser.id === userId.toString() && receiverUser.id === connectedUserId.toString())) {
             connectedMessages.push(message);

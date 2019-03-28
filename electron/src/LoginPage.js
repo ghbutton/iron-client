@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
 import * as qs from 'qs';
 
 class LoginPage extends Component {
@@ -17,9 +16,7 @@ class LoginPage extends Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    console.log("Submit");
-    let sendCodeResp = await window.controller.sendVerificationCode(this.state.email);
-    console.log(sendCodeResp);
+    await window.controller.sendVerificationCode(this.state.email);
     let query = {email: this.state.email};
     const searchString = qs.stringify(query);
 
@@ -29,7 +26,6 @@ class LoginPage extends Component {
   render() {
     return (
       <div>
-        <Link className="btn btn-outline-primary" to={`/settings`}>{"< Back"}</Link>
         <h2>Login Page</h2>
         <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit}>
           <label><b>Email</b></label>

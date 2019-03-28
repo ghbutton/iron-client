@@ -48,7 +48,7 @@ let api = (function() {
   }
 
   return {
-    connect: async function(userId, userSessionToken, clientVersion, deviceId) {
+    connect: async function(userId, userSessionToken, clientVersion, deviceId, deviceSecret) {
       let url = `${config.wsProtocol()}://${config.wsUrl()}`;
 
       let wsPort = config.wsPort();
@@ -62,10 +62,11 @@ let api = (function() {
       socket = new Socket(url,
         {
           params: {
-            userId: userId,
-            sessionToken: userSessionToken,
-            clientVersion: clientVersion,
-            deviceId: deviceId
+            user_id: userId,
+            session_token: userSessionToken,
+            client_version: clientVersion,
+            device_id: deviceId,
+            device_secret: deviceSecret
           }
         }
       );
@@ -74,6 +75,10 @@ let api = (function() {
       apiChannel = socket.channel("api:connect", {})
       loginChannel = socket.channel("login:connect", {})
       socket.connect();
+    },
+    reconnect: async function(userId, userSessionToken, clientVersion, deviceId, deviceSecret) {
+      await socket.disconnect();
+      return this.connect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
     },
     joinApiChannel: async function(apiChannelCallback){
       apiChannel.join()
@@ -177,7 +182,7 @@ let api = (function() {
 
       return user;
     },
-    getDeviceId: async function(userId, userSessionToken, timeout) {
+    getDevice: async function(userId, userSessionToken, timeout) {
       await waitForLoginChannel(timeout);
 
       const resp = await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken});

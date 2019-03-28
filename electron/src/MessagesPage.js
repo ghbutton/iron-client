@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import './MessagePage.css';
+import './App.css';
 
 class MessagesPage extends Component {
 
@@ -8,16 +10,31 @@ class MessagesPage extends Component {
     this.state = {connectedUser: null, loaded: false, value: ``, userMessages: []}
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleKeyUp= this.handleKeyUp.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleNewMessage = this.handleNewMessage.bind(this);
     this.uploadFile= this.uploadFile.bind(this);
     this.downloadFile= this.downloadFile.bind(this);
+    this.focusInput = React.createRef();
 
     window.apiCallbacks.newMessage = this.handleNewMessage;
   }
 
   async handleChange(event) {
     this.setState({value: event.target.value});
+  }
+
+  async focusTextInput() {
+    // Explicitly focus the text input using the raw DOM API
+    // Note: we're accessing "current" to get the DOM node
+    this.textInput.current.focus();
+  }
+
+  async handleKeyUp(event) {
+    if(event.key === "Enter" ) {
+      event.preventDefault();
+      this.handleSubmit(event);
+    }
   }
 
   async uploadFile() {
@@ -33,13 +50,22 @@ class MessagesPage extends Component {
   }
 
   async handleNewMessage() {
+    let rescroll = false;
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+      rescroll = true;
+    }
     let userMessages = await window.controller.getMessages(this.state.connectedUser.id);
     this.setState({userMessages: userMessages});
+
+    if (rescroll) {
+      window.scroll({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }
 
   async handleSubmit(event) {
-    event.preventDefault();
-
     await window.controller.sendMessage(this.state.value, this.props.match.params.id);
     this.setState({value: ""});
     this.handleNewMessage();
@@ -47,35 +73,49 @@ class MessagesPage extends Component {
 
   render() {
     let messages = this.state.userMessages.map((message, index) =>
-      {if(window.view.messageHasLink(message)) {
-        return <p className={window.controller.currentUsersMessage(message) ? "text-primary text-right" : "text-secondary"} key={message.id}>
-          <button className="btn btn-primary" onClick={this.downloadFile(message)}>{window.view.messageDisplay(message)}</button>
-          </p>
-      } else {
-        return <p className={window.controller.currentUsersMessage(message) ? "text-primary text-right" : "text-secondary"} key={message.id}>{window.view.messageDisplay(message)}</p>
-      }}
-    )
+      {
+        let body = null;
+
+        if(window.view.messageHasLink(message)) {
+          body = <button className="btn btn-primary" onClick={this.downloadFile(message)}>{window.view.messageDisplay(message)}</button>
+        } else {
+          body = window.view.messageDisplay(message);
+        }
+
+        return <div key={message.id}><div className={window.controller.currentUsersMessage(message) ? "from-me" : "from-them"} >
+          {body}
+      </div><div className="clear"></div></div>
+    })
     return (
       <div>
-        <Link className="btn btn-outline-primary" to={`/`}>{"< Back"}</Link>
-        <h2>Messages {this.state.connectedUser === null ? `` : `- ${window.view.userDisplay(this.state.connectedUser)}`}</h2>
-        <div>
-          {messages}
+        <div className="sticky-header color1">
+          <Link className="btn btn-primary" to={`/`}>{"< Back"}</Link>
+          <h2>{this.state.connectedUser === null ? `` : `${window.view.userDisplay(this.state.connectedUser)}`}</h2>
         </div>
-        <form onSubmit={this.handleSubmit}>
-          <input type="text" value={this.state.value} onChange={this.handleChange} placeholder="Write a message..." />
-          <input type="submit" value="Submit" className="btn btn-primary" />
-          <button type="button" className="btn btn-success" onClick={this.uploadFile}>+</button>
-        </form>
+        <section>
+          {messages}
+        </section>
+        <div className="sticky-footer">
+          <textarea rows="1" ref={this.focusInput} type="text" value={this.state.value} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
+          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.uploadFile}>+</button>
+        </div>
       </div>
     );
   }
 
   async componentDidMount() {
     let connectedUserId = this.props.match.params.id
-    let connectedUser = await window.controller.getUserById(connectedUserId);
     let userMessages = await window.controller.getMessages(connectedUserId);
-    this.setState({connectedUser: connectedUser, loaded: true, userMessages: userMessages});
+    this.focusInput.current.focus();
+    this.setState({loaded: true, userMessages});
+
+    // Api call, slow
+    let connectedUser = await window.controller.getUserById(connectedUserId);
+    this.setState({connectedUser});
+
+    window.scroll({
+      top: document.body.scrollHeight
+    });
   }
 }
 

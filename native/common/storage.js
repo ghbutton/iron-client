@@ -53,14 +53,15 @@ let storage = (function() {
       const key = `ironSignalInfo_${deviceId}`;
       await setItem(key, payload);
     },
-    getDeviceId: async function(userId) {
+    getDevice: async function(userId) {
       const key = `ironDeviceId_${userId}`;
-      console.log(await getItem(key));
-      return (await getItem(key)) || null;
+      const devicePayload = await getItem(key);
+      const device = JSON.parse(devicePayload);
+      return (device) || null;
     },
-    saveDeviceId: async function(userId, deviceId) {
+    saveDevice: async function(userId, device) {
       const key = `ironDeviceId_${userId}`;
-      await setItem(key, deviceId);
+      return setItem(key, JSON.stringify(device));
     }
   }
 })()
