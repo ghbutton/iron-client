@@ -39,6 +39,7 @@ let signal = (function() {
       const bundleDeviceId = preKeyBundle.relationships.device.data.id
       const addressString = await _addressString(bundleDeviceId)
       const address = new window.libsignal.SignalProtocolAddress(addressString, bundleDeviceId);
+
       if (!await _storeHasSession(store, addressString, bundleDeviceId)) {
         let sessionBuilder = new window.libsignal.SessionBuilder(store, address);
         await sessionBuilder.processPreKey({
@@ -58,7 +59,7 @@ let signal = (function() {
       }
 
       let message = await _encryptMessage(store, address, payload);
-      let encryptedPayload = {message: message, preKeyBundleId: preKeyBundle.id};
+      let encryptedPayload = {message: message, deviceId: bundleDeviceId};
       encryptedMessages.push(encryptedPayload);
     }
 
@@ -224,14 +225,13 @@ let signal = (function() {
         }
       }
     },
-    decryptMessage: async function(deviceId, senderDeviceId, payload){
+    decryptMessage: async function(deviceId, senderDeviceId, encryptedMessage){
       if (deviceId === senderDeviceId) {
         throw new Error("We should never send a message the same device");
       }
       let addressString = await utility.addressString(senderDeviceId);
       let address = new window.libsignal.SignalProtocolAddress(addressString, senderDeviceId);
       let sessionCipher = new window.libsignal.SessionCipher(store, address);
-      let encryptedMessage = payload.data[0];
 
       let message = null;
 

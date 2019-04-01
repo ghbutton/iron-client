@@ -138,6 +138,23 @@ let api = (function() {
       const updateResp = await _sendPush(apiChannel, `PATCH:users:${userId}`, payload);
       return updateResp;
     },
+    messageDelivered: async function(messageId) {
+      await _waitForApiChannel();
+
+      let payload = {
+        payload: {
+          data: {
+            type: "message",
+            attributes: {
+              delivered_at: "now"
+            }
+          }
+        }
+      }
+
+      const updateResp = await _sendPush(apiChannel, `PATCH:messages:${messageId}`, payload);
+      return updateResp;
+    },
     sendPreKeyBundle: async function(payload){
       return _sendPush(apiChannel, "POST:pre_key_bundles", payload);
     },
@@ -194,6 +211,12 @@ let api = (function() {
       const preKeyBundlesResp = await _sendPush(apiChannel, "GET:pre_key_bundles", {"id": id});
       return preKeyBundlesResp.payload.data[0]
     },
+    getMessages: async function() {
+      await _waitForApiChannel();
+
+      const messagesResp = await _sendPush(apiChannel, "GET:messages", {});
+      return messagesResp.payload.data
+    },
     getPreKeyBundlesByUserId: async function(userId) {
       await _waitForApiChannel();
 
@@ -206,8 +229,8 @@ let api = (function() {
       const userResp = await _sendPush(apiChannel, "GET:users", {pre_key_bundle_id: preKeyBundleId});
       return userResp.payload.data[0];
     },
-    sendEncryptedMessages: async function(encryptedMessages, senderPreKeyBundleId) {
-      for (let {message, preKeyBundleId} of encryptedMessages) {
+    sendEncryptedMessages: async function(encryptedMessages, senderDeviceId, senderUserId, receiverUserId) {
+      for (let {message, deviceId} of encryptedMessages) {
         let payload = {
           "payload" : {
             "data": {
@@ -215,8 +238,10 @@ let api = (function() {
               "attributes": {
                 "type": message.type,
                 "body": message.body,
-                "pre_key_bundle_id": preKeyBundleId,
-                "sender_pre_key_bundle_id": senderPreKeyBundleId
+                "device_id": deviceId,
+                "sender_device_id": senderDeviceId,
+                "sender_user_id": senderUserId,
+                "receiver_user_id": receiverUserId
               }
             }
           }

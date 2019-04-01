@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import './MessagePage.css';
+import './MessagesPage.css';
 import './App.css';
 
 class MessagesPage extends Component {
@@ -15,9 +15,8 @@ class MessagesPage extends Component {
     this.handleNewMessage = this.handleNewMessage.bind(this);
     this.uploadFile= this.uploadFile.bind(this);
     this.downloadFile= this.downloadFile.bind(this);
-    this.focusInput = React.createRef();
 
-    window.apiCallbacks.newMessage = this.handleNewMessage;
+    this.focusInput = React.createRef();
   }
 
   async handleChange(event) {
@@ -116,6 +115,12 @@ class MessagesPage extends Component {
     window.scroll({
       top: document.body.scrollHeight
     });
+
+    window.addEventListener("new_message", this.handleNewMessage);
+  }
+
+  async componentWillUnmount() {
+    window.removeEventListener("new_message", this.handleNewMessage);
   }
 }
 

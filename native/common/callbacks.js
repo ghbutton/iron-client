@@ -1,7 +1,9 @@
 let callbacks = (function() {
   return {
     newMessage: function() {
-      window.apiCallbacks.newMessage();
+      const event = new CustomEvent("new_message", {});
+      // Dispatch the event.
+      window.dispatchEvent(event);
     }
   }
 })()

@@ -36110,7 +36110,6 @@ SessionCipher.prototype = {
               }.bind(this));
           }.bind(this));
       }.bind(this)).then(function(message) {
-        console.log(session);
           if (session.pendingPreKey !== undefined) {
               var preKeyMsg = new Internal.protobuf.PreKeyWhisperMessage();
               preKeyMsg.identityKey = util.toArrayBuffer(ourIdentityKey.pubKey);
@@ -36319,7 +36318,6 @@ SessionCipher.prototype = {
           return Promise.resolve();
       }
 
-      console.log('New remote ephemeral key');
       var ratchet = session.currentRatchet;
 
       return Promise.resolve().then(function() {

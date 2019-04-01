@@ -1,18 +1,59 @@
 import utility from "./utility.js"
+const isDev = (process.env.NODE_ENV === "development");
+// const app = window.app;
+const fs = window.fs;
+const os = window.os;
+
+let basePath = null;
+
+if (isDev) {
+  if (window.localStorage.getItem("basePath")) {
+    basePath = window.localStorage.getItem("basePath");
+  } else {
+    basePath = "/tmp/iron/storage";
+  }
+} else {
+  basePath = `${os.homedir()}/Library/Application Support/Iron/Storage`;
+}
 
 let storage = (function() {
   async function setItem(key, value) {
-    return window.localStorage.setItem(key, value);
+    return fs.writeFileSync(`${basePath}/${key}`, value);
   }
   async function getItem(key) {
-    return window.localStorage.getItem(key);
+    return new Promise(function(resolve, reject) {
+      fs.readFile(`${basePath}/${key}`, (err, data) => {
+        if (err) {
+          if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
+            resolve(null);
+          } else {
+            throw(err);
+          }
+        } else {
+          resolve(data);
+        }
+      });
+    });
   }
   async function userSessionKey() {
     return `ironUserSession`;
   }
+
+  async function messagesKey(deviceId) {
+    return `ironMessages_${deviceId}`;
+  }
+
+  async function signalInfoKey(deviceId) {
+    return `ironSignalInfo_${deviceId}`;
+  }
+
+  async function deviceKey(userId) {
+    return `ironDeviceId_${userId}`;
+  }
+
   return {
     loadMessages: async function(deviceId) {
-      const key = `ironMessages_${deviceId}`;
+      const key = await messagesKey(deviceId);
       const messagesPayload = await getItem(key);
       if (await utility.nullOrUndefined(messagesPayload)) {
         return [];
@@ -20,9 +61,30 @@ let storage = (function() {
         return JSON.parse(messagesPayload);
       }
     },
+    init: async function() {
+      let folders = basePath.split("/");
+      let currentPath = "";
+      if (folders[0] === "") {
+        // Remove the leading slash
+        folders.shift();
+
+        let first = folders.shift();
+        currentPath= `/${first}`
+      } else {
+        currentPath = `${folders.shift()}`
+      }
+
+      while(folders.length > 0) {
+        let current = folders.shift();
+        currentPath = `${currentPath}/${current}`;
+        if (!fs.existsSync(currentPath)) {
+          fs.mkdirSync(currentPath);
+        }
+      }
+    },
     saveMessages: async function(deviceId, messages) {
-      const key = `ironMessages_${deviceId}`;
-      setItem(key, JSON.stringify(messages));
+      const key = await messagesKey(deviceId);
+      return setItem(key, JSON.stringify(messages));
     },
     loadCurrentSession: async function() {
       const key = await userSessionKey();
@@ -37,10 +99,10 @@ let storage = (function() {
     },
     saveSession: async function(session) {
       const key = await userSessionKey();
-      setItem(key, JSON.stringify(session));
+      return setItem(key, JSON.stringify(session));
     },
     loadSignalInfo: async function(deviceId) {
-      const key = `ironSignalInfo_${deviceId}`;
+      const key = await signalInfoKey(deviceId);
       const deviceInfoPayload = await getItem(key);
       if (await utility.nullOrUndefined(deviceInfoPayload)) {
         return null;
@@ -50,17 +112,17 @@ let storage = (function() {
       }
     },
     saveSignalInfo: async function(deviceId, payload) {
-      const key = `ironSignalInfo_${deviceId}`;
-      await setItem(key, payload);
+      const key = await signalInfoKey(deviceId);
+      return setItem(key, payload);
     },
     getDevice: async function(userId) {
-      const key = `ironDeviceId_${userId}`;
+      const key = await deviceKey(userId);
       const devicePayload = await getItem(key);
       const device = JSON.parse(devicePayload);
       return (device) || null;
     },
     saveDevice: async function(userId, device) {
-      const key = `ironDeviceId_${userId}`;
+      const key = await deviceKey(userId);
       return setItem(key, JSON.stringify(device));
     }
   }

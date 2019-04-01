@@ -42,6 +42,9 @@ let applicationState = (function() {
     },
     initMessages: async function(messages) {
       state.messages = messages;
+    },
+    hasMessage: async function(message) {
+      return state.messages.some((thisMessage) => { return thisMessage.id === message.id })
     }
   }
 })();
@@ -49,8 +52,25 @@ let applicationState = (function() {
 window.applicationState = applicationState;
 
 let controller = (function() {
-  let [userId, userSessionToken, preKeyBundleId, deviceId, deviceSecret] = [null, null, null, null, null];
+  let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
   const clientVersion = "0.0.1"
+
+  async function _decryptMessage(encryptedMessage) {
+    let senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
+
+    logger.info(`Got a message from ${senderDeviceId}`);
+
+    // Dedup messages that we already have
+    if (!await applicationState.hasMessage(encryptedMessage)) {
+      let message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
+      // Needs to happen atomically
+      await applicationState.addMessage(message);
+      await storage.saveMessages(deviceId, await applicationState.messages());
+      // END
+    }
+
+    await api.messageDelivered(encryptedMessage.id);
+  }
 
   async function _searchIncludes(baseString, searchString) {
     baseString = baseString || "";
@@ -63,13 +83,19 @@ let controller = (function() {
   async function _apiChannelCallback(resp) {
     logger.info("Joined api channel successfully", resp);
     let bundle = await signal.getPreKeyBundle();
-    let response = await api.sendPreKeyBundle(bundle);
-    preKeyBundleId = response.payload.data[0].id;
+    await api.sendPreKeyBundle(bundle);
     logger.info("Done with api channel");
   }
 
   async function _userDeviceChannelCallback(resp) {
     logger.info("Joined user device successfully", resp);
+    const messages = await api.getMessages();
+
+    for(let i = 0; i < messages.length; i++) {
+      const encryptedMessage = messages[i];
+      _decryptMessage(encryptedMessage)
+    }
+    callbacks.newMessage();
   }
 
   async function _loginChannelCallback(resp) {
@@ -78,18 +104,9 @@ let controller = (function() {
 
   async function _receiveMessagesCallback(response) {
     let encryptedMessage = response.payload.data[0]
-    let senderPreKeyBundleId = encryptedMessage.relationships.sender_pre_key_bundle.data.id;
 
-    logger.info(`Got a message from ${senderPreKeyBundleId}`);
+    await _decryptMessage(encryptedMessage);
 
-    let senderPreKeyBundle = await api.getPreKeyBundlesById(senderPreKeyBundleId);
-    let senderDeviceId = senderPreKeyBundle.relationships.device.data.id;
-
-    logger.info(`Got a message from device: ${senderDeviceId}`);
-
-    let message = await signal.decryptMessage(deviceId, senderDeviceId, response.payload);
-    await applicationState.addMessage(message);
-    await storage.saveMessages(deviceId, await applicationState.messages());
     callbacks.newMessage();
   };
 
@@ -98,25 +115,26 @@ let controller = (function() {
     let basename = await fileSystem.basename(filename);
     let bytes = await fileSystem.readBytes(filename);
     let {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
-    logger.info(`Encrypted`);
 
     let fileUpload = await api.uploadFile({encrypted, deviceId});
-    logger.info(`Uploaded`);
 
     // Save a local version to memory and storage
     let localFileMessage = await signal.localFileMessage(basename, userId, recipientUserId, deviceId)
     await applicationState.addMessage(localFileMessage);
     await storage.saveMessages(deviceId, await applicationState.messages());
 
-    // TODO use a queue system to send messages to the server
+    // Send to Recipient
     const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
     let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
-    await api.sendEncryptedMessages(encryptedMessages, preKeyBundleId);
+    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
   }
 
   return {
     init: async function(){
-      logger.info("Async init");
+      logger.info("Init");
+      await storage.init();
+
+      logger.info("Storaged initialized");
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
       let device = await storage.getDevice(userId);
@@ -158,17 +176,13 @@ let controller = (function() {
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
       }
     },
-    showOpenDialog: async function() {
-    },
     inspectStore: async function() {
       return signal.inspectStore();
     },
+    // TODO get messages from API
     getMessages: async function(connectedUserId) {
       let messages = await applicationState.messages();
       let connectedMessages = [];
-
-      // This should probably be done in application state with some kind of caching
-      let usersByBundle = {};
 
       for (let i = 0; i < messages.length; i++) {
         let message = messages[i];
@@ -177,34 +191,22 @@ let controller = (function() {
             connectedMessages.push(message);
           }
         } else {
-          let senderPreKeyBundleId = message.relationships.sender_pre_key_bundle.data.id;
-          let receiverPreKeyBundleId = message.relationships.pre_key_bundle.data.id;
+          let senderUserId = message.relationships.sender_user.data.id;
+          let receiverUserId = message.relationships.receiver_user.data.id;
 
-          let senderUser = usersByBundle[senderPreKeyBundleId];
-          if (!senderUser) {
-            senderUser = await api.getUserByPreKeyBundleId(senderPreKeyBundleId);
-            usersByBundle[senderPreKeyBundleId] = senderUser;
-          }
-
-          let receiverUser = usersByBundle[receiverPreKeyBundleId];
-          if (!receiverUser) {
-            receiverUser = await api.getUserByPreKeyBundleId(receiverPreKeyBundleId);
-            usersByBundle[receiverPreKeyBundleId] = receiverUser;
-          }
-
-          if (senderUser.id === connectedUserId.toString() || (senderUser.id === userId.toString() && receiverUser.id === connectedUserId.toString())) {
+          if (senderUserId === connectedUserId.toString() || (senderUserId === userId.toString() && receiverUserId === connectedUserId.toString())) {
             connectedMessages.push(message);
           }
         }
       }
       return connectedMessages;
     },
-    // TODO make async
+    // TODO make async ??
     currentUsersMessage: function(message) {
       if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
         return (message.relationships.sender.data.id === userId.toString());
       } else {
-        return (preKeyBundleId === message.relationships.sender_pre_key_bundle.data.id);
+        return (deviceId === message.relationships.sender_device.data.id);
       }
     },
     currentUser: async function(message) {
@@ -279,16 +281,15 @@ let controller = (function() {
       let fileNames = await fileSystem.showOpenDialog();
       if (fileNames === undefined) return;
 
-      for(let i = 0; i < fileNames.length; i++) {
-        _uploadFile(fileNames[i], recipientUserId);
-      }
-
-
+      return await Promise.all(
+        fileNames.map(
+          fileName =>
+            _uploadFile(fileName, recipientUserId)
+        )
+      )
     },
     downloadFile: async function(message) {
-      console.log("Downloading file");
-      console.log(message);
-
+      logger.info("Downloading file");
       let {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
       let fileUpload = await api.downloadFile(fileUploadId);
 
@@ -297,9 +298,9 @@ let controller = (function() {
 
       if (path === undefined) return;
 
-      console.log(decrypted);
       return fileSystem.writeBytes(path, decrypted);
     },
+    // TODO sync messages to all users devices
     sendMessage: async function(messageString, recipientUserId){
       logger.info(`Sending message ${messageString} to ${recipientUserId}`);
       const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
@@ -309,9 +310,9 @@ let controller = (function() {
       await applicationState.addMessage(localMessage);
       await storage.saveMessages(deviceId, await applicationState.messages());
 
-      // TODO use a queue system to send messages to the server
+      // Send to receiver
       let encryptedMessages = await signal.encryptMessages(preKeyBundles, messageString, deviceId);
-      await api.sendEncryptedMessages(encryptedMessages, preKeyBundleId);
+      await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
     }
   }
 })();
