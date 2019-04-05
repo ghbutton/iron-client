@@ -8,3 +8,9 @@ Yarn commands:
 - `yarn start` run the server
 - `yarn build` create a production build
 - `yarn electron` start an electron app
+
+
+Building for prod:
+- `yarn preelectron-pack`
+- `yarn electron-pack`
+- `yarn dist`

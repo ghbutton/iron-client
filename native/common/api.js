@@ -8,13 +8,21 @@ let api = (function() {
   let [apiChannelReady, loginChannelReady] = [false, false];
   let [failedToJoin] = [false];
 
-  async function _sendPush(channel, event, options) {
+  async function _sendPush(channel, topic, payload, timeout = 10000) {
     let [ready, results] = [false, null];
 
-    channel.push(event, options).receive("ok", pushResults => {
+    channel.push(topic, payload, timeout).receive("ok", pushResults => {
       results = pushResults;
       ready = true;
-    });
+    }).receive("error", resp => {
+      results = {status: "error", resp: resp};
+      ready = true;
+    }).receive("timeout",
+      () => {
+        results = {status: "error", resp: JSON.parse(`{"message": "Server timeout, try again later"}`)};
+        ready = true;
+      }
+    );
 
     while(true) {
       if (ready) {
@@ -263,7 +271,7 @@ let api = (function() {
         }
       }
 
-      let resp = await _sendPush(apiChannel, "POST:file_uploads", payload);
+      let resp = await _sendPush(apiChannel, "POST:file_uploads", payload, 60000);
       return resp.payload.data[0];
     },
     downloadFile: async function(fileUploadId) {

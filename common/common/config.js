@@ -1,4 +1,6 @@
 const isDev = (process.env.NODE_ENV === "development");
+const os = window.os;
+
 
 let config = (function() {
   return {
@@ -21,6 +23,17 @@ let config = (function() {
         return parseInt(process.env.REACT_APP_IRON_WS_PORT, 10);
       } else {
         return null;
+      }
+    },
+    basePath: function() {
+      if (isDev) {
+        if (window.localStorage.getItem("basePath")) {
+          return window.localStorage.getItem("basePath");
+        } else {
+          return "/tmp/iron/storage";
+        }
+      } else {
+        return `${os.homedir()}/Library/Application Support/Iron/Storage`;
       }
     }
   }

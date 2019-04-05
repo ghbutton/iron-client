@@ -1,20 +1,9 @@
 import utility from "./utility.js"
-const isDev = (process.env.NODE_ENV === "development");
+import config from "./config.js"
 // const app = window.app;
 const fs = window.fs;
-const os = window.os;
 
-let basePath = null;
-
-if (isDev) {
-  if (window.localStorage.getItem("basePath")) {
-    basePath = window.localStorage.getItem("basePath");
-  } else {
-    basePath = "/tmp/iron/storage";
-  }
-} else {
-  basePath = `${os.homedir()}/Library/Application Support/Iron/Storage`;
-}
+let basePath = config.basePath();
 
 let storage = (function() {
   async function setItem(key, value) {
