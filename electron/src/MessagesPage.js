@@ -128,8 +128,8 @@ class MessagesPage extends Component {
         </section>
         <div className="sticky-footer">
           <textarea rows="1" ref={this.focusInput} type="text" value={this.state.value} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
-          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.showEmojis}>😀</button>
-          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.uploadFile}>📁</button>
+          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.showEmojis}><span role="img" aria-label="face">😀</span></button>
+          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.uploadFile}><span role="img" aria-label="folder">📁</span></button>
         </div>
       </div>
     );
