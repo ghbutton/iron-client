@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "electron-is-dev": "^1.0.1",
+    "emoji-mart": "^2.11.0",
     "phoenix-channels": "^1.0.0",
     "qs": "~6.5.2",
     "react": "^16.5.2",

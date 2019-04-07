@@ -1,13 +1,16 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import './MessagesPage.css';
 import './App.css';
+import 'emoji-mart/css/emoji-mart.css'
+
+import { Picker } from 'emoji-mart'
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 class MessagesPage extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {connectedUser: null, loaded: false, value: ``, userMessages: []}
+    this.state = {connectedUser: null, loaded: false, value: ``, userMessages: [], emojisVisible: false}
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
@@ -34,6 +37,30 @@ class MessagesPage extends Component {
       event.preventDefault();
       this.handleSubmit(event);
     }
+  }
+
+  addEmoji = (e) => {
+    // console.log(e.unified)
+    if (e.unified.length <= 5){
+      let emojiPic = String.fromCodePoint(`0x${e.unified}`)
+      this.setState({
+        value: this.state.value + emojiPic
+      })
+    } else {
+      let sym = e.unified.split('-')
+      let codesArray = []
+      sym.forEach(el => codesArray.push('0x' + el))
+      // console.log(codesArray.length)
+      // console.log(codesArray)  // ["0x1f3f3", "0xfe0f"]
+      let emojiPic = String.fromCodePoint(...codesArray)
+      this.setState({
+        value: this.state.value + emojiPic
+      })
+    }
+  }
+
+  showEmojis = async () => {
+    this.setState({emojisVisible: !this.state.emojisVisible});
   }
 
   async uploadFile() {
@@ -65,9 +92,11 @@ class MessagesPage extends Component {
   }
 
   async handleSubmit(event) {
-    await window.controller.sendMessage(this.state.value, this.props.match.params.id);
-    this.setState({value: ""});
-    this.handleNewMessage();
+    if (this.state.value !== "") {
+      await window.controller.sendMessage(this.state.value, this.props.match.params.id);
+      this.setState({value: ""});
+      this.handleNewMessage();
+    }
   }
 
   render() {
@@ -91,12 +120,16 @@ class MessagesPage extends Component {
           <Link className="btn btn-primary" to={`/`}>{"< Back"}</Link>
           <h2>{this.state.connectedUser === null ? `` : `${window.view.userDisplay(this.state.connectedUser)}`}</h2>
         </div>
-        <section>
+        <section className="message-display">
           {messages}
+          <span id="picker">
+            {this.state.emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}
+          </span>
         </section>
         <div className="sticky-footer">
           <textarea rows="1" ref={this.focusInput} type="text" value={this.state.value} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
-          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.uploadFile}>+</button>
+          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.showEmojis}>😀</button>
+          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.uploadFile}>📁</button>
         </div>
       </div>
     );

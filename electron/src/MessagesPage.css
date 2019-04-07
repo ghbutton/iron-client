@@ -4,6 +4,12 @@ body {
   font-weight: normal;
 }
 
+#picker {
+  position: absolute;
+  right: 0;
+  bottom: 60px;
+}
+
 .sticky-footer {
   position: fixed;
   width: 100%;
@@ -62,7 +68,7 @@ body {
   padding-bottom: 5px;
 }
 
-section {
+section.message-display {
   margin: 100px auto;
 
   div {
