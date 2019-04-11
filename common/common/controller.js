@@ -45,6 +45,14 @@ let applicationState = (function() {
     },
     hasMessage: async function(message) {
       return state.messages.some((thisMessage) => { return thisMessage.id === message.id })
+    },
+    messageSent: async function(localMessage) {
+      // TODO, should the server send something back to say the message has been received?
+      for(let i = 0; i< state.messages.length; i++){
+        if (localMessage.id === state.messages[i].id) {
+          state.messages[i].attributes.sent_at = Date.now();
+        }
+      }
     }
   }
 })();
@@ -54,6 +62,37 @@ window.applicationState = applicationState;
 let controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
   const clientVersion = "0.0.1"
+
+  async function _sendLocalFile(localFileMessage) {
+    const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
+
+    const bytes = await fileSystem.readBytes(filename);
+    const {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
+
+    const fileUpload = await api.uploadFile({encrypted, deviceId});
+
+    const recipientUserId = localFileMessage.relationships.receiver.data.id;
+    const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+    let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
+    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
+
+    await applicationState.messageSent(localFileMessage);
+    await storage.saveMessages(deviceId, await applicationState.messages());
+    callbacks.newMessage();
+  }
+
+  async function _sendLocalMessage(localMessage) {
+    const recipientUserId = localMessage.relationships.receiver.data.id;
+    const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+
+    // Send to receiver
+    let encryptedMessages = await signal.encryptMessages(preKeyBundles, localMessage.attributes.decryptedBody.data, deviceId);
+    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
+
+    await applicationState.messageSent(localMessage);
+    await storage.saveMessages(deviceId, await applicationState.messages());
+    callbacks.newMessage();
+  }
 
   async function _decryptMessage(encryptedMessage) {
     let senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
@@ -113,20 +152,12 @@ let controller = (function() {
   async function _uploadFile(filename, recipientUserId) {
     logger.info(`Sending file ${filename} to ${recipientUserId}`);
     let basename = await fileSystem.basename(filename);
-    let bytes = await fileSystem.readBytes(filename);
-    let {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
-
-    let fileUpload = await api.uploadFile({encrypted, deviceId});
-
-    // Save a local version to memory and storage
-    let localFileMessage = await signal.localFileMessage(basename, userId, recipientUserId, deviceId)
+    let localFileMessage = await signal.localFileMessage({basename, filename}, userId, recipientUserId, deviceId);
     await applicationState.addMessage(localFileMessage);
     await storage.saveMessages(deviceId, await applicationState.messages());
 
-    // Send to Recipient
-    const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
-    let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
-    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
+    _sendLocalFile(localFileMessage);
+    return null;
   }
 
   return {
@@ -303,16 +334,16 @@ let controller = (function() {
     // TODO sync messages to all users devices
     sendMessage: async function(messageString, recipientUserId){
       logger.info(`Sending message ${messageString} to ${recipientUserId}`);
-      const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
 
       // Save a local version to memory and storage
       let localMessage = await signal.localMessage(messageString, userId, recipientUserId, deviceId)
       await applicationState.addMessage(localMessage);
       await storage.saveMessages(deviceId, await applicationState.messages());
 
-      // Send to receiver
-      let encryptedMessages = await signal.encryptMessages(preKeyBundles, messageString, deviceId);
-      await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
+      // This will be done async
+      _sendLocalMessage(localMessage);
+
+      return null;
     }
   }
 })();

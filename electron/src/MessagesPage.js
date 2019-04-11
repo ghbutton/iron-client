@@ -110,9 +110,17 @@ class MessagesPage extends Component {
           body = window.view.messageDisplay(message);
         }
 
-        return <div key={message.id}><div className={window.controller.currentUsersMessage(message) ? "from-me" : "from-them"} >
-          {body}
-      </div><div className="clear"></div></div>
+        const fromMe = window.controller.currentUsersMessage(message);
+
+        return (
+          <div key={message.id} className="message">
+            <div className={fromMe ? "from-me" : "from-them"} >
+              {body}
+            </div>
+            {fromMe && message.attributes.sent_at !== null && <div className="sent-checkmark"><span>&#10003;</span></div>}
+            <div className="clear"></div>
+          </div>
+        )
     })
     return (
       <div>

@@ -291,13 +291,14 @@ let signal = (function() {
     syncLocalFileMessageType: function() {
       return "local_file_message_v1";
     },
-    localFileMessage: async function(basename, userId, recipientUserId, deviceId) {
-      let object = {"type": "local_file_message_v1", "data": basename};
+    localFileMessage: async function({basename, filename}, userId, recipientUserId, deviceId) {
+      let object = {"type": "local_file_message_v1", "data": {filename, basename}};
 
       return {
         id: `local_${Date.now()}`,
         attributes: {
-          decryptedBody: object
+          decryptedBody: object,
+          sent_at: null
         },
         relationships: {
           sender: {
@@ -321,7 +322,8 @@ let signal = (function() {
       return {
         id: `local_${Date.now()}`,
         attributes: {
-          decryptedBody: object
+          decryptedBody: object,
+          sent_at: null
         },
         relationships: {
           sender: {

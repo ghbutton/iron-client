@@ -10,6 +10,16 @@ body {
   bottom: 60px;
 }
 
+.sent-checkmark {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.message {
+  position: relative;
+}
+
 .sticky-footer {
   position: fixed;
   width: 100%;

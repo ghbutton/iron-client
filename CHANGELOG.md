@@ -1,0 +1,3 @@
+- Prevent empty messages from being sent
+- Add Emoji Keyboard
+- Add a send checkmark
