@@ -6,7 +6,7 @@ import logger from "./logger.js";
 import fileSystem from "./file_system.js";
 
 let applicationState = (function() {
-  let state = {connectedUsers: [], messages: []}
+  let state = {connectedUsers: [], messages: [], lastRead: {}}
 
   async function addDedup(list, object) {
     let isDup = false;
@@ -22,11 +22,18 @@ let applicationState = (function() {
     }
   }
 
+  async function insertObject(key, value) {
+    state[`${key}_${value.id}`] = value;
+    const all = state[`${key}`] || new Set([]);
+    state[`${key}`] = all.add(value);
+  }
+
   return {
-    insertObject: async function(key, value) {
-      state[`${key}_${value.id}`] = value;
-      const all = state[`${key}`] || new Set([]);
-      state[`${key}`] = all.add(value);
+    insertUser: async function(user){
+      return insertObject("users", user);
+    },
+    insertConnection: async function(connection){
+      return insertObject("connections", connection);
     },
     connectedUser: async function(user) {
       await addDedup(state.connectedUsers, user);
@@ -34,14 +41,28 @@ let applicationState = (function() {
     connectedUsers: async function() {
       return state.connectedUsers;
     },
-    messages: async function() {
+    messages: function() {
       return state.messages;
+    },
+    lastRead: function() {
+      return state.lastRead;
+    },
+    userLastRead: function(userId) {
+      return state.lastRead[userId] || 0;
+    },
+    updateLastRead: function(userId, lastRead) {
+      if (userId) {
+        state.lastRead[userId] = lastRead;
+      }
     },
     addMessage: async function(message) {
       state.messages.push(message)
     },
     initMessages: async function(messages) {
       state.messages = messages;
+    },
+    initLastRead: async function(lastRead) {
+      state.lastRead = lastRead;
     },
     hasMessage: async function(message) {
       return state.messages.some((thisMessage) => { return thisMessage.id === message.id })
@@ -77,7 +98,7 @@ let controller = (function() {
     await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
 
     await applicationState.messageSent(localFileMessage);
-    await storage.saveMessages(deviceId, await applicationState.messages());
+    await storage.saveMessages(deviceId, applicationState.messages());
     callbacks.newMessage();
   }
 
@@ -90,7 +111,7 @@ let controller = (function() {
     await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
 
     await applicationState.messageSent(localMessage);
-    await storage.saveMessages(deviceId, await applicationState.messages());
+    await storage.saveMessages(deviceId, applicationState.messages());
     callbacks.newMessage();
   }
 
@@ -104,7 +125,7 @@ let controller = (function() {
       let message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
       // Needs to happen atomically
       await applicationState.addMessage(message);
-      await storage.saveMessages(deviceId, await applicationState.messages());
+      await storage.saveMessages(deviceId, applicationState.messages());
       // END
     }
 
@@ -154,7 +175,7 @@ let controller = (function() {
     let basename = await fileSystem.basename(filename);
     let localFileMessage = await signal.localFileMessage({basename, filename}, userId, recipientUserId, deviceId);
     await applicationState.addMessage(localFileMessage);
-    await storage.saveMessages(deviceId, await applicationState.messages());
+    await storage.saveMessages(deviceId, applicationState.messages());
 
     _sendLocalFile(localFileMessage);
     return null;
@@ -177,6 +198,7 @@ let controller = (function() {
 
       if (deviceId !== null) {
         applicationState.initMessages(await storage.loadMessages(deviceId));
+        applicationState.initLastRead(await storage.loadLastRead(deviceId));
       }
 
       return null;
@@ -212,7 +234,7 @@ let controller = (function() {
     },
     // TODO get messages from API
     getMessages: async function(connectedUserId) {
-      let messages = await applicationState.messages();
+      let messages = applicationState.messages();
       let connectedMessages = [];
 
       for (let i = 0; i < messages.length; i++) {
@@ -231,6 +253,38 @@ let controller = (function() {
         }
       }
       return connectedMessages;
+    },
+    hasUnreadMessages: function(userId) {
+      const lastRead = applicationState.userLastRead(userId);
+      const messages = applicationState.messages();
+
+      for(let i = 0; i < messages.length; i++) {
+        const message = messages[i];
+        if (message.attributes.inserted_at) {
+          const insertedAt = new Date(message.attributes.inserted_at).getTime() / 1000;
+          if (insertedAt > lastRead) {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    setLastRead: async function(userId) {
+      let lastRead = applicationState.userLastRead(userId);
+      const messages = applicationState.messages();
+
+      for(let i = 0; i < messages.length; i++) {
+        const message = messages[i];
+        if (message.attributes.inserted_at) {
+          const insertedAt = new Date(message.attributes.inserted_at).getTime() / 1000;
+          if (insertedAt > lastRead) {
+            lastRead = insertedAt;
+          }
+        }
+      }
+
+      await applicationState.updateLastRead(userId, lastRead);
+      await storage.saveLastRead(deviceId, applicationState.lastRead());
     },
     // TODO make async ??
     currentUsersMessage: function(message) {
@@ -252,7 +306,7 @@ let controller = (function() {
     },
     getUserById: async function(userId) {
       let user = await api.getUserById(userId, 2000);
-      await applicationState.insertObject("users", user);
+      await applicationState.insertUser(user);
       return user;
     },
     updateUser: async function(params) {
@@ -277,11 +331,11 @@ let controller = (function() {
     getConnectedUsers: async function() {
       let [connections, connectedUsers] = await api.connectedUsers(2000, userId);
       for(let i = 0; i < connections.length; i++) {
-        await applicationState.insertObject("connections", connections[i]);
+        await applicationState.insertConnection(connections[i]);
       }
 
       for(let i = 0; i < connectedUsers.length; i++) {
-        await applicationState.insertObject("users", connectedUsers[i]);
+        await applicationState.insertUser(connectedUsers[i]);
         await applicationState.connectedUser(connectedUsers[i]);
       }
 
@@ -325,11 +379,10 @@ let controller = (function() {
       let fileUpload = await api.downloadFile(fileUploadId);
 
       let decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
-      let path = await fileSystem.showSaveDialog(basename);
+      let path = await fileSystem.downloadPath(basename);
 
-      if (path === undefined) return;
-
-      return fileSystem.writeBytes(path, decrypted);
+      await fileSystem.writeBytes(path, decrypted);
+      return fileSystem.downloadFinished(path);
     },
     // TODO sync messages to all users devices
     sendMessage: async function(messageString, recipientUserId){
@@ -338,7 +391,7 @@ let controller = (function() {
       // Save a local version to memory and storage
       let localMessage = await signal.localMessage(messageString, userId, recipientUserId, deviceId)
       await applicationState.addMessage(localMessage);
-      await storage.saveMessages(deviceId, await applicationState.messages());
+      await storage.saveMessages(deviceId, applicationState.messages());
 
       // This will be done async
       _sendLocalMessage(localMessage);

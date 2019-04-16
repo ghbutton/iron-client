@@ -1,3 +1,3 @@
-- Prevent empty messages from being sent
-- Add Emoji Keyboard
-- Add a send checkmark
+- Add more feedback after a file has finished downloading
+- Download files to normal download folder
+- Add notifications for new messages

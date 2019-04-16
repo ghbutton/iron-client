@@ -4,8 +4,26 @@ import { Link } from 'react-router-dom'
 import MenuFooter from './MenuFooter';
 
 class ChatsPage extends Component {
-  state = { loaded: false, connectedUsers: []};
+  constructor(props) {
+    super(props);
+    this.state = {connectedUsers: [], hasUnreadMessages: {}, userDisplay: {}};
+    this.handleNewMessage = this.handleNewMessage.bind(this);
+  }
+
+  async handleNewMessage() {
+    const {connectedUsers} = this.state;
+    let hasUnreadMessages = {};
+
+    for (let i = 0; i < connectedUsers.length; i++) {
+      const user = connectedUsers[i];
+      hasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
+    }
+
+    this.setState({hasUnreadMessages});
+  };
+
   render() {
+    const {connectedUsers, hasUnreadMessages, userDisplay} = this.state;
     return (
       <div className="ChatsPage">
           <div className="chatsMenu">
@@ -15,8 +33,12 @@ class ChatsPage extends Component {
           <h1>Chats</h1>
           <div className="list-group">
           {
-            this.state.connectedUsers.map((user) => {
-              return(<Link key={user.id} to={`/connections/${user.id}/messages`} className="list-group-item list-group-item-action">{window.view.userDisplay(user)}</Link>)
+            connectedUsers.map((user) => {
+              return(
+                <Link key={user.id} to={`/connections/${user.id}/messages`} className="list-group-item list-group-item-action">
+                  {userDisplay[user.id]} <span>{hasUnreadMessages[user.id] && (<span className="badge badge-pill badge-primary">!</span>)}</span>
+                </Link>
+              )
             })
           }
           </div>
@@ -26,12 +48,24 @@ class ChatsPage extends Component {
     );
   }
 
+  async componentWillUnmount() {
+    // you need to unbind the same listener that was binded.
+    window.removeEventListener("new_message", this.handleNewMessage);
+  }
+
   async componentDidMount(){
     if (await window.controller.notLoggedIn()) {
       this.props.history.push(`/login`)
     } else {
       const connectedUsers = await window.controller.getConnectedUsers();
-      this.setState({connectedUsers: connectedUsers, loaded: true});
+      let [hasUnreadMessages, userDisplay] = [{}, {}];
+      window.addEventListener("new_message", this.handleNewMessage);
+      for (let i = 0; i < connectedUsers.length; i++) {
+        const user = connectedUsers[i];
+        userDisplay[user.id] = window.view.userDisplay(user);
+        hasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
+      }
+      this.setState({connectedUsers, userDisplay, hasUnreadMessages});
     }
   }
 }

@@ -82,6 +82,7 @@ class MessagesPage extends Component {
     }
     let userMessages = await window.controller.getMessages(this.state.connectedUser.id);
     this.setState({userMessages: userMessages});
+    window.controller.setLastRead(this.state.connectedUser.id);
 
     if (rescroll) {
       window.scroll({
@@ -143,11 +144,17 @@ class MessagesPage extends Component {
     );
   }
 
+  async componentWillUnmount() {
+    // you need to unbind the same listener that was binded.
+    window.removeEventListener("new_message", this.handleNewMessage);
+  }
+
   async componentDidMount() {
     let connectedUserId = this.props.match.params.id
     let userMessages = await window.controller.getMessages(connectedUserId);
     this.focusInput.current.focus();
     this.setState({loaded: true, userMessages});
+    window.controller.setLastRead(connectedUserId);
 
     // Api call, slow
     let connectedUser = await window.controller.getUserById(connectedUserId);

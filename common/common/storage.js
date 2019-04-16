@@ -28,6 +28,10 @@ let storage = (function() {
     return `ironUserSession`;
   }
 
+  async function lastReadKey() {
+    return `ironLastRead`;
+  }
+
   async function messagesKey(deviceId) {
     return `ironMessages_${deviceId}`;
   }
@@ -49,6 +53,20 @@ let storage = (function() {
       } else {
         return JSON.parse(messagesPayload);
       }
+    },
+    loadLastRead: async function(deviceId) {
+      const key = await lastReadKey(deviceId);
+      const messagesPayload = await getItem(key);
+
+      if (await utility.nullOrUndefined(messagesPayload)) {
+        return {};
+      } else {
+        return JSON.parse(messagesPayload);
+      }
+    },
+    saveLastRead: async function(deviceId, lastRead) {
+      const key = await lastReadKey(deviceId);
+      return setItem(key, JSON.stringify(lastRead));
     },
     init: async function() {
       let folders = basePath.split("/");

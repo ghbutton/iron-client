@@ -1,6 +1,7 @@
 const fs = window.fs;
 const fs_path = window.path;
 const dialog = window.dialog;
+const app = window.app;
 
 let fileSystem = (function() {
   return {
@@ -18,7 +19,14 @@ let fileSystem = (function() {
     },
     showSaveDialog: async function(filename) {
       return dialog.showSaveDialog(null, {defaultPath: filename});
-    }
+    },
+    downloadPath: async function(basename) {
+      const downloads = app.getPath("downloads");
+      return `${downloads}/${basename}`;
+    },
+    downloadFinished: async function(path) {
+      app.dock.downloadFinished(path);
+    },
   }
 })()
 
