@@ -166,10 +166,6 @@ class MessagesPage extends Component {
 
     window.addEventListener("new_message", this.handleNewMessage);
   }
-
-  async componentWillUnmount() {
-    window.removeEventListener("new_message", this.handleNewMessage);
-  }
 }
 
 export default MessagesPage;
