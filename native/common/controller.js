@@ -74,6 +74,13 @@ let applicationState = (function() {
           state.messages[i].attributes.sent_at = Date.now();
         }
       }
+    },
+    messageDelivered: async function(id) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (id === state.messages[i].id) {
+          state.messages[i].attributes.delivered_at = Date.now();
+        }
+      }
     }
   }
 })();
@@ -95,7 +102,9 @@ let controller = (function() {
     const recipientUserId = localFileMessage.relationships.receiver.data.id;
     const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
     let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
-    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
+
+    // add to queue
+    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
 
     await applicationState.messageSent(localFileMessage);
     await storage.saveMessages(deviceId, applicationState.messages());
@@ -108,11 +117,16 @@ let controller = (function() {
 
     // Send to receiver
     let encryptedMessages = await signal.encryptMessages(preKeyBundles, localMessage.attributes.decryptedBody.data, deviceId);
-    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId);
+    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
 
     await applicationState.messageSent(localMessage);
     await storage.saveMessages(deviceId, applicationState.messages());
     callbacks.newMessage();
+  }
+
+  async function _markDelivered(idempotencyKey) {
+    await applicationState.messageDelivered(idempotencyKey);
+    await storage.saveMessages(deviceId, applicationState.messages());
   }
 
   async function _decryptMessage(encryptedMessage) {
@@ -167,6 +181,13 @@ let controller = (function() {
 
     await _decryptMessage(encryptedMessage);
 
+    callbacks.newMessage();
+  };
+
+  async function _receiveMessagePackagesCallback(response) {
+    let messagePackage = response.payload.data[0]
+
+    _markDelivered(messagePackage.attributes.idempotency_key);
     callbacks.newMessage();
   };
 
@@ -227,6 +248,7 @@ let controller = (function() {
         await api.joinApiChannel(_apiChannelCallback);
         await api.joinUserDeviceChannel(_userDeviceChannelCallback);
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
+        await api.userDeviceChannelReceiveMessagePackages(_receiveMessagePackagesCallback);
       }
     },
     inspectStore: async function() {

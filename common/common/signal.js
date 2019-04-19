@@ -100,6 +100,12 @@ let signal = (function() {
     return new TextDecoder().decode(buffer);
   }
 
+  // Also used as the idempotency key
+  async function _localMessageId(deviceId){
+    const random_piece = Math.random().toString(36).substr(2).substring(0, 4);
+    return `${deviceId}_${random_piece}_${Math.floor(Date.now() / 1000)}`
+  }
+
   async function _saveState(deviceId) {
     const idKeyPair = await store.getIdentityKeyPair();
     const preKeyPair = await store.loadPreKey(keyId);
@@ -172,7 +178,6 @@ let signal = (function() {
       let signature = await _bToS(await window.crypto.subtle.sign({name: "HMAC"}, hmacKey, bEncrypted));
 
       return {encrypted, hmacExported, sIv, signature, aesExported}
-
     },
     aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
@@ -295,10 +300,11 @@ let signal = (function() {
       let object = {"type": "local_file_message_v1", "data": {filename, basename}};
 
       return {
-        id: `local_${Date.now()}`,
+        id: await _localMessageId(deviceId),
         attributes: {
           decryptedBody: object,
-          sent_at: null
+          sent_at: null,
+          delivered_at: null,
         },
         relationships: {
           sender: {
@@ -320,7 +326,7 @@ let signal = (function() {
       let object = {"type": "local_message_v1", "data": messageString};
 
       return {
-        id: `local_${Date.now()}`,
+        id: await _localMessageId(deviceId),
         attributes: {
           decryptedBody: object,
           sent_at: null

@@ -28,8 +28,8 @@ let storage = (function() {
     return `ironUserSession`;
   }
 
-  async function lastReadKey() {
-    return `ironLastRead`;
+  async function lastReadKey(deviceId) {
+    return `ironLastRead_${deviceId}`;
   }
 
   async function messagesKey(deviceId) {

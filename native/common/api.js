@@ -129,6 +129,11 @@ let api = (function() {
         receiveMessagesCallback(response);
       });
     },
+    userDeviceChannelReceiveMessagePackages: async function(receiveMessagePackagesCallback){
+      userDeviceChannel.on("POST:message_packages", async (response) => {
+        receiveMessagePackagesCallback(response);
+      });
+    },
     updateUser: async function(userId, {name}) {
       await _waitForApiChannel();
 
@@ -237,26 +242,32 @@ let api = (function() {
       const userResp = await _sendPush(apiChannel, "GET:users", {pre_key_bundle_id: preKeyBundleId});
       return userResp.payload.data[0];
     },
-    sendEncryptedMessages: async function(encryptedMessages, senderDeviceId, senderUserId, receiverUserId) {
+    sendEncryptedMessages: async function(encryptedMessages, senderDeviceId, senderUserId, receiverUserId, idempotencyKey) {
+      let messages = [];
       for (let {message, deviceId} of encryptedMessages) {
-        let payload = {
-          "payload" : {
-            "data": {
-              "type": "message",
-              "attributes": {
-                "type": message.type,
-                "body": message.body,
-                "device_id": deviceId,
-                "sender_device_id": senderDeviceId,
-                "sender_user_id": senderUserId,
-                "receiver_user_id": receiverUserId
-              }
+        messages.push(
+          {
+            "type": "message",
+            "attributes": {
+              "type": message.type,
+              "body": message.body,
+              "device_id": deviceId,
+              "sender_device_id": senderDeviceId,
+              "sender_user_id": senderUserId,
+              "receiver_user_id": receiverUserId,
+              "idempotency_key": idempotencyKey
             }
           }
-        }
-
-        await _sendPush(apiChannel, "POST:messages", payload);
+        )
       }
+
+      let payload = {
+        "payload" : {
+          "data": messages
+        }
+      }
+
+      await _sendPush(apiChannel, "POST:messages", payload);
     },
     uploadFile: async function({encrypted, deviceId}) {
       let payload = {

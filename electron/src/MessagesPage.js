@@ -18,6 +18,8 @@ class MessagesPage extends Component {
     this.handleNewMessage = this.handleNewMessage.bind(this);
     this.uploadFile= this.uploadFile.bind(this);
     this.downloadFile= this.downloadFile.bind(this);
+    this.addEmoji = this.addEmoji.bind(this);
+    this.showEmojis = this.showEmojis.bind(this);
 
     this.focusInput = React.createRef();
   }
@@ -39,7 +41,7 @@ class MessagesPage extends Component {
     }
   }
 
-  addEmoji = (e) => {
+  async addEmoji(e) {
     // console.log(e.unified)
     if (e.unified.length <= 5){
       let emojiPic = String.fromCodePoint(`0x${e.unified}`)
@@ -59,7 +61,7 @@ class MessagesPage extends Component {
     }
   }
 
-  showEmojis = async () => {
+  async showEmojis() {
     this.setState({emojisVisible: !this.state.emojisVisible});
   }
 
@@ -118,7 +120,8 @@ class MessagesPage extends Component {
             <div className={fromMe ? "from-me" : "from-them"} >
               {body}
             </div>
-            {fromMe && message.attributes.sent_at !== null && <div className="sent-checkmark"><span>&#10003;</span></div>}
+            {fromMe && message.attributes.sent_at && <div className="sent-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+            {fromMe && message.attributes.delivered_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
             <div className="clear"></div>
           </div>
         )
