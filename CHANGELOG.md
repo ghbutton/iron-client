@@ -1,1 +1,2 @@
-- Add delivered checkmark
+- Added uploading spinning circle
+- Added downloading spinning circle
