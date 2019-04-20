@@ -23,6 +23,8 @@ let applicationState = (function() {
   }
 
   async function insertObject(key, value) {
+    console.log(key);
+    console.log(value);
     state[`${key}_${value.id}`] = value;
     const all = state[`${key}`] || new Set([]);
     state[`${key}`] = all.add(value);
@@ -81,15 +83,45 @@ let applicationState = (function() {
           state.messages[i].attributes.delivered_at = Date.now();
         }
       }
+    },
+    messageErrored: async function(localMessage) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (localMessage.id === state.messages[i].id) {
+          state.messages[i].attributes.errored_at = Date.now();
+        }
+      }
+    },
+    messageResending: async function(message) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (message.id === state.messages[i].id) {
+          state.messages[i].attributes.errored_at = null;
+          state.messages[i].attributes.sending_at = Date.now();
+        }
+      }
+    },
+    getMessageById: async function(id) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (id === state.messages[i].id) {
+          return state.messages[i];
+        }
+      }
+      return null;
     }
   }
 })();
 
 window.applicationState = applicationState;
+window.storage = storage;
 
 let controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
   const clientVersion = "0.0.1"
+
+  async function _messageErrored(message) {
+    await applicationState.messageErrored(message);
+    await storage.saveMessages(deviceId, applicationState.messages());
+    callbacks.newMessage();
+  }
 
   async function _sendLocalFile(localFileMessage) {
     const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
@@ -99,14 +131,30 @@ let controller = (function() {
 
     const fileUpload = await api.uploadFile({encrypted, deviceId});
 
+    if (!fileUpload) {
+      await _messageErrored(localFileMessage);
+      return;
+    }
+
     const recipientUserId = localFileMessage.relationships.receiver.data.id;
     const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+
+    if (!preKeyBundles) {
+      await _messageErrored(localFileMessage);
+      return;
+    }
+
     let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
 
     // add to queue
-    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
+    const {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
 
-    await applicationState.messageSent(localFileMessage);
+    if(status === "ok") {
+      await applicationState.messageSent(localFileMessage);
+    } else {
+      await applicationState.messageErrored(localFileMessage);
+    }
+
     await storage.saveMessages(deviceId, applicationState.messages());
     callbacks.newMessage();
   }
@@ -115,11 +163,23 @@ let controller = (function() {
     const recipientUserId = localMessage.relationships.receiver.data.id;
     const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
 
+    if (!preKeyBundles) {
+      await applicationState.messageErrored(localMessage);
+      await storage.saveMessages(deviceId, applicationState.messages());
+      callbacks.newMessage();
+      return;
+    }
+
     // Send to receiver
     let encryptedMessages = await signal.encryptMessages(preKeyBundles, localMessage.attributes.decryptedBody.data, deviceId);
-    await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
+    let {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
 
-    await applicationState.messageSent(localMessage);
+    if(status === "ok") {
+      await applicationState.messageSent(localMessage);
+    } else {
+      await applicationState.messageErrored(localMessage);
+    }
+
     await storage.saveMessages(deviceId, applicationState.messages());
     callbacks.newMessage();
   }
@@ -327,9 +387,13 @@ let controller = (function() {
       return userId === null;
     },
     getUserById: async function(userId) {
-      let user = await api.getUserById(userId, 2000);
-      await applicationState.insertUser(user);
-      return user;
+      let {status, resp} = await api.getUserById(userId, 2000);
+      if (status === "ok") {
+        await applicationState.insertUser(resp);
+        return resp;
+      } else {
+        return null;
+      }
     },
     updateUser: async function(params) {
       return api.updateUser(userId, params);
@@ -419,6 +483,20 @@ let controller = (function() {
       _sendLocalMessage(localMessage);
 
       return null;
+    },
+    resendMessage: async function(messageId) {
+      let message = await applicationState.getMessageById(messageId);
+      await applicationState.messageResending(message);
+      await storage.saveMessages(deviceId, applicationState.messages());
+      callbacks.newMessage();
+
+      // This will be done async
+      // TODO put all message types together
+      if (message.attributes.decryptedBody.type === "local_file_message_v1") {
+        _sendLocalFile(message)
+      } else {
+        _sendLocalMessage(message);
+      }
     }
   }
 })();

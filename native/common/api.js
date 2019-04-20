@@ -12,7 +12,7 @@ let api = (function() {
     let [ready, results] = [false, null];
 
     channel.push(topic, payload, timeout).receive("ok", pushResults => {
-      results = pushResults;
+      results = {status: "ok", resp: pushResults};
       ready = true;
     }).receive("error", resp => {
       results = {status: "error", resp: resp};
@@ -148,8 +148,7 @@ let api = (function() {
         }
       }
 
-      const updateResp = await _sendPush(apiChannel, `PATCH:users:${userId}`, payload);
-      return updateResp;
+      return _sendPush(apiChannel, `PATCH:users:${userId}`, payload);
     },
     messageDelivered: async function(messageId) {
       await _waitForApiChannel();
@@ -165,8 +164,7 @@ let api = (function() {
         }
       }
 
-      const updateResp = await _sendPush(apiChannel, `PATCH:messages:${messageId}`, payload);
-      return updateResp;
+      return _sendPush(apiChannel, `PATCH:messages:${messageId}`, payload);
     },
     sendPreKeyBundle: async function(payload){
       return _sendPush(apiChannel, "POST:pre_key_bundles", payload);
@@ -174,8 +172,7 @@ let api = (function() {
     sendVerificationCode: async function(email, timeout) {
       await waitForLoginChannel(timeout);
 
-      const resp = await _sendPush(loginChannel, "POST:email_verifications", {email: email});
-      return resp;
+      return _sendPush(loginChannel, "POST:email_verifications", {email: email});
     },
     sendInvitation: async function(name, email, timeout) {
       await _waitForApiChannel(timeout);
@@ -197,8 +194,7 @@ let api = (function() {
     login: async function(email, code, timeout) {
       await waitForLoginChannel(timeout);
 
-      const resp = await _sendPush(loginChannel, "POST:sessions", {email: email, code: code});
-      return resp;
+      return _sendPush(loginChannel, "POST:sessions", {email: email, code: code});
     },
     failedToJoin: async function(timeout) {
       await _waitForApiChannel(timeout);
@@ -207,40 +203,64 @@ let api = (function() {
     getUserById: async function(userId, timeout) {
       await _waitForApiChannel(timeout);
 
-      let usersResp = await _sendPush(apiChannel, "GET:users", {id: userId});
-      let user = usersResp.payload.data[0];
+      let {status, resp} = await _sendPush(apiChannel, "GET:users", {id: userId});
+      if (status === "ok") {
+        let user = resp.payload.data[0];
 
-      return user;
+        return {status: "ok", resp: user};
+      } else {
+        return {status, resp}
+      }
     },
     getDevice: async function(userId, userSessionToken, timeout) {
       await waitForLoginChannel(timeout);
 
-      const resp = await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken});
-      return resp.payload.data.devices[0];
+      const {status, resp}= await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken});
+      if (status === "ok") {
+        return resp.payload.data.devices[0];
+      } else {
+        return null;
+      }
     },
     getPreKeyBundlesById: async function(id) {
       await _waitForApiChannel();
 
-      const preKeyBundlesResp = await _sendPush(apiChannel, "GET:pre_key_bundles", {"id": id});
-      return preKeyBundlesResp.payload.data[0]
+      const {status, resp} = await _sendPush(apiChannel, "GET:pre_key_bundles", {"id": id});
+      if (status === "ok") {
+        return resp.payload.data[0]
+      } else {
+        return null;
+      }
     },
     getMessages: async function() {
       await _waitForApiChannel();
 
-      const messagesResp = await _sendPush(apiChannel, "GET:messages", {});
-      return messagesResp.payload.data
+      const {status, resp} = await _sendPush(apiChannel, "GET:messages", {});
+      if (status === "ok") {
+        return resp.payload.data
+      } else {
+        return null;
+      }
     },
     getPreKeyBundlesByUserId: async function(userId) {
       await _waitForApiChannel();
 
-      const preKeyBundlesResp = await _sendPush(apiChannel, "GET:pre_key_bundles", {"user_id": userId});
-      return preKeyBundlesResp.payload.data
+      const {status, resp} = await _sendPush(apiChannel, "GET:pre_key_bundles", {"user_id": userId});
+      if (status === "ok") {
+        return resp.payload.data
+      } else {
+        return null;
+      }
     },
     getUserByPreKeyBundleId: async function(preKeyBundleId){
       await _waitForApiChannel()
 
-      const userResp = await _sendPush(apiChannel, "GET:users", {pre_key_bundle_id: preKeyBundleId});
-      return userResp.payload.data[0];
+      const {status, resp}= await _sendPush(apiChannel, "GET:users", {pre_key_bundle_id: preKeyBundleId});
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
     },
     sendEncryptedMessages: async function(encryptedMessages, senderDeviceId, senderUserId, receiverUserId, idempotencyKey) {
       let messages = [];
@@ -267,7 +287,7 @@ let api = (function() {
         }
       }
 
-      await _sendPush(apiChannel, "POST:messages", payload);
+      return _sendPush(apiChannel, "POST:messages", payload);
     },
     uploadFile: async function({encrypted, deviceId}) {
       let payload = {
@@ -282,31 +302,47 @@ let api = (function() {
         }
       }
 
-      let resp = await _sendPush(apiChannel, "POST:file_uploads", payload, 60000);
-      return resp.payload.data[0];
+      let {status, resp} = await _sendPush(apiChannel, "POST:file_uploads", payload, 60000);
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
     },
     downloadFile: async function(fileUploadId) {
-      const resp = await _sendPush(apiChannel, "GET:file_uploads", {"id": fileUploadId});
-      return resp.payload.data[0];
+      const {status, resp} = await _sendPush(apiChannel, "GET:file_uploads", {"id": fileUploadId});
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
     },
     connectedUsers: async function(timeout, userId){
       await _waitForApiChannel(timeout);
       let connections = [];
 
-      const connectionsResp = await _sendPush(apiChannel, "GET:connections", {});
+      const {status, resp: connectionsResp} = await _sendPush(apiChannel, "GET:connections", {});
 
-      const connectedUsers = await Promise.all(connectionsResp.payload.data.map(async (connection) => {
-        connections.push(connection);
+      if (status === "ok") {
+        const connectedUsers = await Promise.all(connectionsResp.payload.data.map(async (connection) => {
+          connections.push(connection);
 
-        let connectedUserId = connection.relationships.users.data[0].id === userId ? connection.relationships.users.data[1].id : connection.relationships.users.data[0].id;
-        const usersResp = await _sendPush(apiChannel, "GET:users", {"id": connectedUserId});
-        let usersById = await Promise.all(usersResp.payload.data.map((user) => {
-          return user;
+          let connectedUserId = connection.relationships.users.data[0].id === userId ? connection.relationships.users.data[1].id : connection.relationships.users.data[0].id;
+          const {status, resp: usersResp} = await _sendPush(apiChannel, "GET:users", {"id": connectedUserId});
+          if (status === "ok") {
+            let usersById = await Promise.all(usersResp.payload.data.map((user) => {
+              return user;
+            }));
+            return usersById[0];
+          } else {
+            return null;
+          }
         }));
-        return usersById[0];
-      }));
 
-      return [connections, connectedUsers];
+        return [connections, connectedUsers];
+      } else {
+        return null;
+      }
     }
   }
 })()

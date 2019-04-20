@@ -305,6 +305,8 @@ let signal = (function() {
           decryptedBody: object,
           sent_at: null,
           delivered_at: null,
+          errored_at: null,
+          sending_at: Date.now(),
         },
         relationships: {
           sender: {
@@ -329,7 +331,10 @@ let signal = (function() {
         id: await _localMessageId(deviceId),
         attributes: {
           decryptedBody: object,
-          sent_at: null
+          sent_at: null,
+          delivered_at: null,
+          errored_at: null,
+          sending_at: Date.now(),
         },
         relationships: {
           sender: {

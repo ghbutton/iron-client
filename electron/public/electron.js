@@ -9,8 +9,12 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  console.log(__dirname)
-  mainWindow = new BrowserWindow({width: 800, height: 600, webPreferences: { webSecurity: false, nodeIntegration: false, preload: __dirname + '/preload.js' }})
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    icon: path.join(__dirname, 'assets/icons/png/512x512.png'),
+    webPreferences: { nodeIntegration: false, preload: __dirname + '/preload.js' }
+  })
 
   // and load the index.html of the app.
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, 'index.html')}`);

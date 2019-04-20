@@ -7,10 +7,9 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
 class MessagesPage extends Component {
-
   constructor(props) {
     super(props);
-    this.state = {connectedUser: null, loaded: false, value: ``, userMessages: [], emojisVisible: false}
+    this.state = {connectedUser: null, connectedUserId: null, loaded: false, value: ``, userMessages: [], emojisVisible: false}
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
@@ -20,6 +19,7 @@ class MessagesPage extends Component {
     this.downloadFile= this.downloadFile.bind(this);
     this.addEmoji = this.addEmoji.bind(this);
     this.showEmojis = this.showEmojis.bind(this);
+    this.resendMessage = this.resendMessage.bind(this);
 
     this.focusInput = React.createRef();
   }
@@ -65,8 +65,13 @@ class MessagesPage extends Component {
     this.setState({emojisVisible: !this.state.emojisVisible});
   }
 
+  async resendMessage(event) {
+    window.controller.resendMessage((event.target.getAttribute("data-id")));
+  }
+
   async uploadFile() {
-    await window.controller.uploadFiles(this.props.match.params.id);
+    const {connectedUserId} = this.state;
+    await window.controller.uploadFiles(connectedUserId);
     this.handleNewMessage();
   }
 
@@ -78,13 +83,14 @@ class MessagesPage extends Component {
   }
 
   async handleNewMessage() {
+    const {connectedUserId} = this.state;
     let rescroll = false;
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
       rescroll = true;
     }
-    let userMessages = await window.controller.getMessages(this.state.connectedUser.id);
+    let userMessages = await window.controller.getMessages(connectedUserId);
     this.setState({userMessages: userMessages});
-    window.controller.setLastRead(this.state.connectedUser.id);
+    window.controller.setLastRead(connectedUserId);
 
     if (rescroll) {
       window.scroll({
@@ -114,14 +120,19 @@ class MessagesPage extends Component {
         }
 
         const fromMe = window.controller.currentUsersMessage(message);
+        const sentAt = message.attributes.sent_at;
+        const deliveredAt = message.attributes.delivered_at;
+        const erroredAt = message.attributes.errored_at || (!sentAt && (!message.attributes.sending_at || message.attributes.sending_at < Date.now() - 60000));
 
         return (
           <div key={message.id} className="message">
             <div className={fromMe ? "from-me" : "from-them"} >
               {body}
             </div>
-            {fromMe && message.attributes.sent_at && <div className="sent-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
-            {fromMe && message.attributes.delivered_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+            {fromMe && sentAt && <div className="bottom-right"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+            {fromMe && deliveredAt && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+            {fromMe && !sentAt && !deliveredAt && !erroredAt && <div className="ring-div"><div className="lds-ring"><div></div><div></div><div></div><div></div></div></div>}
+            {fromMe && erroredAt && <div className="bottom-right"><span className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</span></div>}
             <div className="clear"></div>
           </div>
         )
@@ -156,18 +167,20 @@ class MessagesPage extends Component {
     let connectedUserId = this.props.match.params.id
     let userMessages = await window.controller.getMessages(connectedUserId);
     this.focusInput.current.focus();
-    this.setState({loaded: true, userMessages});
+    this.setState({loaded: true, userMessages, connectedUserId});
     window.controller.setLastRead(connectedUserId);
-
-    // Api call, slow
-    let connectedUser = await window.controller.getUserById(connectedUserId);
-    this.setState({connectedUser});
 
     window.scroll({
       top: document.body.scrollHeight
     });
 
     window.addEventListener("new_message", this.handleNewMessage);
+
+    // Api call, slow
+    let connectedUser = await window.controller.getUserById(connectedUserId);
+    if (connectedUser) {
+      this.setState({connectedUser});
+    }
   }
 }
 
