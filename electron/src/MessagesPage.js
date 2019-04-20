@@ -119,20 +119,25 @@ class MessagesPage extends Component {
           body = window.view.messageDisplay(message);
         }
 
+        // TODO put this in view logic
+        const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = (message.meta ? message.meta : {})
         const fromMe = window.controller.currentUsersMessage(message);
-        const sentAt = message.attributes.sent_at;
-        const deliveredAt = message.attributes.delivered_at;
-        const erroredAt = message.attributes.errored_at || (!sentAt && (!message.attributes.sending_at || message.attributes.sending_at < Date.now() - 60000));
+        const sent = !!sent_at;
+        const delivered = !!delivered_at;
+        const errored = !!errored_at || (!sent && (!sending_at || sending_at < Date.now() - 60000));
+        const downloading = !!downloading_at && (downloading_at > Date.now() - 60000);
 
         return (
           <div key={message.id} className="message">
             <div className={fromMe ? "from-me" : "from-them"} >
               {body}
+              {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+              {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+              {fromMe && !sent && !delivered && !errored && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
+              {fromMe && errored && <div className="bottom-right"><a href="#" className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</a></div>}
+              {!fromMe && downloading && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
+              {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
             </div>
-            {fromMe && sentAt && <div className="bottom-right"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
-            {fromMe && deliveredAt && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
-            {fromMe && !sentAt && !deliveredAt && !erroredAt && <div className="ring-div"><div className="lds-ring"><div></div><div></div><div></div><div></div></div></div>}
-            {fromMe && erroredAt && <div className="bottom-right"><span className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</span></div>}
             <div className="clear"></div>
           </div>
         )

@@ -73,29 +73,48 @@ let applicationState = (function() {
       // TODO, should the server send something back to say the message has been received?
       for(let i = 0; i< state.messages.length; i++){
         if (localMessage.id === state.messages[i].id) {
-          state.messages[i].attributes.sent_at = Date.now();
+          state.messages[i].meta.sent_at = Date.now();
         }
       }
     },
     messageDelivered: async function(id) {
       for(let i = 0; i< state.messages.length; i++){
         if (id === state.messages[i].id) {
-          state.messages[i].attributes.delivered_at = Date.now();
+          state.messages[i].meta.delivered_at = Date.now();
         }
       }
     },
     messageErrored: async function(localMessage) {
       for(let i = 0; i< state.messages.length; i++){
         if (localMessage.id === state.messages[i].id) {
-          state.messages[i].attributes.errored_at = Date.now();
+          state.messages[i].meta.errored_at = Date.now();
         }
       }
     },
     messageResending: async function(message) {
       for(let i = 0; i< state.messages.length; i++){
         if (message.id === state.messages[i].id) {
-          state.messages[i].attributes.errored_at = null;
-          state.messages[i].attributes.sending_at = Date.now();
+          state.messages[i].meta = state.messages[i].meta || {}
+          state.messages[i].meta.errored_at = null;
+          state.messages[i].meta.sending_at = Date.now();
+        }
+      }
+    },
+    // TODO refactor for loops into a single method.
+    messageDownloadFinished: async function(message) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (message.id === state.messages[i].id) {
+          state.messages[i].meta.downloading_at = null;
+          state.messages[i].meta.downloaded_at = Date.now();
+        }
+      }
+    },
+    // TODO refactor for loops into a single method.
+    messageDownloading: async function(message) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (message.id === state.messages[i].id) {
+          state.messages[i].meta = state.messages[i].meta || {};
+          state.messages[i].meta.downloading_at = Date.now();
         }
       }
     },
@@ -461,6 +480,11 @@ let controller = (function() {
     },
     downloadFile: async function(message) {
       logger.info("Downloading file");
+
+      await applicationState.messageDownloading(message);
+      await storage.saveMessages(deviceId, applicationState.messages());
+      callbacks.newMessage();
+
       let {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
       let fileUpload = await api.downloadFile(fileUploadId);
 
@@ -468,6 +492,11 @@ let controller = (function() {
       let path = await fileSystem.downloadPath(basename);
 
       await fileSystem.writeBytes(path, decrypted);
+
+      await applicationState.messageDownloadFinished(message);
+      await storage.saveMessages(deviceId, applicationState.messages());
+      callbacks.newMessage();
+
       return fileSystem.downloadFinished(path);
     },
     // TODO sync messages to all users devices

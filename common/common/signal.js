@@ -255,6 +255,7 @@ let signal = (function() {
       encryptedMessage.attributes.decryptedBody = message;
       logger.info(`Decrypted message`);
       logger.info(encryptedMessage);
+      encryptedMessage.meta = {};
       _saveState(deviceId);
       return encryptedMessage;
     },
@@ -303,6 +304,8 @@ let signal = (function() {
         id: await _localMessageId(deviceId),
         attributes: {
           decryptedBody: object,
+        },
+        meta:{
           sent_at: null,
           delivered_at: null,
           errored_at: null,
@@ -331,6 +334,8 @@ let signal = (function() {
         id: await _localMessageId(deviceId),
         attributes: {
           decryptedBody: object,
+        },
+        meta: {
           sent_at: null,
           delivered_at: null,
           errored_at: null,
