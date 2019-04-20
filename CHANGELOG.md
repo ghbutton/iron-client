@@ -1,3 +1,1 @@
-- Add more feedback after a file has finished downloading
-- Download files to normal download folder
-- Add notifications for new messages
+- Add delivered checkmark
