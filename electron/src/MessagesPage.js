@@ -20,6 +20,7 @@ class MessagesPage extends Component {
     this.addEmoji = this.addEmoji.bind(this);
     this.showEmojis = this.showEmojis.bind(this);
     this.resendMessage = this.resendMessage.bind(this);
+    this.clickBackground = this.clickBackground.bind(this);
 
     this.focusInput = React.createRef();
   }
@@ -39,6 +40,11 @@ class MessagesPage extends Component {
       event.preventDefault();
       this.handleSubmit(event);
     }
+  }
+
+  async clickBackground(event) {
+    console.log("BACKGROUND CLICK");
+    console.log(event.target);
   }
 
   async addEmoji(e) {
@@ -128,15 +134,15 @@ class MessagesPage extends Component {
         const downloading = !!downloading_at && (downloading_at > Date.now() - 60000);
 
         return (
-          <div key={message.id} className="message">
-            <div className={fromMe ? "from-me" : "from-them"} >
+          <div key={message.id} className="message-row">
+            <div className={fromMe ? "from-me bubble" : "from-them bubble"} >
               {body}
-              {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
-              {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+              {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
+              {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
               {fromMe && !sent && !delivered && !errored && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
               {fromMe && errored && <div className="bottom-right"><button className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</button></div>}
               {!fromMe && downloading && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
-              {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
+              {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
             </div>
             <div className="clear"></div>
           </div>
@@ -148,7 +154,8 @@ class MessagesPage extends Component {
           <Link className="btn btn-primary" to={`/`}>{"< Back"}</Link>
           <h2>{this.state.connectedUser === null ? `` : `${window.view.userDisplay(this.state.connectedUser)}`}</h2>
         </div>
-        <section className="message-display">
+        <section className="message-display" >
+          <div className="clickable-background" onClick={this.clickBackground}></div>
           {messages}
           <span id="picker">
             {this.state.emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}

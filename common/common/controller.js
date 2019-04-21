@@ -425,9 +425,9 @@ let controller = (function() {
       return resp;
     },
     login: async function(email, code) {
-      const resp = await api.login(email, code, 2000);
+      const {status, resp} = await api.login(email, code, 2000);
 
-      if (resp.payload) {
+      if (status === "ok" && resp.payload) {
         storage.saveSession(resp.payload.data.sessions[0]);
       }
 
