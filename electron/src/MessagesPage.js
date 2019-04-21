@@ -134,7 +134,7 @@ class MessagesPage extends Component {
               {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
               {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
               {fromMe && !sent && !delivered && !errored && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
-              {fromMe && errored && <div className="bottom-right"><a href="#" className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</a></div>}
+              {fromMe && errored && <div className="bottom-right"><button className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</button></div>}
               {!fromMe && downloading && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
               {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary">&#10003;</span></div>}
             </div>
