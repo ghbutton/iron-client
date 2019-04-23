@@ -23,8 +23,6 @@ let applicationState = (function() {
   }
 
   async function insertObject(key, value) {
-    console.log(key);
-    console.log(value);
     state[`${key}_${value.id}`] = value;
     const all = state[`${key}`] || new Set([]);
     state[`${key}`] = all.add(value);
@@ -42,6 +40,26 @@ let applicationState = (function() {
     },
     connectedUsers: async function() {
       return state.connectedUsers;
+    },
+    connectedMessages: function(userId, connectedUserId) {
+      let connectedMessages = [];
+
+      for (let i = 0; i < state.messages.length; i++) {
+        let message = state.messages[i];
+        if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
+          if (message.relationships.receiver.data.id === connectedUserId.toString()) {
+            connectedMessages.push(message);
+          }
+        } else {
+          let senderUserId = message.relationships.sender_user.data.id;
+          let receiverUserId = message.relationships.receiver_user.data.id;
+
+          if (senderUserId === connectedUserId.toString() || (senderUserId === userId.toString() && receiverUserId === connectedUserId.toString())) {
+            connectedMessages.push(message);
+          }
+        }
+      }
+      return connectedMessages;
     },
     messages: function() {
       return state.messages;
@@ -355,9 +373,9 @@ let controller = (function() {
       }
       return connectedMessages;
     },
-    hasUnreadMessages: function(userId) {
-      const lastRead = applicationState.userLastRead(userId);
-      const messages = applicationState.messages();
+    hasUnreadMessages: function(connectedUserId) {
+      const lastRead = applicationState.userLastRead(connectedUserId);
+      const messages = applicationState.connectedMessages(userId, connectedUserId);
 
       for(let i = 0; i < messages.length; i++) {
         const message = messages[i];
@@ -370,9 +388,9 @@ let controller = (function() {
       }
       return false;
     },
-    setLastRead: async function(userId) {
-      let lastRead = applicationState.userLastRead(userId);
-      const messages = applicationState.messages();
+    setLastRead: async function(connectedUserId) {
+      let lastRead = applicationState.userLastRead(connectedUserId);
+      const messages = applicationState.connectedMessages(userId, connectedUserId);
 
       for(let i = 0; i < messages.length; i++) {
         const message = messages[i];
@@ -384,7 +402,7 @@ let controller = (function() {
         }
       }
 
-      await applicationState.updateLastRead(userId, lastRead);
+      await applicationState.updateLastRead(connectedUserId, lastRead);
       await storage.saveLastRead(deviceId, applicationState.lastRead());
     },
     // TODO make async ??
