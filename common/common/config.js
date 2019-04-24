@@ -33,6 +33,7 @@ let config = (function() {
           return "/tmp/iron/storage";
         }
       } else {
+        // TODO make this different for windows and os x
         return `${os.homedir()}/Library/Application Support/Iron/Storage`;
       }
     }

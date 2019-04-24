@@ -24,6 +24,20 @@ let view = (function() {
       } else {
         return false;
       }
+    },
+    deviceDisplay: function(device, deviceId) {
+      let osDisplayName;
+      if (device.os_name === "Darwin") {
+        osDisplayName = "OS X";
+      } else if (device.os_name === "Windows_NT") {
+        osDisplayName = "Windows";
+      }
+
+      if (!device.os_name) {
+        return "Unknown";
+      } else {
+        return `${osDisplayName} - ${device.name} ${device.id === deviceId ? "(this)" : ""}`
+      }
     }
   }
 })()

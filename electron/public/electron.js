@@ -12,7 +12,6 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    icon: path.join(__dirname, 'assets/icons/png/512x512.png'),
     webPreferences: { nodeIntegration: false, preload: __dirname + '/preload.js' }
   })
 
@@ -76,6 +75,7 @@ app.on('activate', function () {
     createWindow()
   }
 })
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

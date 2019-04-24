@@ -1,9 +1,10 @@
-import callbacks from "./callbacks.js";
 import api from "./api.js";
-import signal from "./signal.js";
-import storage from "./storage.js";
+import callbacks from "./callbacks.js";
+import deviceOS from "./device_os.js";
 import logger from "./logger.js";
 import fileSystem from "./file_system.js";
+import signal from "./signal.js";
+import storage from "./storage.js";
 
 let applicationState = (function() {
   let state = {connectedUsers: [], messages: [], lastRead: {}}
@@ -153,6 +154,10 @@ window.storage = storage;
 let controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
   const clientVersion = "0.0.1"
+
+  async function resetState(){
+    [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
+  }
 
   async function _messageErrored(message) {
     await applicationState.messageErrored(message);
@@ -328,7 +333,10 @@ let controller = (function() {
 
       if (userId && deviceId === null) {
         if (deviceId === null) {
-          let device = await api.getDevice(userId, userSessionToken, 2000);
+          const name = await deviceOS.deviceName();
+          const osName = await deviceOS.osName();
+
+          let device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
           await api.reconnect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
@@ -353,25 +361,7 @@ let controller = (function() {
     },
     // TODO get messages from API
     getMessages: async function(connectedUserId) {
-      let messages = applicationState.messages();
-      let connectedMessages = [];
-
-      for (let i = 0; i < messages.length; i++) {
-        let message = messages[i];
-        if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
-          if (message.relationships.receiver.data.id === connectedUserId.toString()) {
-            connectedMessages.push(message);
-          }
-        } else {
-          let senderUserId = message.relationships.sender_user.data.id;
-          let receiverUserId = message.relationships.receiver_user.data.id;
-
-          if (senderUserId === connectedUserId.toString() || (senderUserId === userId.toString() && receiverUserId === connectedUserId.toString())) {
-            connectedMessages.push(message);
-          }
-        }
-      }
-      return connectedMessages;
+      return applicationState.connectedMessages(userId, connectedUserId);
     },
     hasUnreadMessages: function(connectedUserId) {
       const lastRead = applicationState.userLastRead(connectedUserId);
@@ -544,7 +534,22 @@ let controller = (function() {
       } else {
         _sendLocalMessage(message);
       }
-    }
+    },
+    getDevices: async function() {
+      const {status, resp}= await api.getDevices(userId, 2000);
+      if (status === "ok") {
+        return resp;
+      } else {
+        return [];
+      }
+    },
+    getDeviceId: async function() {
+      return deviceId;
+    },
+    clearData: async function() {
+      await storage.clearData();
+      resetState();
+    },
   }
 })();
 

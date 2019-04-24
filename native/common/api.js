@@ -212,10 +212,22 @@ let api = (function() {
         return {status, resp}
       }
     },
-    getDevice: async function(userId, userSessionToken, timeout) {
+    getDevices: async function(userId, timeout) {
+      await _waitForApiChannel(timeout);
+
+      let {status, resp} = await _sendPush(apiChannel, "GET:devices", {user_id: userId});
+      if (status === "ok") {
+        let devices = resp.payload.data;
+
+        return {status: "ok", resp: devices};
+      } else {
+        return {status, resp}
+      }
+    },
+    createDevice: async function(userId, userSessionToken, name, osName, timeout) {
       await waitForLoginChannel(timeout);
 
-      const {status, resp}= await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken});
+      const {status, resp}= await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken, name: name, os_name: osName});
       if (status === "ok") {
         return resp.payload.data.devices[0];
       } else {

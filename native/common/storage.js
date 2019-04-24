@@ -131,6 +131,13 @@ let storage = (function() {
     saveDevice: async function(userId, device) {
       const key = await deviceKey(userId);
       return setItem(key, JSON.stringify(device));
+    },
+    clearData: async function() {
+      const files = fs.readdirSync(basePath);
+
+      for(let file of files) {
+        fs.unlinkSync(`${basePath}/${file}`);
+      }
     }
   }
 })()
