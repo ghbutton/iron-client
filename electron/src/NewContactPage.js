@@ -1,36 +1,36 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 
 class NewContactPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: "", name: ""}
+    this.state = {email: '', name: ''};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async handleChange(event) {
-    if(event.target.name === "name") {
-      this.setState({name: event.target.value})
-    } else if (event.target.name === "email") {
-      this.setState({email: event.target.value})
+    if (event.target.name === 'name') {
+      this.setState({name: event.target.value});
+    } else if (event.target.name === 'email') {
+      this.setState({email: event.target.value});
     }
   }
 
   async handleSubmit(event) {
     event.preventDefault();
-    let resp = await window.controller.createNewInvitation(this.state.name, this.state.email);
+    const resp = await window.controller.createNewInvitation(this.state.name, this.state.email);
 
-    if(resp.payload && resp.payload.data) {
-      this.props.history.push(`/new_chat`)
+    if (resp.payload && resp.payload.data) {
+      this.props.history.push(`/new_chat`);
     }
   }
 
   render() {
     return (
       <div className="newContactPage">
-        <Link className="btn btn-outline-primary" to={`/new_chat`}>{"< Back"}</Link>
+        <Link className="btn btn-outline-primary" to={`/new_chat`}>{'< Back'}</Link>
         <h1>New Contact</h1>
 
         <form onSubmit={this.handleSubmit}>

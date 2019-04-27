@@ -1,15 +1,15 @@
 import './MessagesPage.css';
 import './App.css';
-import 'emoji-mart/css/emoji-mart.css'
+import 'emoji-mart/css/emoji-mart.css';
 
-import { Picker } from 'emoji-mart'
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import {Picker} from 'emoji-mart';
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 
 class MessagesPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {connectedUser: null, connectedUserId: null, loaded: false, value: ``, userMessages: [], emojisVisible: false}
+    this.state = {connectedUser: null, connectedUserId: null, loaded: false, value: ``, userMessages: [], emojisVisible: false};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
@@ -36,34 +36,34 @@ class MessagesPage extends Component {
   }
 
   async handleKeyUp(event) {
-    if(event.key === "Enter" ) {
+    if (event.key === 'Enter' ) {
       event.preventDefault();
       this.handleSubmit(event);
     }
   }
 
   async clickBackground(event) {
-    console.log("BACKGROUND CLICK");
+    console.log('BACKGROUND CLICK');
     console.log(event.target);
   }
 
   async addEmoji(e) {
     // console.log(e.unified)
-    if (e.unified.length <= 5){
-      let emojiPic = String.fromCodePoint(`0x${e.unified}`)
+    if (e.unified.length <= 5) {
+      const emojiPic = String.fromCodePoint(`0x${e.unified}`);
       this.setState({
-        value: this.state.value + emojiPic
-      })
+        value: this.state.value + emojiPic,
+      });
     } else {
-      let sym = e.unified.split('-')
-      let codesArray = []
-      sym.forEach(el => codesArray.push('0x' + el))
+      const sym = e.unified.split('-');
+      const codesArray = [];
+      sym.forEach((el) => codesArray.push('0x' + el));
       // console.log(codesArray.length)
       // console.log(codesArray)  // ["0x1f3f3", "0xfe0f"]
-      let emojiPic = String.fromCodePoint(...codesArray)
+      const emojiPic = String.fromCodePoint(...codesArray);
       this.setState({
-        value: this.state.value + emojiPic
-      })
+        value: this.state.value + emojiPic,
+      });
     }
   }
 
@@ -72,7 +72,7 @@ class MessagesPage extends Component {
   }
 
   async resendMessage(event) {
-    window.controller.resendMessage((event.target.getAttribute("data-id")));
+    window.controller.resendMessage((event.target.getAttribute('data-id')));
   }
 
   async uploadFile() {
@@ -83,9 +83,9 @@ class MessagesPage extends Component {
 
   // Returns a function, kind of hacky
   downloadFile(message) {
-    return async function(){
+    return async function() {
       window.controller.downloadFile(message);
-    }
+    };
   }
 
   async handleNewMessage() {
@@ -94,64 +94,63 @@ class MessagesPage extends Component {
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
       rescroll = true;
     }
-    let userMessages = await window.controller.getMessages(connectedUserId);
+    const userMessages = await window.controller.getMessages(connectedUserId);
     this.setState({userMessages: userMessages});
     window.controller.setLastRead(connectedUserId);
 
     if (rescroll) {
       window.scroll({
         top: document.body.scrollHeight,
-        behavior: "smooth"
+        behavior: 'smooth',
       });
     }
   }
 
   async handleSubmit(event) {
-    if (this.state.value !== "") {
+    if (this.state.value !== '') {
       await window.controller.sendMessage(this.state.value, this.props.match.params.id);
-      this.setState({value: ""});
+      this.setState({value: ''});
       this.handleNewMessage();
     }
   }
 
   render() {
-    let messages = this.state.userMessages.map((message, index) =>
-      {
-        let body = null;
+    const messages = this.state.userMessages.map((message, index) => {
+      let body = null;
 
-        if(window.view.messageHasLink(message)) {
-          body = <button className="btn btn-primary" onClick={this.downloadFile(message)}>{window.view.messageDisplay(message)}</button>
-        } else {
-          body = window.view.messageDisplay(message);
-        }
+      if (window.view.messageHasLink(message)) {
+        body = <button className="btn btn-primary" onClick={this.downloadFile(message)}>{window.view.messageDisplay(message)}</button>;
+      } else {
+        body = window.view.messageDisplay(message);
+      }
 
-        // TODO put this in view logic
-        const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = (message.meta ? message.meta : {})
-        const fromMe = window.controller.currentUsersMessage(message);
-        const sent = !!sent_at;
-        const delivered = !!delivered_at;
-        const errored = !!errored_at || (!sent && (!sending_at || sending_at < Date.now() - 60000));
-        const downloading = !!downloading_at && (downloading_at > Date.now() - 60000);
+      // TODO put this in view logic
+      const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = (message.meta ? message.meta : {});
+      const fromMe = window.controller.currentUsersMessage(message);
+      const sent = !!sent_at;
+      const delivered = !!delivered_at;
+      const errored = !!errored_at || (!sent && (!sending_at || sending_at < Date.now() - 60000));
+      const downloading = !!downloading_at && (downloading_at > Date.now() - 60000);
 
-        return (
-          <div key={message.id} className="message-row">
-            <div className={fromMe ? "from-me bubble" : "from-them bubble"} >
-              {body}
-              {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
-              {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
-              {fromMe && !sent && !delivered && !errored && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
-              {fromMe && errored && <div className="bottom-right"><button className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</button></div>}
-              {!fromMe && downloading && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
-              {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
-            </div>
-            <div className="clear"></div>
+      return (
+        <div key={message.id} className="message-row">
+          <div className={fromMe ? 'from-me bubble' : 'from-them bubble'} >
+            {body}
+            {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
+            {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
+            {fromMe && !sent && !delivered && !errored && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
+            {fromMe && errored && <div className="bottom-right"><button className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</button></div>}
+            {!fromMe && downloading && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
+            {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
           </div>
-        )
-    })
+          <div className="clear"></div>
+        </div>
+      );
+    });
     return (
       <div>
         <div className="sticky-header color1">
-          <Link className="btn btn-primary" to={`/`}>{"< Back"}</Link>
+          <Link className="btn btn-primary" to={`/`}>{'< Back'}</Link>
           <h2>{this.state.connectedUser === null ? `` : `${window.view.userDisplay(this.state.connectedUser)}`}</h2>
         </div>
         <section className="message-display" >
@@ -172,24 +171,24 @@ class MessagesPage extends Component {
 
   async componentWillUnmount() {
     // you need to unbind the same listener that was binded.
-    window.removeEventListener("new_message", this.handleNewMessage);
+    window.removeEventListener('new_message', this.handleNewMessage);
   }
 
   async componentDidMount() {
-    let connectedUserId = this.props.match.params.id
-    let userMessages = await window.controller.getMessages(connectedUserId);
+    const connectedUserId = this.props.match.params.id;
+    const userMessages = await window.controller.getMessages(connectedUserId);
     this.focusInput.current.focus();
     this.setState({loaded: true, userMessages, connectedUserId});
     window.controller.setLastRead(connectedUserId);
 
     window.scroll({
-      top: document.body.scrollHeight
+      top: document.body.scrollHeight,
     });
 
-    window.addEventListener("new_message", this.handleNewMessage);
+    window.addEventListener('new_message', this.handleNewMessage);
 
     // Api call, slow
-    let connectedUser = await window.controller.getUserById(connectedUserId);
+    const connectedUser = await window.controller.getUserById(connectedUserId);
     if (connectedUser) {
       this.setState({connectedUser});
     }

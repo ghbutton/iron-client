@@ -46,6 +46,7 @@ let api = (function() {
   }
 
   async function _waitForApiChannel(_timeout) {
+    console.log(apiChannel);
     while (true) {
       if  (apiChannelReady || failedToJoin) {
         return true;
@@ -56,10 +57,11 @@ let api = (function() {
   }
 
   return {
-    connect: async function(userId, userSessionToken, clientVersion, deviceId, deviceSecret) {
+    connect: async function(userId, userSessionToken, deviceId, deviceSecret, onSocketOpen) {
       let url = `${config.wsProtocol()}://${config.wsUrl()}`;
 
       let wsPort = config.wsPort();
+      const apiVersion = config.apiVersion();
 
       if (Number.isInteger(wsPort)) {
         url = url + `:${wsPort}`;
@@ -72,7 +74,7 @@ let api = (function() {
           params: {
             user_id: userId,
             session_token: userSessionToken,
-            client_version: clientVersion,
+            api_version: apiVersion,
             device_id: deviceId,
             device_secret: deviceSecret
           }
@@ -82,44 +84,63 @@ let api = (function() {
       userDeviceChannel = socket.channel(`device:connect:${deviceId}`, {})
       apiChannel = socket.channel("api:connect", {})
       loginChannel = socket.channel("login:connect", {})
+
+      socket.onOpen(() =>
+        onSocketOpen()
+      );
+      //      socket.onError( () => console.log("Error"));
+      socket.onClose( () => {
+        apiChannelReady = false;
+        loginChannelReady = false;
+        console.log("Close")
+      });
       socket.connect();
     },
-    reconnect: async function(userId, userSessionToken, clientVersion, deviceId, deviceSecret) {
+    reconnect: async function(userId, userSessionToken, deviceId, deviceSecret) {
       await socket.disconnect();
-      return this.connect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
+      return this.connect(userId, userSessionToken, deviceId, deviceSecret);
     },
-    joinApiChannel: async function(apiChannelCallback){
-      apiChannel.join()
+    joinChannel: async function(type, onOk, onError, onTimeout){
+      let channel = null;
+      if (type === "login") {
+        channel = loginChannel;
+      } else if (type === "userDevice") {
+        channel = userDeviceChannel;
+      } else if (type === "api") {
+        channel = apiChannel;
+      } else {
+        throw new Error(`Unrecognized channel type ${type}`);
+      }
+
+      channel.join()
         .receive("ok", async resp => {
-          await apiChannelCallback(resp);
-          apiChannelReady = true;
+          if(type === "login") {
+            loginChannelReady = true;
+          } else if (type === "api") {
+            apiChannelReady = true;
+          }
+          if(onOk) {
+            onOk(resp);
+          }
         })
-      .receive("error", async resp => {
-        logger.info("Unable to join api", resp)
-        failedToJoin = true;
-      })
-      .receive("timeout", async resp  => {
-        failedToJoin = true;
-      })
-    },
-    joinUserDeviceChannel: async function(userDeviceChannelCallback) {
-      await _waitForApiChannel(2000);
-      userDeviceChannel.join()
-        .receive("ok", async resp => {
-          await userDeviceChannelCallback(resp);
+        .receive("error", async resp => {
+          if (onError) {
+            onError(resp);
+          }
         })
-      .receive("error", async resp => {
-        logger.info("Unable to join user", resp)
-        failedToJoin = true;
-      })
+        .receive("timeout", async resp => {
+          if (onTimeout) {
+            onTimeout(resp);
+          }
+        })
     },
     joinLoginChannel: async function(loginChannelCallback) {
       loginChannel.join()
         .receive("ok", async resp => {
           loginChannelReady = true;
-          await loginChannelCallback(resp);
+          loginChannelCallback(resp);
         })
-        .receive("error", async resp => {
+        .receive("error", (resp) => {
           logger.info("Unable to join", resp)
           failedToJoin = true;
         })

@@ -1,26 +1,26 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import * as qs from 'qs';
 
 class LoginPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: ""}
+    this.state = {email: ''};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async handleChange(event) {
-    this.setState({email: event.target.value})
+    this.setState({email: event.target.value});
   }
 
   async handleSubmit(event) {
     event.preventDefault();
     await window.controller.sendVerificationCode(this.state.email);
-    let query = {email: this.state.email};
+    const query = {email: this.state.email};
     const searchString = qs.stringify(query);
 
-    this.props.history.push({pathname: `/login_verification`, search: searchString})
+    this.props.history.push({pathname: `/login_verification`, search: searchString});
   }
 
   render() {
@@ -38,10 +38,10 @@ class LoginPage extends Component {
     );
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
     if (!await window.controller.notLoggedIn()) {
-      console.log("Redirecting to chats");
-      this.props.history.push(`/`)
+      console.log('Redirecting to chats');
+      this.props.history.push(`/`);
     }
   }
 }

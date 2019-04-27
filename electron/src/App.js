@@ -1,20 +1,23 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import './App.css';
 import ChatsPage from './ChatsPage';
+import ForceUpgradePage from './ForceUpgradePage';
 import MessagesPage from './MessagesPage';
 import LoginPage from './LoginPage';
 import LoginVerificationPage from './LoginVerificationPage';
 import SettingsPage from './SettingsPage';
 import NewChatPage from './NewChatPage';
 import NewContactPage from './NewContactPage';
+import TopLevel from './TopLevel';
 import UserEditPage from './UserEditPage';
-import { HashRouter as Router, Route } from "react-router-dom";
+import {HashRouter as Router, Route} from 'react-router-dom';
 
 class App extends Component {
   render() {
     return (
       <Router className="App">
         <div>
+          <TopLevel/>
           <Route exact path="/" component={ChatsPage} />
           <Route path="/connections/:id/messages" component={MessagesPage} />
           <Route path="/login" component={LoginPage} />
@@ -23,6 +26,7 @@ class App extends Component {
           <Route path="/new_chat" component={NewChatPage} />
           <Route path="/new_contact" component={NewContactPage} />
           <Route path="/user_edit" component={UserEditPage} />
+          <Route path="/force_upgrade" component={ForceUpgradePage} />
         </div>
       </Router>
     );

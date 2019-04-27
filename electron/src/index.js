@@ -13,7 +13,7 @@ window.controller = controller;
 
 async function init() {
   await controller.init();
-  ReactDOM.render(<App applicationState={window.applicationState} />, document.getElementById('root'));
+  ReactDOM.render(<App/>, document.getElementById('root'));
   await controller.connectToServer();
 }
 

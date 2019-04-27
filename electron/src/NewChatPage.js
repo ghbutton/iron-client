@@ -1,22 +1,22 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 
 class NewChatPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {search: "", results: []}
+    this.state = {search: '', results: []};
 
     this.handleChange = this.handleChange.bind(this);
   }
 
   async handleChange(event) {
-    let searchString = event.target.value;
+    const searchString = event.target.value;
     this.setState({search: searchString});
     if (searchString.length > 3) {
-      let users = await window.controller.connectedUsersSearch(searchString);
+      const users = await window.controller.connectedUsersSearch(searchString);
       this.setState({results: users});
     } else {
-      let users = [];
+      const users = [];
       this.setState({results: users});
     }
   }
@@ -24,11 +24,11 @@ class NewChatPage extends Component {
   render() {
     return (
       <div className="newChatPage">
-        <Link className="btn btn-outline-primary" to={`/`}>{"< Back"}</Link>
+        <Link className="btn btn-outline-primary" to={`/`}>{'< Back'}</Link>
         <h1>New Chat</h1>
 
         <div>
-          <Link to={`/new_contact`}>{"+ New Contact"}</Link>
+          <Link to={`/new_contact`}>{'+ New Contact'}</Link>
         </div>
         <br/>
 
@@ -37,11 +37,11 @@ class NewChatPage extends Component {
         </form>
 
         <ul>
-        {
-          this.state.results.map((user) => {
-            return(<li key={user.id}><Link to={`/connections/${user.id}/messages`}>{window.view.userDisplay(user)}</Link></li>)
-          })
-        }
+          {
+            this.state.results.map((user) => {
+              return (<li key={user.id}><Link to={`/connections/${user.id}/messages`}>{window.view.userDisplay(user)}</Link></li>);
+            })
+          }
         </ul>
       </div>
     );

@@ -4,6 +4,9 @@ const os = window.os;
 
 let config = (function() {
   return {
+    isDev: function() {
+      return isDev;
+    },
     wsProtocol: function() {
       if (isDev) {
         return process.env.REACT_APP_IRON_WS_PROTOCOL;
@@ -36,7 +39,10 @@ let config = (function() {
         // TODO make this different for windows and os x
         return `${os.homedir()}/Library/Application Support/Iron/Storage`;
       }
-    }
+    },
+    apiVersion: function() {
+      return 1;
+    },
   }
 })()
 

@@ -1,6 +1,6 @@
 import './ChatsPage.css';
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 import MenuFooter from './MenuFooter';
 
 class ChatsPage extends Component {
@@ -12,7 +12,7 @@ class ChatsPage extends Component {
 
   async handleNewMessage() {
     const {connectedUsers} = this.state;
-    let hasUnreadMessages = {};
+    const hasUnreadMessages = {};
 
     for (let i = 0; i < connectedUsers.length; i++) {
       const user = connectedUsers[i];
@@ -26,21 +26,22 @@ class ChatsPage extends Component {
     const {connectedUsers, hasUnreadMessages, userDisplay} = this.state;
     return (
       <div className="ChatsPage">
-          <div className="chatsMenu">
-            <Link to="/new_chat" className="pull-right btn btn-outline-primary">New</Link>
+        <div className="chatsMenu">
+          <Link to="/new_chat" className="pull-right btn btn-outline-primary">New</Link>
         </div>
         <div className="container">
           <h1>Chats</h1>
+          <hr/>
           <div className="list-group">
-          {
-            connectedUsers.map((user) => {
-              return(
-                <Link key={user.id} to={`/connections/${user.id}/messages`} className="list-group-item list-group-item-action">
-                  {userDisplay[user.id]} <span>{hasUnreadMessages[user.id] && (<span className="badge badge-pill badge-primary">!</span>)}</span>
-                </Link>
-              )
-            })
-          }
+            {
+              connectedUsers.map((user) => {
+                return (
+                  <Link key={user.id} to={`/connections/${user.id}/messages`} className="list-group-item list-group-item-action">
+                    {userDisplay[user.id]} <span>{hasUnreadMessages[user.id] && (<span className="badge badge-pill badge-primary">!</span>)}</span>
+                  </Link>
+                );
+              })
+            }
           </div>
         </div>
         <MenuFooter/>
@@ -50,16 +51,16 @@ class ChatsPage extends Component {
 
   async componentWillUnmount() {
     // you need to unbind the same listener that was binded.
-    window.removeEventListener("new_message", this.handleNewMessage);
+    window.removeEventListener('new_message', this.handleNewMessage);
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
     if (await window.controller.notLoggedIn()) {
-      this.props.history.push(`/login`)
+      this.props.history.push(`/login`);
     } else {
       const connectedUsers = await window.controller.getConnectedUsers();
-      let [hasUnreadMessages, userDisplay] = [{}, {}];
-      window.addEventListener("new_message", this.handleNewMessage);
+      const [hasUnreadMessages, userDisplay] = [{}, {}];
+      window.addEventListener('new_message', this.handleNewMessage);
       for (let i = 0; i < connectedUsers.length; i++) {
         const user = connectedUsers[i];
         userDisplay[user.id] = window.view.userDisplay(user);

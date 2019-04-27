@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 import * as qs from 'qs';
 
 class LoginVerificationPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: "", code: "", errorMessage: ""}
+    this.state = {email: '', code: '', errorMessage: ''};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -13,25 +13,25 @@ class LoginVerificationPage extends Component {
   }
 
   async handleChange(event) {
-    if (event.target.name === "code") {
-      this.setState({code: event.target.value})
+    if (event.target.name === 'code') {
+      this.setState({code: event.target.value});
     }
   }
 
   async sendVerificationCode(event) {
-    let sendCodeResp = await window.controller.sendVerificationCode(this.state.email);
+    const sendCodeResp = await window.controller.sendVerificationCode(this.state.email);
     console.log(sendCodeResp);
   }
 
   async handleSubmit(event) {
     event.preventDefault();
-    let loginResp = await window.controller.login(this.state.email, this.state.code);
+    const loginResp = await window.controller.login(this.state.email, this.state.code);
 
     if (loginResp.error) {
       this.setState({errorMessage: loginResp.error.message});
     } else {
-      this.setState({verification: ""});
-      console.log("Reloading page");
+      this.setState({verification: ''});
+      console.log('Reloading page');
       window.location.reload();
     }
   }
@@ -39,9 +39,9 @@ class LoginVerificationPage extends Component {
   render() {
     return (
       <div>
-        <Link to={`/login`}>{"< Back"}</Link>
+        <Link to={`/login`}>{'< Back'}</Link>
         <h2>Verification Page</h2>
-        {(this.state.errorMessage !== "") &&
+        {(this.state.errorMessage !== '') &&
             <div className="alert alert-warning" role="alert">
               {this.state.errorMessage}
             </div>
@@ -61,13 +61,13 @@ class LoginVerificationPage extends Component {
     );
   }
 
-  async componentDidMount(){
-    let queryParams = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
+  async componentDidMount() {
+    const queryParams = qs.parse(this.props.location.search, {ignoreQueryPrefix: true});
     this.setState({email: queryParams.email});
 
     if (!await window.controller.notLoggedIn()) {
-      console.log("Redirecting to chats");
-      this.props.history.push(`/`)
+      console.log('Redirecting to chats');
+      this.props.history.push(`/`);
     }
   }
 }

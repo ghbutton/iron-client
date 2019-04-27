@@ -22,7 +22,21 @@ let fileSystem = (function() {
     },
     downloadPath: async function(basename) {
       const downloads = app.getPath("downloads");
-      return `${downloads}/${basename}`;
+      const fullPath = `${downloads}/${basename}`;
+      if (fs.existsSync(fullPath)) {
+        const {name, ext} = fs_path.parse(basename);
+        for (let i = 1; i < 100; i++) {
+          const newBasename = `${name} (${i})${ext}`
+          const newFullpath = `${downloads}/${newBasename}`
+          if (!fs.existsSync(newFullpath)) {
+            return {type: "ok", path: newFullpath};
+          }
+        }
+        return {type: "error", path: null};
+      } else {
+        return {type: "ok", path: `${downloads}/${basename}`};
+      }
+
     },
     downloadFinished: async function(path) {
       app.dock.downloadFinished(path);

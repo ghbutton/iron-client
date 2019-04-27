@@ -153,7 +153,6 @@ window.storage = storage;
 
 let controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
-  const clientVersion = "0.0.1"
 
   async function resetState(){
     [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
@@ -234,7 +233,7 @@ let controller = (function() {
   async function _decryptMessage(encryptedMessage) {
     let senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
 
-    logger.info(`Got a message from ${senderDeviceId}`);
+    logger.debug(`Got a message from ${senderDeviceId}`);
 
     // Dedup messages that we already have
     if (!await applicationState.hasMessage(encryptedMessage)) {
@@ -256,15 +255,8 @@ let controller = (function() {
     return baseString.includes(searchString);
   }
 
-  async function _apiChannelCallback(resp) {
-    logger.info("Joined api channel successfully", resp);
-    let bundle = await signal.getPreKeyBundle();
-    await api.sendPreKeyBundle(bundle);
-    logger.info("Done with api channel");
-  }
-
   async function _userDeviceChannelCallback(resp) {
-    logger.info("Joined user device successfully", resp);
+    logger.debug("Joined user device successfully", resp);
     const messages = await api.getMessages();
 
     for(let i = 0; i < messages.length; i++) {
@@ -272,10 +264,6 @@ let controller = (function() {
       _decryptMessage(encryptedMessage)
     }
     callbacks.newMessage();
-  }
-
-  async function _loginChannelCallback(resp) {
-    logger.info("Joined login successfully", resp);
   }
 
   async function _receiveMessagesCallback(response) {
@@ -294,7 +282,7 @@ let controller = (function() {
   };
 
   async function _uploadFile(filename, recipientUserId) {
-    logger.info(`Sending file ${filename} to ${recipientUserId}`);
+    logger.debug(`Sending file ${filename} to ${recipientUserId}`);
     let basename = await fileSystem.basename(filename);
     let localFileMessage = await signal.localFileMessage({basename, filename}, userId, recipientUserId, deviceId);
     await applicationState.addMessage(localFileMessage);
@@ -306,7 +294,7 @@ let controller = (function() {
 
   return {
     init: async function(){
-      logger.info("Init");
+      logger.debug("Init");
       await storage.init();
 
       logger.info("Storaged initialized");
@@ -328,33 +316,51 @@ let controller = (function() {
     },
     connectToServer: async function() {
       logger.info("Connect to server");
-      await api.connect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
-      await api.joinLoginChannel(_loginChannelCallback);
 
-      if (userId && deviceId === null) {
-        if (deviceId === null) {
+      const _onApiChannelOk = async (resp) => {
+        logger.debug("Joined api channel successfully", resp);
+        await api.joinChannel("userDevice", _userDeviceChannelCallback);
+        await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
+        await api.userDeviceChannelReceiveMessagePackages(_receiveMessagePackagesCallback);
+        let bundle = await signal.getPreKeyBundle();
+        await api.sendPreKeyBundle(bundle);
+        logger.debug("Done with api channel");
+
+      }
+      const _onLoginChannelOk = async () => {
+        console.log("Login ok");
+        if (!!userId && deviceId === null) {
           const name = await deviceOS.deviceName();
           const osName = await deviceOS.osName();
 
           let device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
-          await api.reconnect(userId, userSessionToken, clientVersion, deviceId, deviceSecret);
-        }
-      }
-
-      if (userId && deviceId) {
-        let loaded = await signal.loadSignalInfo(deviceId);
-
-        if (!loaded && userId) {
-          await signal.generateDeviceInfo(deviceId);
+          await api.reconnect(userId, userSessionToken, deviceId, deviceSecret);
         }
 
-        await api.joinApiChannel(_apiChannelCallback);
-        await api.joinUserDeviceChannel(_userDeviceChannelCallback);
-        await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
-        await api.userDeviceChannelReceiveMessagePackages(_receiveMessagePackagesCallback);
+        if (userId && deviceId) {
+          let loaded = await signal.loadSignalInfo(deviceId);
+
+          if (!loaded && userId) {
+            await signal.generateDeviceInfo(deviceId);
+          }
+
+          await api.joinChannel("api", _onApiChannelOk);
+        }
       }
+      const _onLoginChannelError = async (resp) => {
+        console.log("Login error", resp);
+        if (resp.type === "force_upgrade") {
+          callbacks.forceUpgrade();
+        }
+      }
+      const _onSocketOpen = async () => {
+        logger.info("Socket open");
+        api.joinChannel("login", _onLoginChannelOk, _onLoginChannelError);
+      }
+
+      await api.connect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
     },
     inspectStore: async function() {
       return signal.inspectStore();
@@ -411,6 +417,7 @@ let controller = (function() {
       }
     },
     notLoggedIn: async function() {
+      console.log(userId);
       return userId === null;
     },
     getUserById: async function(userId) {
@@ -493,19 +500,23 @@ let controller = (function() {
       await storage.saveMessages(deviceId, applicationState.messages());
       callbacks.newMessage();
 
-      let {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
-      let fileUpload = await api.downloadFile(fileUploadId);
+      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
+      const fileUpload = await api.downloadFile(fileUploadId);
 
-      let decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
-      let path = await fileSystem.downloadPath(basename);
+      const decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
+      const {type, path} = await fileSystem.downloadPath(basename);
 
-      await fileSystem.writeBytes(path, decrypted);
+      if (type === "ok") {
+        await fileSystem.writeBytes(path, decrypted);
 
-      await applicationState.messageDownloadFinished(message);
-      await storage.saveMessages(deviceId, applicationState.messages());
-      callbacks.newMessage();
+        await applicationState.messageDownloadFinished(message);
+        await storage.saveMessages(deviceId, applicationState.messages());
+        callbacks.newMessage();
 
-      return fileSystem.downloadFinished(path);
+        return fileSystem.downloadFinished(path);
+      } else {
+        // TODO throw error
+      }
     },
     // TODO sync messages to all users devices
     sendMessage: async function(messageString, recipientUserId){
