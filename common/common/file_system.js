@@ -14,13 +14,20 @@ let fileSystem = (function() {
     basename: async function(path) {
       return fs_path.basename(path);
     },
-    showOpenDialog: async function() {
+    selectDirectory: async function() {
+      return dialog.showOpenDialog({properties: ["openDirectory"]});
+    },
+    multiSelectFiles: async function() {
       return dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
     },
     showSaveDialog: async function(filename) {
       return dialog.showSaveDialog(null, {defaultPath: filename});
     },
-    downloadPath: async function(basename) {
+    defaultDownloadDirectory: async function() {
+      const downloads = app.getPath("downloads");
+      return downloads;
+    },
+    fileDownloadPath: async function(basename) {
       const downloads = app.getPath("downloads");
       const fullPath = `${downloads}/${basename}`;
       if (fs.existsSync(fullPath)) {

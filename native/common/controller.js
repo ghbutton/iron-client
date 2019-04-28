@@ -300,7 +300,7 @@ let controller = (function() {
       logger.info("Storaged initialized");
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
-      let device = await storage.getDevice(userId);
+      let device = await storage.loadDevice(userId);
 
       if (device) {
         deviceId = device.id;
@@ -317,6 +317,11 @@ let controller = (function() {
     connectToServer: async function() {
       logger.info("Connect to server");
 
+      const _onSocketOpen = async () => {
+        logger.info("Socket open");
+        api.joinChannel("login", _onLoginChannelOk, _onLoginChannelError);
+      }
+
       const _onApiChannelOk = async (resp) => {
         logger.debug("Joined api channel successfully", resp);
         await api.joinChannel("userDevice", _userDeviceChannelCallback);
@@ -328,7 +333,7 @@ let controller = (function() {
 
       }
       const _onLoginChannelOk = async () => {
-        console.log("Login ok");
+        logger.debug("Login ok");
         if (!!userId && deviceId === null) {
           const name = await deviceOS.deviceName();
           const osName = await deviceOS.osName();
@@ -336,7 +341,7 @@ let controller = (function() {
           let device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
-          await api.reconnect(userId, userSessionToken, deviceId, deviceSecret);
+          await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
         }
 
         if (userId && deviceId) {
@@ -350,16 +355,11 @@ let controller = (function() {
         }
       }
       const _onLoginChannelError = async (resp) => {
-        console.log("Login error", resp);
+        logger.debug("Login error", resp);
         if (resp.type === "force_upgrade") {
           callbacks.forceUpgrade();
         }
       }
-      const _onSocketOpen = async () => {
-        logger.info("Socket open");
-        api.joinChannel("login", _onLoginChannelOk, _onLoginChannelError);
-      }
-
       await api.connect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
     },
     inspectStore: async function() {
@@ -417,7 +417,6 @@ let controller = (function() {
       }
     },
     notLoggedIn: async function() {
-      console.log(userId);
       return userId === null;
     },
     getUserById: async function(userId) {
@@ -483,7 +482,7 @@ let controller = (function() {
       return api.sendInvitation(name, email, 2000);
     },
     uploadFiles: async function(recipientUserId) {
-      let fileNames = await fileSystem.showOpenDialog();
+      let fileNames = await fileSystem.multiSelectFiles();
       if (fileNames === undefined) return;
 
       return await Promise.all(
@@ -492,6 +491,28 @@ let controller = (function() {
             _uploadFile(fileName, recipientUserId)
         )
       )
+    },
+    downloadDirectory: async function(){
+      const downloadDirectory = await storage.loadDownloadDirectory();
+      if (!downloadDirectory) {
+        const defaultDirectory = await fileSystem.defaultDownloadDirectory();
+        return defaultDirectory;
+      } else {
+        return downloadDirectory;
+      }
+    },
+    updateDownloadDirectory: async function() {
+      const directories = await fileSystem.selectDirectory();
+      if (!directories) {
+        return;
+      }
+      const directory = directories[0];
+      const defaultDirectory = await fileSystem.defaultDownloadDirectory();
+      if(directory === defaultDirectory) {
+        await storage.deleteDownloadDirectory();
+      } else {
+        await storage.saveDownloadDirectory(directory);
+      }
     },
     downloadFile: async function(message) {
       logger.info("Downloading file");
@@ -504,7 +525,7 @@ let controller = (function() {
       const fileUpload = await api.downloadFile(fileUploadId);
 
       const decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
-      const {type, path} = await fileSystem.downloadPath(basename);
+      const {type, path} = await fileSystem.fileDownloadPath(basename);
 
       if (type === "ok") {
         await fileSystem.writeBytes(path, decrypted);

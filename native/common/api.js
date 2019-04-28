@@ -46,7 +46,6 @@ let api = (function() {
   }
 
   async function _waitForApiChannel(_timeout) {
-    console.log(apiChannel);
     while (true) {
       if  (apiChannelReady || failedToJoin) {
         return true;
@@ -92,13 +91,14 @@ let api = (function() {
       socket.onClose( () => {
         apiChannelReady = false;
         loginChannelReady = false;
-        console.log("Close")
+        logger.info("Socket Closed");
       });
       socket.connect();
     },
-    reconnect: async function(userId, userSessionToken, deviceId, deviceSecret) {
+    reconnect: async function(...args) {
+      logger.info("Reconnecting to the API");
       await socket.disconnect();
-      return this.connect(userId, userSessionToken, deviceId, deviceSecret);
+      return this.connect(...args);
     },
     joinChannel: async function(type, onOk, onError, onTimeout){
       let channel = null;

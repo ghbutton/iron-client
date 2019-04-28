@@ -9,6 +9,16 @@ let storage = (function() {
   async function setItem(key, value) {
     return fs.writeFileSync(`${basePath}/${key}`, value);
   }
+
+  async function deleteItem(key) {
+    const currentPath = `${basePath}/${key}`;
+    if (fs.existsSync(currentPath)) {
+      return fs.unlinkSync(currentPath);
+    } else {
+      return null;
+    }
+  }
+
   async function getItem(key) {
     return new Promise(function(resolve, reject) {
       fs.readFile(`${basePath}/${key}`, (err, data) => {
@@ -26,6 +36,10 @@ let storage = (function() {
   }
   async function userSessionKey() {
     return `ironUserSession`;
+  }
+
+  async function downloadDirectoryKey() {
+    return `ironDownloadDirectory`;
   }
 
   async function lastReadKey(deviceId) {
@@ -122,7 +136,7 @@ let storage = (function() {
       const key = await signalInfoKey(deviceId);
       return setItem(key, payload);
     },
-    getDevice: async function(userId) {
+    loadDevice: async function(userId) {
       const key = await deviceKey(userId);
       const devicePayload = await getItem(key);
       const device = JSON.parse(devicePayload);
@@ -138,6 +152,20 @@ let storage = (function() {
       for(let file of files) {
         fs.unlinkSync(`${basePath}/${file}`);
       }
+    },
+    saveDownloadDirectory: async function(directory){
+      const key = await downloadDirectoryKey();
+      return setItem(key, JSON.stringify(directory));
+    },
+    deleteDownloadDirectory: async function() {
+      const key = await downloadDirectoryKey();
+      return deleteItem(key);
+    },
+    loadDownloadDirectory: async function() {
+      const key = await downloadDirectoryKey();
+      const directoryPayload = await getItem(key);
+      const downloadDirectory = JSON.parse(directoryPayload);
+      return (downloadDirectory) || null;
     }
   }
 })()
