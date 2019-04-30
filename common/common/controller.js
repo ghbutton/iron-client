@@ -7,7 +7,7 @@ import signal from "./signal.js";
 import storage from "./storage.js";
 
 let applicationState = (function() {
-  let state = {connectedUsers: [], messages: [], lastRead: {}}
+  let state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []}
 
   async function addDedup(list, object) {
     let isDup = false;
@@ -144,6 +144,12 @@ let applicationState = (function() {
         }
       }
       return null;
+    },
+    addDownload: async function(path, message) {
+      state.downloads.push({path, message});
+    },
+    downloads: async function() {
+      return state.downloads;
     }
   }
 })();
@@ -514,12 +520,22 @@ let controller = (function() {
         await storage.saveDownloadDirectory(directory);
       }
     },
+    getDownloads: async function() {
+      return applicationState.downloads();
+    },
+    openDownload: async function(download) {
+      // TODO make sure it is the same file with a checksum or something
+      fileSystem.openItem(download.path);
+    },
+    openExternal: async function(website) {
+      fileSystem.openExternal(website);
+    },
     downloadFile: async function(message) {
       logger.info("Downloading file");
 
       await applicationState.messageDownloading(message);
       await storage.saveMessages(deviceId, applicationState.messages());
-      callbacks.newMessage();
+      callbacks.newDownload();
 
       const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
       const fileUpload = await api.downloadFile(fileUploadId);
@@ -529,10 +545,10 @@ let controller = (function() {
 
       if (type === "ok") {
         await fileSystem.writeBytes(path, decrypted);
-
         await applicationState.messageDownloadFinished(message);
         await storage.saveMessages(deviceId, applicationState.messages());
-        callbacks.newMessage();
+        await applicationState.addDownload(path, message);
+        callbacks.newDownload();
 
         return fileSystem.downloadFinished(path);
       } else {

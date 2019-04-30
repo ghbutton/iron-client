@@ -8,6 +8,12 @@ let callbacks = (function() {
       // Dispatch the event.
       window.dispatchEvent(event);
     },
+    newDownload: function() {
+      const event = new CustomEvent("new_download", {});
+      logger.debug("New download");
+      // Dispatch the event.
+      window.dispatchEvent(event);
+    },
     forceUpgrade: function() {
       const event = new CustomEvent("force_upgrade", {});
       logger.debug("Force upgrade event");

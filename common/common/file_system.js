@@ -2,9 +2,16 @@ const fs = window.fs;
 const fs_path = window.path;
 const dialog = window.dialog;
 const app = window.app;
+const shell = window.shell;
 
 let fileSystem = (function() {
   return {
+    openItem(path) {
+      shell.openItem(path);
+    },
+    openExternal(webpage) {
+      shell.openExternal(webpage);
+    },
     readBytes: async function(path) {
       return fs.readFileSync(path, {encoding: "binary"});
     },

@@ -6,17 +6,22 @@ import {Picker} from 'emoji-mart';
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
+import Dropdown from 'react-bootstrap/Dropdown';
+
 class MessagesPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {connectedUser: null, connectedUserId: null, loaded: false, value: ``, userMessages: [], emojisVisible: false};
+    // TODO rename value to something else
+    this.state = {connectedUser: null, connectedUserId: null, value: ``, userMessages: [], emojisVisible: false, downloads: []};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleNewMessage = this.handleNewMessage.bind(this);
+    this.handleNewDownload = this.handleNewDownload.bind(this);
     this.uploadFile= this.uploadFile.bind(this);
     this.downloadFile= this.downloadFile.bind(this);
+    this.openDownload= this.openDownload.bind(this);
     this.addEmoji = this.addEmoji.bind(this);
     this.showEmojis = this.showEmojis.bind(this);
     this.resendMessage = this.resendMessage.bind(this);
@@ -48,6 +53,7 @@ class MessagesPage extends Component {
   }
 
   async addEmoji(e) {
+    // TODO {value} = this.state;
     // console.log(e.unified)
     if (e.unified.length <= 5) {
       const emojiPic = String.fromCodePoint(`0x${e.unified}`);
@@ -81,10 +87,16 @@ class MessagesPage extends Component {
     this.handleNewMessage();
   }
 
-  // Returns a function, kind of hacky
+  // TODO returns a function, kind of hacky
   downloadFile(message) {
     return async function() {
       window.controller.downloadFile(message);
+    };
+  }
+  // TODO also hacky
+  openDownload(download) {
+    return async function() {
+      window.controller.openDownload(download);
     };
   }
 
@@ -95,7 +107,7 @@ class MessagesPage extends Component {
       rescroll = true;
     }
     const userMessages = await window.controller.getMessages(connectedUserId);
-    this.setState({userMessages: userMessages});
+    this.setState({userMessages});
     window.controller.setLastRead(connectedUserId);
 
     if (rescroll) {
@@ -104,6 +116,15 @@ class MessagesPage extends Component {
         behavior: 'smooth',
       });
     }
+  }
+
+  async handleNewDownload() {
+    console.log("New Download");
+    const {connectedUserId} = this.state;
+    const userMessages = await window.controller.getMessages(connectedUserId);
+    const downloads = await window.controller.getDownloads();
+    console.log(downloads);
+    this.setState({userMessages, downloads});
   }
 
   async handleSubmit(event) {
@@ -147,10 +168,30 @@ class MessagesPage extends Component {
         </div>
       );
     });
+
+    const downloadDropdown = (this.state.downloads.length > 0 &&
+      <Dropdown>
+        <Dropdown.Toggle className="btn btn-outline-primary download-button">
+          <span role="img" aria-label="arrow">⇩</span>
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          {
+            this.state.downloads.map((download, index) => {
+              return (<Dropdown.Item key={index} onClick={this.openDownload(download)}>{download.path}</Dropdown.Item>);
+            })
+          }
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+    // TODO put emoji's over the messages on the z axis, also close emojis after one has been selected
     return (
       <div>
         <div className="sticky-header color1">
-          <Link className="btn btn-primary" to={`/`}>{'< Back'}</Link>
+          <div className="header-line-1">
+            <Link className="btn btn-outline-primary" to={`/`}>{'< Back'}</Link>
+            {downloadDropdown}
+          </div>
           <h2>{this.state.connectedUser === null ? `` : `${window.view.userDisplay(this.state.connectedUser)}`}</h2>
         </div>
         <section className="message-display" >
@@ -162,8 +203,8 @@ class MessagesPage extends Component {
         </section>
         <div className="sticky-footer">
           <textarea rows="1" ref={this.focusInput} type="text" value={this.state.value} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
-          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.showEmojis}><span role="img" aria-label="face">😀</span></button>
-          <button type="button" className="btn btn-success upload-button footer-padding" onClick={this.uploadFile}><span role="img" aria-label="folder">📁</span></button>
+          <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.showEmojis}><span role="img" aria-label="face">😀</span></button>
+          <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.uploadFile}><span role="img" aria-label="folder">📁</span></button>
         </div>
       </div>
     );
@@ -172,13 +213,15 @@ class MessagesPage extends Component {
   async componentWillUnmount() {
     // you need to unbind the same listener that was binded.
     window.removeEventListener('new_message', this.handleNewMessage);
+    window.removeEventListener('new_download', this.handleNewDownload);
   }
 
   async componentDidMount() {
     const connectedUserId = this.props.match.params.id;
     const userMessages = await window.controller.getMessages(connectedUserId);
+    const downloads = await window.controller.getDownloads();
     this.focusInput.current.focus();
-    this.setState({loaded: true, userMessages, connectedUserId});
+    this.setState({userMessages, connectedUserId, downloads});
     window.controller.setLastRead(connectedUserId);
 
     window.scroll({
@@ -186,6 +229,7 @@ class MessagesPage extends Component {
     });
 
     window.addEventListener('new_message', this.handleNewMessage);
+    window.addEventListener('new_download', this.handleNewDownload);
 
     // Api call, slow
     const connectedUser = await window.controller.getUserById(connectedUserId);

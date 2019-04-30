@@ -52,6 +52,20 @@ body {
   z-index: 3;
 }
 
+.header-line-1 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.download-button {
+  justify-content: flex-end;
+}
+
+.download-button::after {
+  display:none;
+}
+
 .footer-padding {
   margin-top: 10px;
   margin-bottom: 10px;

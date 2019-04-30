@@ -112,27 +112,35 @@ let api = (function() {
         throw new Error(`Unrecognized channel type ${type}`);
       }
 
-      channel.join()
-        .receive("ok", async resp => {
-          if(type === "login") {
-            loginChannelReady = true;
-          } else if (type === "api") {
-            apiChannelReady = true;
-          }
-          if(onOk) {
-            onOk(resp);
-          }
-        })
-        .receive("error", async resp => {
-          if (onError) {
-            onError(resp);
-          }
-        })
-        .receive("timeout", async resp => {
-          if (onTimeout) {
-            onTimeout(resp);
-          }
-        })
+      const joined = (resp) => {
+        if(type === "login") {
+          loginChannelReady = true;
+        } else if (type === "api") {
+          apiChannelReady = true;
+        }
+        if(onOk) {
+          onOk(resp);
+        }
+      }
+
+      if (channel.joinedOnce) {
+        joined();
+      } else {
+        channel.join()
+          .receive("ok", async resp => {
+            joined(resp);
+          })
+          .receive("error", async resp => {
+            if (onError) {
+              onError(resp);
+            }
+          })
+          .receive("timeout", async resp => {
+            if (onTimeout) {
+              onTimeout(resp);
+            }
+          })
+      }
     },
     joinLoginChannel: async function(loginChannelCallback) {
       loginChannel.join()
