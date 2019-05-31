@@ -12,6 +12,5 @@ Yarn commands:
 
 Building for prod:
 - `# Bump version`
-- `yarn preelectron-pack`
 - `yarn electron-pack`
 - `yarn dist`

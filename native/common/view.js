@@ -22,12 +22,13 @@ let view = (function() {
     },
     messageTimestamp: function(message) {
       let date = null;
+      const meta = message.meta || {};
       if (message.attributes.decryptedBody.type === "fm") {
         date = new Date(message.attributes.inserted_at + "Z");
-      } else if (message.attributes.decryptedBody.type === "local_file_message_v1" && message.meta.sent_at) {
-        date = new Date(message.meta.sent_at);
-      } else if (message.attributes.decryptedBody.type === "local_message_v1" && message.meta.sent_at) {
-        date = new Date(message.meta.sent_at);
+      } else if (message.attributes.decryptedBody.type === "local_file_message_v1" && meta.sent_at) {
+        date = new Date(meta.sent_at);
+      } else if (message.attributes.decryptedBody.type === "local_message_v1" && meta.sent_at) {
+        date = new Date(meta.sent_at);
       } else if (message.attributes.decryptedBody.type === "m") {
         date = new Date(message.attributes.inserted_at + "Z");
       }
@@ -76,9 +77,10 @@ let view = (function() {
       return (senderId === userId.toString());
     },
     messageState: function(message, userId) {
+      const meta = message.meta || {};
       const fromMe = this.currentUsersMessage(message, userId);
       const fromThisDevice = (message.attributes.decryptedBody.type === "local_message_v1");
-      const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = (message.meta ? message.meta : {});
+      const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = meta;
       const sent = !!sent_at;
       const delivered = !!delivered_at;
       const errored = !!errored_at || (!sent && (!sending_at || sending_at < Date.now() - 60000));
