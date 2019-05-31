@@ -6,11 +6,11 @@ html {
 }
 
 body.withFooter {
-  margin-bottom: 60px; /* Margin bottom by footer height */
+  margin-bottom: 80px; /* Margin bottom by footer height */
 }
 
 .footer {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   width: 100%;
   height: 60px; /* Set the fixed height of the footer here */

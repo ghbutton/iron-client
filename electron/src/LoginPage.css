@@ -1,0 +1,13 @@
+.centeredContainer {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.loginButton {
+  margin-top: 10px;
+}
+
+.loginForm {
+  margin-top: 10px;
+}

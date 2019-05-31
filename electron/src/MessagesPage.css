@@ -4,10 +4,16 @@ body {
   font-weight: normal;
 }
 
+.message-timestamp{
+  font-size: 10px;
+  padding-left: 10px;
+}
+
 #picker {
   position: absolute;
   right: 0;
   bottom: 60px;
+  z-index: 3;
 }
 
 .bottom-right {
@@ -32,6 +38,15 @@ body {
 
 .bubble {
   z-index: 2;
+}
+
+.date-container{
+  display: flex;
+  justify-content: center;
+}
+
+.date-bubble {
+  background-color: green;
 }
 
 .sticky-footer {
@@ -131,6 +146,9 @@ section.message-display {
   }
 }
 
+.from-me-space {
+  padding-top: 5px;
+}
 .clear {clear: both}
 .from-me {
   position:relative;
@@ -139,7 +157,6 @@ section.message-display {
   background:#0B93F6;
   border-radius:25px;
   float: right;
-  margin-bottom: 3px;
 
   &:before {
     content:"";

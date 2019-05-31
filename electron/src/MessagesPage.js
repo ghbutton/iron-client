@@ -2,17 +2,20 @@ import './MessagesPage.css';
 import './App.css';
 import 'emoji-mart/css/emoji-mart.css';
 
-import {Picker} from 'emoji-mart';
+import {emojiIndex, Picker} from 'emoji-mart';
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
 import Dropdown from 'react-bootstrap/Dropdown';
 
+const PLING = new Audio();
+PLING.src = './static/sounds/pling.wav';
+PLING.volume = 0.75;
+
 class MessagesPage extends Component {
   constructor(props) {
     super(props);
-    // TODO rename value to something else
-    this.state = {connectedUser: null, connectedUserId: null, value: ``, userMessages: [], emojisVisible: false, downloads: []};
+    this.state = {connectedUser: null, connectedUserId: null, messageString: ``, userMessages: [], emojisVisible: false, downloads: [], now: new Date(), userId: null, deviceId: null};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
@@ -26,18 +29,19 @@ class MessagesPage extends Component {
     this.showEmojis = this.showEmojis.bind(this);
     this.resendMessage = this.resendMessage.bind(this);
     this.clickBackground = this.clickBackground.bind(this);
+    this.focusTextInput= this.focusTextInput.bind(this);
 
     this.focusInput = React.createRef();
   }
 
   async handleChange(event) {
-    this.setState({value: event.target.value});
+    this.setState({messageString: event.target.value});
   }
 
   async focusTextInput() {
     // Explicitly focus the text input using the raw DOM API
     // Note: we're accessing "current" to get the DOM node
-    this.textInput.current.focus();
+    this.focusInput.current.focus();
   }
 
   async handleKeyUp(event) {
@@ -53,12 +57,12 @@ class MessagesPage extends Component {
   }
 
   async addEmoji(e) {
-    // TODO {value} = this.state;
+    const {messageString} = this.state;
     // console.log(e.unified)
     if (e.unified.length <= 5) {
       const emojiPic = String.fromCodePoint(`0x${e.unified}`);
       this.setState({
-        value: this.state.value + emojiPic,
+        messageString: messageString+ emojiPic,
       });
     } else {
       const sym = e.unified.split('-');
@@ -68,13 +72,20 @@ class MessagesPage extends Component {
       // console.log(codesArray)  // ["0x1f3f3", "0xfe0f"]
       const emojiPic = String.fromCodePoint(...codesArray);
       this.setState({
-        value: this.state.value + emojiPic,
+        messageString: messageString + emojiPic,
       });
     }
+
+    this.setState({
+      emojisVisible: false,
+    });
+    this.focusTextInput();
   }
 
   async showEmojis() {
-    this.setState({emojisVisible: !this.state.emojisVisible});
+    const {emojisVisible} = this.state;
+    this.setState({emojisVisible: !emojisVisible});
+    this.focusTextInput();
   }
 
   async resendMessage(event) {
@@ -119,24 +130,28 @@ class MessagesPage extends Component {
   }
 
   async handleNewDownload() {
-    console.log("New Download");
     const {connectedUserId} = this.state;
     const userMessages = await window.controller.getMessages(connectedUserId);
     const downloads = await window.controller.getDownloads();
-    console.log(downloads);
     this.setState({userMessages, downloads});
   }
 
   async handleSubmit(event) {
-    if (this.state.value !== '') {
-      await window.controller.sendMessage(this.state.value, this.props.match.params.id);
-      this.setState({value: ''});
+    const {messageString} = this.state
+    if (messageString !== '') {
+      await window.controller.sendMessage(messageString, this.props.match.params.id);
+      this.setState({messageString: ''});
+      PLING.currentTime = 0;
+      PLING.play();
       this.handleNewMessage();
     }
   }
 
   render() {
-    const messages = this.state.userMessages.map((message, index) => {
+    let date = null;
+    let lastMessageFromMe = true;
+    const {userId, userMessages, downloads, connectedUser, emojisVisible, messageString} = this.state;
+    const messages = userMessages.map((message, index) => {
       let body = null;
 
       if (window.view.messageHasLink(message)) {
@@ -145,31 +160,45 @@ class MessagesPage extends Component {
         body = window.view.messageDisplay(message);
       }
 
+      const timestamp = window.view.messageTimestamp(message);
+      const timestampDisplay = window.view.messageDisplayTimestamp(timestamp);
+
+      const fromMe = window.view.currentUsersMessage(message, userId);
+      const messageState = window.view.messageState(message, userId);
+      const fromMeSpace = (fromMe && !lastMessageFromMe) || (!fromMe && lastMessageFromMe);
+
+      if (fromMeSpace) {
+        lastMessageFromMe = fromMe;
+      }
+
+      let dateDisplay = null;
+
       // TODO put this in view logic
-      const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = (message.meta ? message.meta : {});
-      const fromMe = window.controller.currentUsersMessage(message);
-      const sent = !!sent_at;
-      const delivered = !!delivered_at;
-      const errored = !!errored_at || (!sent && (!sending_at || sending_at < Date.now() - 60000));
-      const downloading = !!downloading_at && (downloading_at > Date.now() - 60000);
+      if (timestamp === null){
+      } else if (date === null || timestamp.getFullYear() !== date.getFullYear() || timestamp.getMonth() !== date.getMonth() || timestamp.getDate() !== date.getDate()) {
+        date = timestamp;
+        dateDisplay = window.view.timestampBreakDisplay(date);
+      }
 
       return (
         <div key={message.id} className="message-row">
+          {dateDisplay !== null ? <div className="date-container"><span className="btn btn-info">{dateDisplay}</span></div> : null}
+          {!dateDisplay && fromMeSpace && <div className="from-me-space" />}
           <div className={fromMe ? 'from-me bubble' : 'from-them bubble'} >
-            {body}
-            {fromMe && sent && <div className="bottom-right"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
-            {fromMe && delivered && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
-            {fromMe && !sent && !delivered && !errored && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
-            {fromMe && errored && <div className="bottom-right"><button className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</button></div>}
-            {!fromMe && downloading && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
-            {!fromMe && downloaded_at && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
+            <span className="message"><span className="message-body">{body}</span><span className="message-timestamp">{timestampDisplay}</span></span>
+            {(messageState === "delivered" || messageState === "sent") && <div className="bottom-right"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
+            {messageState === "delivered" && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
+            {messageState === "sending" && <div className="ring-div"><div className="lds-ring lds-ring-me" ><div></div><div></div><div></div><div></div></div></div>}
+            {messageState === "errored" && <div className="bottom-right"><button className="badge badge-pill badge-danger" onClick={this.resendMessage} data-id={message.id}>!</button></div>}
+            {messageState === "downloading" && <div className="ring-div"><div className="lds-ring lds-ring-them"><div></div><div></div><div></div><div></div></div></div>}
+            {messageState === "downloaded" && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
           </div>
           <div className="clear"></div>
         </div>
       );
     });
 
-    const downloadDropdown = (this.state.downloads.length > 0 &&
+    const downloadDropdown = (downloads.length > 0 &&
       <Dropdown>
         <Dropdown.Toggle className="btn btn-outline-primary download-button">
           <span role="img" aria-label="arrow">⇩</span>
@@ -177,14 +206,19 @@ class MessagesPage extends Component {
 
         <Dropdown.Menu>
           {
-            this.state.downloads.map((download, index) => {
-              return (<Dropdown.Item key={index} onClick={this.openDownload(download)}>{download.path}</Dropdown.Item>);
+            downloads.map((download, index) => {
+              return (<Dropdown.Item key={index} onClick={this.openDownload(download)}>{download.basename}</Dropdown.Item>);
             })
           }
         </Dropdown.Menu>
       </Dropdown>
     );
-    // TODO put emoji's over the messages on the z axis, also close emojis after one has been selected
+
+    // TODO add a way to inject emojis
+    //    if (messageString.startsWith(":") && messageString !== ":") {
+    //      const emojiSearchString = messageString.replace(":", "");
+    //      emojiIndex.search(emojiSearchString).map((o) => console.log(o));
+    //    }
     return (
       <div>
         <div className="sticky-header color1">
@@ -192,17 +226,17 @@ class MessagesPage extends Component {
             <Link className="btn btn-outline-primary" to={`/`}>{'< Back'}</Link>
             {downloadDropdown}
           </div>
-          <h2>{this.state.connectedUser === null ? `` : `${window.view.userDisplay(this.state.connectedUser)}`}</h2>
+          <h2>{connectedUser === null ? `` : `${window.view.userDisplay(connectedUser)}`}</h2>
         </div>
         <section className="message-display" >
           <div className="clickable-background" onClick={this.clickBackground}></div>
           {messages}
           <span id="picker">
-            {this.state.emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}
+            {emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}
           </span>
         </section>
         <div className="sticky-footer">
-          <textarea rows="1" ref={this.focusInput} type="text" value={this.state.value} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
+          <textarea rows="1" ref={this.focusInput} type="text" value={messageString} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
           <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.showEmojis}><span role="img" aria-label="face">😀</span></button>
           <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.uploadFile}><span role="img" aria-label="folder">📁</span></button>
         </div>
@@ -220,8 +254,10 @@ class MessagesPage extends Component {
     const connectedUserId = this.props.match.params.id;
     const userMessages = await window.controller.getMessages(connectedUserId);
     const downloads = await window.controller.getDownloads();
-    this.focusInput.current.focus();
-    this.setState({userMessages, connectedUserId, downloads});
+    const userId = window.controller.currentUserId();
+    const deviceId = window.controller.currentDeviceId();
+    this.setState({userMessages, connectedUserId, downloads, userId, deviceId});
+    this.focusTextInput();
     window.controller.setLastRead(connectedUserId);
 
     window.scroll({

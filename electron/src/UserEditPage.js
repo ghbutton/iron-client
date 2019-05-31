@@ -6,9 +6,9 @@ class UserEditPage extends Component {
 
   handleSubmit = async (event) => {
     event.preventDefault();
-    let resp = await window.controller.updateUser({name: this.state.name})
+    const {status}= await window.controller.updateUser({name: this.state.name})
 
-    if (resp.payload && resp.payload.data) {
+    if (status === "ok") {
       this.props.history.push(`/settings`)
     }
   }

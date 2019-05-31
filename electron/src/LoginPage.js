@@ -1,5 +1,8 @@
+
 import React, {Component} from 'react';
 import * as qs from 'qs';
+
+import './LoginPage.css';
 
 class LoginPage extends Component {
   constructor(props) {
@@ -25,14 +28,15 @@ class LoginPage extends Component {
 
   render() {
     return (
-      <div>
+      <div className="centeredContainer">
         <h2>Login Page</h2>
-        <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit}>
+        <img src="/static/icon.png" height="100px" width="100px" alt=""/>
+        <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit} className="loginForm">
           <label><b>Email</b></label>
+          <br/>
           <input type="text" placeholder="Email" name="email" onChange={this.handleChange} required/>
           <br/>
-          <br/>
-          <input type="submit" className="btn btn-primary" value="Submit" />
+          <input type="submit" className="btn btn-primary loginButton" value="Submit"/>
         </form>
       </div>
     );

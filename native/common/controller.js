@@ -5,6 +5,7 @@ import logger from "./logger.js";
 import fileSystem from "./file_system.js";
 import signal from "./signal.js";
 import storage from "./storage.js";
+import utility from "./utility.js";
 
 let applicationState = (function() {
   let state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []}
@@ -145,8 +146,8 @@ let applicationState = (function() {
       }
       return null;
     },
-    addDownload: async function(path, message) {
-      state.downloads.push({path, message});
+    addDownload: async function(path, message, basename) {
+      state.downloads.push({path, message, basename});
     },
     downloads: async function() {
       return state.downloads;
@@ -206,19 +207,32 @@ let controller = (function() {
     callbacks.newMessage();
   }
 
-  async function _sendLocalMessage(localMessage) {
+  async function _localMessageToServer(localMessage) {
     const recipientUserId = localMessage.relationships.receiver.data.id;
+    const senderUserId = localMessage.relationships.sender.data.id;
     const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+    const myBundles = await api.getPreKeyBundlesByUserId(senderUserId);
 
-    if (!preKeyBundles) {
+    if (!preKeyBundles || !myBundles) {
       await applicationState.messageErrored(localMessage);
       await storage.saveMessages(deviceId, applicationState.messages());
       callbacks.newMessage();
       return;
     }
 
+    // Send message to all of my other devices as well
+    let extraBundles = [];
+    for(let i = 0; i < myBundles.length; i++) {
+      // Dont send it to this device
+      if (! await utility.idsEqual(myBundles[i].relationships.device.data.id, deviceId)) {
+        extraBundles.push(myBundles[i]);
+      }
+    }
+
+    const combinedBundles = preKeyBundles.concat(extraBundles);
+
     // Send to receiver
-    let encryptedMessages = await signal.encryptMessages(preKeyBundles, localMessage.attributes.decryptedBody.data, deviceId);
+    let encryptedMessages = await signal.encryptMessages(combinedBundles, localMessage.attributes.decryptedBody.data, deviceId);
     let {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
 
     if(status === "ok") {
@@ -330,11 +344,13 @@ let controller = (function() {
 
       const _onApiChannelOk = async (resp) => {
         logger.debug("Joined api channel successfully", resp);
+        // Create pre key bundle before joining device channel
+        let bundle = await signal.getPreKeyBundle();
+        await api.sendPreKeyBundle(bundle);
+
         await api.joinChannel("userDevice", _userDeviceChannelCallback);
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
         await api.userDeviceChannelReceiveMessagePackages(_receiveMessagePackagesCallback);
-        let bundle = await signal.getPreKeyBundle();
-        await api.sendPreKeyBundle(bundle);
         logger.debug("Done with api channel");
 
       }
@@ -408,12 +424,11 @@ let controller = (function() {
       await storage.saveLastRead(deviceId, applicationState.lastRead());
     },
     // TODO make async ??
-    currentUsersMessage: function(message) {
-      if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
-        return (message.relationships.sender.data.id === userId.toString());
-      } else {
-        return (deviceId === message.relationships.sender_device.data.id);
-      }
+    currentUserId: function() {
+      return userId;
+    },
+    currentDeviceId: function() {
+      return deviceId;
     },
     currentUser: async function(message) {
       if (await this.notLoggedIn()) {
@@ -541,13 +556,15 @@ let controller = (function() {
       const fileUpload = await api.downloadFile(fileUploadId);
 
       const decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
-      const {type, path} = await fileSystem.fileDownloadPath(basename);
+      const directory = await this.downloadDirectory();
+      const {type, path, basename: newBasename} = await fileSystem.fileDownloadPath(directory, basename);
+
 
       if (type === "ok") {
         await fileSystem.writeBytes(path, decrypted);
         await applicationState.messageDownloadFinished(message);
         await storage.saveMessages(deviceId, applicationState.messages());
-        await applicationState.addDownload(path, message);
+        await applicationState.addDownload(path, message, newBasename);
         callbacks.newDownload();
 
         return fileSystem.downloadFinished(path);
@@ -555,7 +572,6 @@ let controller = (function() {
         // TODO throw error
       }
     },
-    // TODO sync messages to all users devices
     sendMessage: async function(messageString, recipientUserId){
       logger.info(`Sending message ${messageString} to ${recipientUserId}`);
 
@@ -565,7 +581,7 @@ let controller = (function() {
       await storage.saveMessages(deviceId, applicationState.messages());
 
       // This will be done async
-      _sendLocalMessage(localMessage);
+      _localMessageToServer(localMessage);
 
       return null;
     },
@@ -580,7 +596,7 @@ let controller = (function() {
       if (message.attributes.decryptedBody.type === "local_file_message_v1") {
         _sendLocalFile(message)
       } else {
-        _sendLocalMessage(message);
+        _localMessageToServer(message);
       }
     },
     getDevices: async function() {

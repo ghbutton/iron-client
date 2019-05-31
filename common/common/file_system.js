@@ -31,24 +31,22 @@ let fileSystem = (function() {
       return dialog.showSaveDialog(null, {defaultPath: filename});
     },
     defaultDownloadDirectory: async function() {
-      const downloads = app.getPath("downloads");
-      return downloads;
+      return app.getPath("downloads");
     },
-    fileDownloadPath: async function(basename) {
-      const downloads = app.getPath("downloads");
-      const fullPath = `${downloads}/${basename}`;
+    fileDownloadPath: async function(directory, basename) {
+      const fullPath = `${directory}/${basename}`;
       if (fs.existsSync(fullPath)) {
         const {name, ext} = fs_path.parse(basename);
         for (let i = 1; i < 100; i++) {
           const newBasename = `${name} (${i})${ext}`
-          const newFullpath = `${downloads}/${newBasename}`
+          const newFullpath = `${directory}/${newBasename}`
           if (!fs.existsSync(newFullpath)) {
-            return {type: "ok", path: newFullpath};
+            return {type: "ok", path: newFullpath, basename: newBasename};
           }
         }
         return {type: "error", path: null};
       } else {
-        return {type: "ok", path: `${downloads}/${basename}`};
+        return {type: "ok", path: `${directory}/${basename}`, basename: basename};
       }
 
     },

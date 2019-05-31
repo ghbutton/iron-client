@@ -19,8 +19,7 @@ class LoginVerificationPage extends Component {
   }
 
   async sendVerificationCode(event) {
-    const sendCodeResp = await window.controller.sendVerificationCode(this.state.email);
-    console.log(sendCodeResp);
+    await window.controller.sendVerificationCode(this.state.email);
   }
 
   async handleSubmit(event) {
@@ -39,24 +38,26 @@ class LoginVerificationPage extends Component {
   render() {
     return (
       <div>
-        <Link to={`/login`}>{'< Back'}</Link>
-        <h2>Verification Page</h2>
-        {(this.state.errorMessage !== '') &&
-            <div className="alert alert-warning" role="alert">
-              {this.state.errorMessage}
-            </div>
-        }
-        <form onSubmit={this.handleSubmit}>
-          <label><b>Email</b></label>
-          <input type="text" name="email" value={this.state.email} disabled/>
+        <Link to={`/login`} className="btn btn-outline-primary">{'< Back'}</Link>
+        <div className="centeredContainer">
+          <h2>Verification Page</h2>
+          {(this.state.errorMessage !== '') &&
+              <div className="alert alert-warning" role="alert">
+                {this.state.errorMessage}
+              </div>
+          }
+          <form onSubmit={this.handleSubmit} className="loginForm">
+            <label><b>Email</b></label>
+            <input type="text" name="email" value={this.state.email} disabled/>
+            <br/>
+            <label><b>Verification Code</b></label>
+            <input type="text" placeholder="Enter Code" name="code" onChange={this.handleChange} required/>
+            <br/>
+            <input type="submit" className="btn btn-primary" value="Submit" />
+          </form>
           <br/>
-          <label><b>Verification Code</b></label>
-          <input type="text" placeholder="Enter Code" name="code" onChange={this.handleChange} required/>
-          <br/>
-          <input type="submit" className="btn btn-primary" value="Submit" />
-        </form>
-        <br/>
-        <button onClick={this.sendVerificationCode} className="btn btn-info">Resend Code</button>
+          <button onClick={this.sendVerificationCode} className="btn btn-info">Resend Code</button>
+        </div>
       </div>
     );
   }

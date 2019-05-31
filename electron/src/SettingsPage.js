@@ -37,9 +37,7 @@ class SettingsPage extends Component {
         <div className="container">
           <h1>Settings</h1>
           <hr/>
-          <section>
             <h2>Attributes</h2>
-            { !loggedIn && <Link to="/login">Login</Link> }
             { currentUser &&
               <div>
                 <p>Name: {currentUser.attributes.name}</p>
@@ -47,19 +45,15 @@ class SettingsPage extends Component {
                 <Link className="btn btn-primary" to={`/user_edit`}>{'Edit'}</Link>
               </div>
             }
-          </section>
-          <section>
             {
               loggedIn &&
                 <div>
-                  <p>Download directory: {downloadDirectory}</p>
+                  <h2 className="sectionHeader">Download directory</h2>
+                  <p>Path: {downloadDirectory}</p>
                   <button className="btn btn-primary" onClick={this.updateDownloadDirectory}>{'Update'}</button>
                 </div>
             }
-          </section>
-        </div>
-        <div className="container">
-          <h2>Devices</h2>
+          <h2 className="sectionHeader">Devices</h2>
           <ul>
             {
               devices.map((device) => (
@@ -67,11 +61,9 @@ class SettingsPage extends Component {
               ))
             }
           </ul>
-        </div>
-        <section>
-          <h2>Private Data</h2>
+          <h2 className="sectionHeader">Private Data</h2>
           <button className="btn btn-danger" onClick={this.clearData}>{'Clear data'}</button>
-        </section>
+        </div>
         <MenuFooter/>
       </div>
     );

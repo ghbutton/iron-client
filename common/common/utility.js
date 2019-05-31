@@ -11,6 +11,9 @@ let utility = (function() {
     },
     addressString: async function (deviceId) {
       return `${deviceId}`
+    },
+    idsEqual: async function(id1, id2) {
+      return `${id1}` === `${id2}`
     }
   }
 })()
