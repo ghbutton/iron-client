@@ -2,7 +2,7 @@ import './MessagesPage.css';
 import './App.css';
 import 'emoji-mart/css/emoji-mart.css';
 
-import {emojiIndex, Picker} from 'emoji-mart';
+import {Picker} from 'emoji-mart';
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
