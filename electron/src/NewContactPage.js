@@ -29,7 +29,7 @@ class NewContactPage extends Component {
 
   render() {
     return (
-      <div className="newContactPage">
+      <div className="newContactPage container">
         <Link className="btn btn-outline-primary" to={`/new_chat`}>{'< Back'}</Link>
         <h1>New Contact</h1>
 

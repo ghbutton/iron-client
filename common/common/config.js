@@ -1,7 +1,6 @@
 const isDev = (process.env.NODE_ENV === "development");
 const os = window.os;
 
-
 let config = (function() {
   return {
     isDev: function() {

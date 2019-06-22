@@ -13,11 +13,13 @@ class ForceUpgradePage extends Component {
   render() {
     return (
       <div>
-        <h2>Force Upgrade</h2>
-        <p>Sorry but we require a force upgrade.
-          Either a API changed or there was an important security update.
-          Either way please visit website for an update. <button type="button" className="btn btn-primary" onClick={this.onClick}>Update</button>
-        </p>
+        <div className="container">
+          <h2>Force Upgrade</h2>
+          <p>Sorry but we require a force upgrade.
+            Either a API changed or there was an important security update.
+            Either way please visit website for an update. <button type="button" className="btn btn-primary" onClick={this.onClick}>Update</button>
+          </p>
+        </div>
       </div>
     );
   }

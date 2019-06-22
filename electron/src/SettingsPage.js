@@ -37,7 +37,7 @@ class SettingsPage extends Component {
         <div className="container">
           <h1>Settings</h1>
           <hr/>
-            <h2>Attributes</h2>
+            <h2>Personal</h2>
             { currentUser &&
               <div>
                 <p>Name: {currentUser.attributes.name}</p>

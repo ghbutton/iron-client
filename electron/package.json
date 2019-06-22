@@ -7,11 +7,11 @@
     "emoji-mart": "^2.11.0",
     "phoenix-channels": "^1.0.0",
     "qs": "~6.5.2",
-    "react": "^16.5.2",
+    "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.8",
-    "react-dom": "^16.5.2",
+    "react-dom": "^16.8.6",
     "react-router-dom": "4.3.1",
-    "react-scripts": "2.0.5"
+    "react-scripts": "3.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -36,7 +36,7 @@
   ],
   "devDependencies": {
     "concurrently": "^4.0.1",
-    "electron": "4.1.1",
+    "electron": "^5.0.2",
     "electron-builder": "^20.34.0",
     "eslint-config-google": "^0.12.0",
     "eslint-plugin-react": "^7.12.4",

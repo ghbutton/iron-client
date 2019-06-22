@@ -2,7 +2,7 @@ import './MessagesPage.css';
 import './App.css';
 import 'emoji-mart/css/emoji-mart.css';
 
-import {Picker} from 'emoji-mart';
+import {emojiIndex, Picker} from 'emoji-mart';
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
@@ -15,7 +15,7 @@ PLING.volume = 0.75;
 class MessagesPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {connectedUser: null, connectedUserId: null, messageString: ``, userMessages: [], emojisVisible: false, downloads: [], now: new Date(), userId: null, deviceId: null};
+    this.state = {connectedUser: null, connectedUserId: null, messageString: ``, userMessages: [], emojisVisible: false, emojiResults: [], downloads: [], now: new Date(), userId: null, deviceId: null};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
@@ -30,12 +30,38 @@ class MessagesPage extends Component {
     this.resendMessage = this.resendMessage.bind(this);
     this.clickBackground = this.clickBackground.bind(this);
     this.focusTextInput= this.focusTextInput.bind(this);
+    this.selectEmoji = this.selectEmoji.bind(this);
 
     this.focusInput = React.createRef();
   }
 
+  lastWord(message) {
+    const words = message.split(" ");
+    if (words.length === 0) {
+      return [null, ""];
+    } else if (words.length === 1) {
+      return [null, words[0]];
+    } else {
+      return [words.slice(0, -1).join(" "), words[words.length - 1]];
+    }
+  }
+
   async handleChange(event) {
-    this.setState({messageString: event.target.value});
+    const messageString = event.target.value;
+    this.updateMessage(messageString)
+  }
+
+  async updateMessage(messageString) {
+    this.setState({messageString});
+
+    const [, last] = this.lastWord(messageString);
+    if (last.startsWith(":") && last.length > 2) {
+      const emojiSearchString = last.replace(":", "");
+      const results = emojiIndex.search(emojiSearchString).slice(0,10);
+      this.setState({emojiResults: results});
+    } else {
+      this.setState({emojiResults: []});
+    }
   }
 
   async focusTextInput() {
@@ -52,8 +78,10 @@ class MessagesPage extends Component {
   }
 
   async clickBackground(event) {
-    console.log('BACKGROUND CLICK');
-    console.log(event.target);
+    this.setState({
+      emojisVisible: false,
+    });
+    this.focusTextInput();
   }
 
   async addEmoji(e) {
@@ -111,6 +139,22 @@ class MessagesPage extends Component {
     };
   }
 
+  // Also hacky
+  selectEmoji(emoji) {
+    const _this = this;
+    return async function() {
+      const {messageString} = _this.state;
+      const [prev, ] = _this.lastWord(messageString);
+      // TODO set focus
+      if (prev === null) {
+        _this.updateMessage(`${emoji.native}`)
+      } else {
+        _this.updateMessage(`${prev} ${emoji.native}`)
+      }
+    }
+  }
+
+
   async handleNewMessage() {
     const {connectedUserId} = this.state;
     let rescroll = false;
@@ -150,7 +194,7 @@ class MessagesPage extends Component {
   render() {
     let date = null;
     let lastMessageFromMe = true;
-    const {userId, userMessages, downloads, connectedUser, emojisVisible, messageString} = this.state;
+    const {userId, userMessages, downloads, connectedUser, emojisVisible, emojiResults, messageString} = this.state;
     const messages = userMessages.map((message, index) => {
       let body = null;
 
@@ -182,7 +226,7 @@ class MessagesPage extends Component {
 
       return (
         <div key={message.id} className="message-row">
-          {dateDisplay !== null ? <div className="date-container"><span className="btn btn-info">{dateDisplay}</span></div> : null}
+          {dateDisplay !== null ? <div className="date-container"><span className="badge badge-primary">{dateDisplay}</span></div> : null}
           {!dateDisplay && fromMeSpace && <div className="from-me-space" />}
           <div className={fromMe ? 'from-me bubble' : 'from-them bubble'} >
             <span className="message"><span className="message-body">{body}</span><span className="message-timestamp">{timestampDisplay}</span></span>
@@ -214,13 +258,19 @@ class MessagesPage extends Component {
       </Dropdown>
     );
 
-    // TODO add a way to inject emojis
-    //    if (messageString.startsWith(":") && messageString !== ":") {
-    //      const emojiSearchString = messageString.replace(":", "");
-    //      emojiIndex.search(emojiSearchString).map((o) => console.log(o));
-    //    }
+    const emojiSearchResults = (emojiResults.length > 0 &&
+      <div className="emoji-results">
+      {
+        emojiResults.map((result) =>
+          <button type="button" key={result.id} className="btn btn-outline-success upload-button" onClick={this.selectEmoji(result)}><span role="img">{result.native}</span></button>
+        )
+      }
+      </div>
+    );
+
     return (
       <div>
+        <div className="clickable-background" onClick={this.clickBackground}></div>
         <div className="sticky-header color1">
           <div className="header-line-1">
             <Link className="btn btn-outline-primary" to={`/`}>{'< Back'}</Link>
@@ -228,17 +278,19 @@ class MessagesPage extends Component {
           </div>
           <h2>{connectedUser === null ? `` : `${window.view.userDisplay(connectedUser)}`}</h2>
         </div>
-        <section className="message-display" >
-          <div className="clickable-background" onClick={this.clickBackground}></div>
+        <section className="message-display">
           {messages}
           <span id="picker">
             {emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}
           </span>
         </section>
         <div className="sticky-footer">
-          <textarea rows="1" ref={this.focusInput} type="text" value={messageString} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
-          <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.showEmojis}><span role="img" aria-label="face">😀</span></button>
-          <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.uploadFile}><span role="img" aria-label="folder">📁</span></button>
+          {emojiSearchResults}
+          <div className="message-bar">
+            <textarea rows="1" ref={this.focusInput} type="text" value={messageString} onChange={this.handleChange} onKeyPress={this.handleKeyUp} placeholder="Secure Message" className="message-input footer-padding"/>
+            <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.showEmojis}><span role="img" aria-label="face">😀</span></button>
+            <button type="button" className="btn btn-outline-success upload-button footer-padding" onClick={this.uploadFile}><span role="img" aria-label="folder">📁</span></button>
+          </div>
         </div>
       </div>
     );

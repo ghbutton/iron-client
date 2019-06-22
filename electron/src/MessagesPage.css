@@ -4,6 +4,11 @@ body {
   font-weight: normal;
 }
 
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
 .message-timestamp{
   font-size: 10px;
   padding-left: 10px;
@@ -53,10 +58,13 @@ body {
   position: fixed;
   width: 100%;
   bottom: 0;
+  z-index: 3;
+}
+
+.message-bar {
   display: flex;
   flex-direction: row;
   background-color: #D4D4DCDD;
-  z-index: 3;
 }
 
 .sticky-header {
@@ -122,8 +130,11 @@ body {
 }
 
 .clickable-background {
-  min-height: 100%;
-  min-width: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
   z-index: 1;
 }
 
@@ -132,6 +143,7 @@ section.message-display {
   padding-right: 10px;
   padding-top: 100px;
   padding-bottom: 100px;
+  height: 100%;
 
   div {
     max-width: 255px;

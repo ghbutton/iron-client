@@ -1,49 +1,52 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
 
-class UserEditPage extends Component {
-  state = {currentUser: null, name: "", email: ""};
+function UserEditPage(props) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
-  handleSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const {status}= await window.controller.updateUser({name: this.state.name})
+    const {status}= await window.controller.updateUser({name})
 
     if (status === "ok") {
-      this.props.history.push(`/settings`)
+      props.history.push(`/settings`)
     }
   }
 
-  handleChange = async (event) => {
+  const handleChange = async (event) => {
     if (event.target.name === "name") {
-      this.setState({name: event.target.value})
+      setName(event.target.value)
     }
   }
 
-  render() {
-    return (
-      <div className="userEditPage">
-        <Link className="btn btn-outline-primary" to={`/settings`}>{"< Back"}</Link>
-        <h1>User edit</h1>
-        <form onSubmit={this.handleSubmit}>
-          <div className="form-group">
-            <input type="text" value={this.state.name} placeholder="Full name" name="name" onChange={this.handleChange} required/>
-          </div>
+  useEffect(() => {
+    const getUser = async () => {
+      const currentUser = await window.controller.currentUser();
 
-          <div className="form-group">
-            <input type="text" name="email" value={this.state.email} disabled/>
-          </div>
+      setName(currentUser.attributes.name || "");
+      setEmail(currentUser.attributes.email);
+    };
+    getUser();
+  }, []);
 
-          <input type="submit" className="btn btn-primary" value="Submit" />
-        </form>
-      </div>
-    );
-  }
+  return (
+    <div className="userEditPage container">
+      <Link className="btn btn-outline-primary" to={`/settings`}>{"< Back"}</Link>
+      <h1>Edit User</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <input type="text" value={name} placeholder="Full name" name="name" onChange={handleChange} required/>
+        </div>
 
-  async componentDidMount(){
-    const currentUser = await window.controller.currentUser();
+        <div className="form-group">
+          <input type="text" name="email" value={email} disabled/>
+        </div>
 
-    this.setState({currentUser: currentUser, name: currentUser.attributes.name || "", email: currentUser.attributes.email});
-  }
+        <input type="submit" className="btn btn-primary" value="Submit" />
+      </form>
+    </div>
+  );
 }
 
 export default UserEditPage;

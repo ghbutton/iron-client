@@ -2,6 +2,7 @@
 const {app, BrowserWindow, Menu} = require('electron');
 const isDev = require('electron-is-dev');
 const path = require('path');
+const fs = require('fs');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -9,10 +10,16 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
+var remote = require('electron').remote;
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    webPreferences: { nodeIntegration: false, preload: __dirname + '/preload.js' }
+    webPreferences: {
+      nodeIntegration: false,
+      preload: __dirname + '/preload.js',
+      contextIsolation: false,
+      devTools: isDev,
+    }
   })
 
   // and load the index.html of the app.
@@ -75,7 +82,6 @@ app.on('activate', function () {
     createWindow()
   }
 })
-
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

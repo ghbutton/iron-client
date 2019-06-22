@@ -1,6 +1,6 @@
 // Preloading hack for electron + react....
 // Fucking hate this shit
-// https://stackoverflow.com/questions/53426331/open-file-dialog-from-react-component-using-electron
+// https://electronjs.org/docs/api/process#event-loaded
 window.dialog = require('electron').remote.dialog;
 window.fs = require('fs');
 window.path = require('path');
