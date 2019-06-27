@@ -15,8 +15,8 @@ html, body {
 }
 
 #picker {
-  position: absolute;
-  right: 0;
+  position: fixed;
+  right: 0px;
   bottom: 60px;
   z-index: 3;
 }

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import * as qs from 'qs';
+import './LoginVerificationPage.css';
 
 class LoginVerificationPage extends Component {
   constructor(props) {
@@ -53,10 +54,11 @@ class LoginVerificationPage extends Component {
             <label><b>Verification Code</b></label>
             <input type="text" placeholder="Enter Code" name="code" onChange={this.handleChange} required/>
             <br/>
-            <input type="submit" className="btn btn-primary" value="Submit" />
+            <input type="submit" className="btn btn-primary submit-btn" value="Submit" />
+            <br/>
+            <button onClick={this.sendVerificationCode} className="btn btn-info resend-btn">Resend Code</button>
           </form>
           <br/>
-          <button onClick={this.sendVerificationCode} className="btn btn-info">Resend Code</button>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import * as qs from 'qs';
 
+import BlankHeader from './BlankHeader';
 import './LoginPage.css';
 
 class LoginPage extends Component {
@@ -29,6 +30,7 @@ class LoginPage extends Component {
   render() {
     return (
       <div className="centeredContainer">
+        <BlankHeader/>
         <h2>Login Page</h2>
         <img src="/static/icon.png" height="100px" width="100px" alt=""/>
         <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit} className="loginForm">

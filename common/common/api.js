@@ -5,7 +5,7 @@ const { Socket } = require('phoenix-channels')
 
 let api = (function() {
   let [socket, userDeviceChannel, apiChannel, loginChannel] = [null, null, null, null];
-  let [apiChannelReady, loginChannelReady] = [false, false];
+  let [apiChannelReady, loginChannelReady, userDeviceChannelReady] = [false, false, false];
   let [failedToJoin] = [false];
 
   async function _sendPush(channel, topic, payload, timeout = 10000) {
@@ -33,6 +33,15 @@ let api = (function() {
     }
 
     return results;
+  }
+
+  async function hasBinding(channel, event) {
+    for(let i = 0; i < channel.bindings.length; i++) {
+      if(channel.bindings[i].event === event) {
+        return true;
+      }
+    }
+    return false;
   }
 
   async function waitForLoginChannel(_timeout) {
@@ -91,6 +100,7 @@ let api = (function() {
       socket.onClose( () => {
         apiChannelReady = false;
         loginChannelReady = false;
+        userDeviceChannelReady = false;
         logger.info("Socket Closed");
       });
       socket.connect();
@@ -98,6 +108,9 @@ let api = (function() {
     reconnect: async function(...args) {
       logger.info("Reconnecting to the API");
       await socket.disconnect();
+      for(let i = 0; i < socket.channels.length; i++){
+        await socket.channels[i].leave();
+      }
       return this.connect(...args);
     },
     joinChannel: async function(type, onOk, onError, onTimeout){
@@ -114,12 +127,20 @@ let api = (function() {
 
       const joined = (resp) => {
         if(type === "login") {
+          if (!loginChannelReady && onOk) {
+            onOk(resp);
+          }
           loginChannelReady = true;
         } else if (type === "api") {
+          if (!apiChannelReady && onOk) {
+            onOk(resp);
+          }
           apiChannelReady = true;
-        }
-        if(onOk) {
-          onOk(resp);
+        } else if (type === "userDevice") {
+          if (!userDeviceChannelReady && onOk) {
+            onOk(resp);
+          }
+          userDeviceChannelReady = true;
         }
       }
 
@@ -142,26 +163,21 @@ let api = (function() {
           })
       }
     },
-    joinLoginChannel: async function(loginChannelCallback) {
-      loginChannel.join()
-        .receive("ok", async resp => {
-          loginChannelReady = true;
-          loginChannelCallback(resp);
-        })
-        .receive("error", (resp) => {
-          logger.info("Unable to join", resp)
-          failedToJoin = true;
-        })
-    },
     userDeviceChannelReceiveMessages: async function(receiveMessagesCallback){
-      userDeviceChannel.on("POST:messages", async (response) => {
-        receiveMessagesCallback(response);
-      });
+      if (!await hasBinding(userDeviceChannel, "POST:messages")) {
+        logger.info("Setting up receive messages");
+        userDeviceChannel.on("POST:messages", async (response) => {
+          receiveMessagesCallback(response);
+        });
+      }
     },
     userDeviceChannelReceiveMessagePackages: async function(receiveMessagePackagesCallback){
-      userDeviceChannel.on("POST:message_packages", async (response) => {
-        receiveMessagePackagesCallback(response);
-      });
+      if (!await hasBinding(userDeviceChannel, "POST:message_packages")) {
+        logger.info("Setting up receive message packages");
+        userDeviceChannel.on("POST:message_packages", async (response) => {
+          receiveMessagePackagesCallback(response);
+        });
+      }
     },
     updateUser: async function(userId, {name}) {
       await _waitForApiChannel();
@@ -280,7 +296,7 @@ let api = (function() {
       if (status === "ok") {
         return resp.payload.data
       } else {
-        return null;
+        return [];
       }
     },
     getPreKeyBundlesByUserId: async function(userId) {

@@ -280,10 +280,10 @@ class MessagesPage extends Component {
         </div>
         <section className="message-display">
           {messages}
-          <span id="picker">
-            {emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}
-          </span>
         </section>
+        <div id="picker">
+          {emojisVisible && (<Picker onSelect={this.addEmoji} native={true} title="Iron" />)}
+        </div>
         <div className="sticky-footer">
           {emojiSearchResults}
           <div className="message-bar">

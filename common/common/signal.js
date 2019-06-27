@@ -41,6 +41,7 @@ let signal = (function() {
       const address = new window.libsignal.SignalProtocolAddress(addressString, bundleDeviceId);
 
       if (!await _storeHasSession(store, addressString, bundleDeviceId)) {
+        console.log("Building new session");
         let sessionBuilder = new window.libsignal.SessionBuilder(store, address);
         await sessionBuilder.processPreKey({
           registrationId: preKeyBundle.attributes.registration_id,
@@ -237,6 +238,8 @@ let signal = (function() {
       let addressString = await utility.addressString(senderDeviceId);
       let address = new window.libsignal.SignalProtocolAddress(addressString, senderDeviceId);
       let sessionCipher = new window.libsignal.SessionCipher(store, address);
+      console.log(sessionCipher);
+      console.log(await sessionCipher.hasOpenSession());
 
       let message = null;
 

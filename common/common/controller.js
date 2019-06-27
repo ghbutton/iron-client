@@ -7,7 +7,7 @@ import signal from "./signal.js";
 import storage from "./storage.js";
 import utility from "./utility.js";
 
-let applicationState = (function() {
+const applicationState = (function() {
   let state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []}
 
   async function addDedup(list, object) {
@@ -89,6 +89,13 @@ let applicationState = (function() {
     hasMessage: async function(message) {
       return state.messages.some((thisMessage) => { return thisMessage.id === message.id })
     },
+    addMessageMetadata: async function(localMessage, metaData) {
+      for(let i = 0; i< state.messages.length; i++){
+        if (localMessage.id === state.messages[i].id) {
+          state.messages[i].meta.data = metaData;
+        }
+      }
+    },
     messageSent: async function(localMessage) {
       // TODO, should the server send something back to say the message has been received?
       for(let i = 0; i< state.messages.length; i++){
@@ -101,22 +108,6 @@ let applicationState = (function() {
       for(let i = 0; i< state.messages.length; i++){
         if (id === state.messages[i].id) {
           state.messages[i].meta.delivered_at = Date.now();
-        }
-      }
-    },
-    messageErrored: async function(localMessage) {
-      for(let i = 0; i< state.messages.length; i++){
-        if (localMessage.id === state.messages[i].id) {
-          state.messages[i].meta.errored_at = Date.now();
-        }
-      }
-    },
-    messageResending: async function(message) {
-      for(let i = 0; i< state.messages.length; i++){
-        if (message.id === state.messages[i].id) {
-          state.messages[i].meta = state.messages[i].meta || {}
-          state.messages[i].meta.errored_at = null;
-          state.messages[i].meta.sending_at = Date.now();
         }
       }
     },
@@ -146,6 +137,17 @@ let applicationState = (function() {
       }
       return null;
     },
+    getMessagesToBeSent: async function() {
+      let messages = [];
+
+      for(let i = 0; i< state.messages.length; i++){
+        if (state.messages[i].meta.sent_at === null && state.messages[i].attributes.decryptedBody.type === "local_message_v1") {
+          messages.push(state.messages[i]);
+        }
+      }
+
+      return messages;
+    },
     addDownload: async function(path, message, basename) {
       state.downloads.push({path, message, basename});
     },
@@ -157,6 +159,62 @@ let applicationState = (function() {
 
 window.applicationState = applicationState;
 window.storage = storage;
+
+const worker = (function() {
+  const SEND_MESSAGES_TIME = 500;
+  const GET_MESSAGES_TIME = 500;
+  let needToGetMessages = false;
+
+  async function _sendMessages(time) {
+    const messages = await applicationState.getMessagesToBeSent();
+    if (messages.length > 0) {
+      console.log("Sending Messages");
+    }
+
+    for (let i = 0; i < messages.length; i++) {
+      const localMessage = messages[i];
+      const {status} = await controller.localMessageToServer(localMessage);
+      if (status !== "ok") {
+        // exponential backoff
+        setTimeout(requeue, time * 2, _sendMessages, time * 2);
+        return {status: "error"};
+      }
+    }
+
+    setTimeout(requeue, SEND_MESSAGES_TIME, _sendMessages, SEND_MESSAGES_TIME);
+  }
+
+  async function _getMessages(time){
+    if (needToGetMessages){
+      needToGetMessages = false;
+      console.log("Getting messages");
+      const messages = await api.getMessages();
+
+      for(let i = 0; i < messages.length; i++) {
+        const encryptedMessage = messages[i];
+        await controller.decryptMessage(encryptedMessage)
+      }
+      callbacks.newMessage();
+      setTimeout(requeue, GET_MESSAGES_TIME, _getMessages, GET_MESSAGES_TIME);
+    } else {
+      setTimeout(requeue, GET_MESSAGES_TIME, _getMessages, GET_MESSAGES_TIME);
+    }
+  }
+
+  async function requeue(f, time) {
+    f(time)
+  }
+
+  return {
+    init: async function() {
+      requeue(_sendMessages, SEND_MESSAGES_TIME)
+      requeue(_getMessages, GET_MESSAGES_TIME)
+    },
+    getMessages: async function() {
+      needToGetMessages = true;
+    }
+  };
+})();
 
 let controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
@@ -172,18 +230,6 @@ let controller = (function() {
   }
 
   async function _sendLocalFile(localFileMessage) {
-    const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
-
-    const bytes = await fileSystem.readBytes(filename);
-    const {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
-
-    const fileUpload = await api.uploadFile({encrypted, deviceId});
-
-    if (!fileUpload) {
-      await _messageErrored(localFileMessage);
-      return;
-    }
-
     const recipientUserId = localFileMessage.relationships.receiver.data.id;
     const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
 
@@ -191,8 +237,9 @@ let controller = (function() {
       await _messageErrored(localFileMessage);
       return;
     }
+    const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
 
-    let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id}, deviceId);
+    let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
 
     // add to queue
     const {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
@@ -207,64 +254,27 @@ let controller = (function() {
     callbacks.newMessage();
   }
 
-  async function _localMessageToServer(localMessage) {
-    const recipientUserId = localMessage.relationships.receiver.data.id;
-    const senderUserId = localMessage.relationships.sender.data.id;
-    const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
-    const myBundles = await api.getPreKeyBundlesByUserId(senderUserId);
+  async function _uploadLocalFile(localFileMessage) {
+    const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
 
-    if (!preKeyBundles || !myBundles) {
-      await applicationState.messageErrored(localMessage);
-      await storage.saveMessages(deviceId, applicationState.messages());
-      callbacks.newMessage();
+    const bytes = await fileSystem.readBytes(filename);
+    const {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
+
+
+    const fileUpload = await api.uploadFile({encrypted, deviceId});
+
+    if (!fileUpload) {
+      await _messageErrored(localFileMessage);
       return;
     }
 
-    // Send message to all of my other devices as well
-    let extraBundles = [];
-    for(let i = 0; i < myBundles.length; i++) {
-      // Dont send it to this device
-      if (! await utility.idsEqual(myBundles[i].relationships.device.data.id, deviceId)) {
-        extraBundles.push(myBundles[i]);
-      }
-    }
-
-    const combinedBundles = preKeyBundles.concat(extraBundles);
-
-    // Send to receiver
-    let encryptedMessages = await signal.encryptMessages(combinedBundles, localMessage.attributes.decryptedBody.data, deviceId);
-    let {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
-
-    if(status === "ok") {
-      await applicationState.messageSent(localMessage);
-    } else {
-      await applicationState.messageErrored(localMessage);
-    }
-
+    await applicationState.addMessageMetadata(localFileMessage, {encrypted, hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id})
     await storage.saveMessages(deviceId, applicationState.messages());
-    callbacks.newMessage();
   }
 
   async function _markDelivered(idempotencyKey) {
     await applicationState.messageDelivered(idempotencyKey);
     await storage.saveMessages(deviceId, applicationState.messages());
-  }
-
-  async function _decryptMessage(encryptedMessage) {
-    let senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
-
-    logger.debug(`Got a message from ${senderDeviceId}`);
-
-    // Dedup messages that we already have
-    if (!await applicationState.hasMessage(encryptedMessage)) {
-      let message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
-      // Needs to happen atomically
-      await applicationState.addMessage(message);
-      await storage.saveMessages(deviceId, applicationState.messages());
-      // END
-    }
-
-    await api.messageDelivered(encryptedMessage.id);
   }
 
   async function _searchIncludes(baseString, searchString) {
@@ -277,21 +287,11 @@ let controller = (function() {
 
   async function _userDeviceChannelCallback(resp) {
     logger.debug("Joined user device successfully", resp);
-    const messages = await api.getMessages();
-
-    for(let i = 0; i < messages.length; i++) {
-      const encryptedMessage = messages[i];
-      _decryptMessage(encryptedMessage)
-    }
-    callbacks.newMessage();
+    worker.getMessages();
   }
 
   async function _receiveMessagesCallback(response) {
-    let encryptedMessage = response.payload.data[0]
-
-    await _decryptMessage(encryptedMessage);
-
-    callbacks.newMessage();
+    worker.getMessages();
   };
 
   async function _receiveMessagePackagesCallback(response) {
@@ -308,7 +308,7 @@ let controller = (function() {
     await applicationState.addMessage(localFileMessage);
     await storage.saveMessages(deviceId, applicationState.messages());
 
-    _sendLocalFile(localFileMessage);
+    _uploadLocalFile(localFileMessage);
     return null;
   }
 
@@ -316,6 +316,9 @@ let controller = (function() {
     init: async function(){
       logger.debug("Init");
       await storage.init();
+
+      logger.debug("Worker");
+      worker.init();
 
       logger.info("Storaged initialized");
       [userId, userSessionToken] = await storage.loadCurrentSession();
@@ -363,10 +366,8 @@ let controller = (function() {
           let device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
-          await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
-        }
-
-        if (userId && deviceId) {
+          return api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
+        } else if (userId && deviceId) {
           let loaded = await signal.loadSignalInfo(deviceId);
 
           if (!loaded && userId) {
@@ -390,6 +391,56 @@ let controller = (function() {
     // TODO get messages from API
     getMessages: async function(connectedUserId) {
       return applicationState.connectedMessages(userId, connectedUserId);
+    },
+    localMessageToServer: async function(localMessage) {
+      const recipientUserId = localMessage.relationships.receiver.data.id;
+      const senderUserId = localMessage.relationships.sender.data.id;
+      const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+      const myBundles = await api.getPreKeyBundlesByUserId(senderUserId);
+
+      if (!preKeyBundles || !myBundles) {
+        return {status: "error"};
+      }
+
+      // Send message to all of my other devices as well
+      let extraBundles = [];
+      for(let i = 0; i < myBundles.length; i++) {
+        // Dont send it to this device
+        if (! await utility.idsEqual(myBundles[i].relationships.device.data.id, deviceId)) {
+          extraBundles.push(myBundles[i]);
+        }
+      }
+
+      const combinedBundles = preKeyBundles.concat(extraBundles);
+
+      // Send to receiver
+      let encryptedMessages = await signal.encryptMessages(combinedBundles, localMessage.attributes.decryptedBody.data, deviceId);
+      let {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
+
+      if(status === "ok") {
+        await applicationState.messageSent(localMessage);
+        await storage.saveMessages(deviceId, applicationState.messages());
+        callbacks.newMessage();
+        return {status: "ok"};
+      } else {
+        return {status: "error"};
+      }
+    },
+    decryptMessage: async function(encryptedMessage) {
+      let senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
+
+      logger.debug(`Got a message from ${senderDeviceId}`);
+
+      // Dedup messages that we already have
+      if (!await applicationState.hasMessage(encryptedMessage)) {
+        let message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
+        // Needs to happen atomically
+        await applicationState.addMessage(message);
+        await storage.saveMessages(deviceId, applicationState.messages());
+        // END
+      }
+
+      await api.messageDelivered(encryptedMessage.id);
     },
     hasUnreadMessages: function(connectedUserId) {
       const lastRead = applicationState.userLastRead(connectedUserId);
@@ -580,24 +631,8 @@ let controller = (function() {
       await applicationState.addMessage(localMessage);
       await storage.saveMessages(deviceId, applicationState.messages());
 
-      // This will be done async
-      _localMessageToServer(localMessage);
 
       return null;
-    },
-    resendMessage: async function(messageId) {
-      let message = await applicationState.getMessageById(messageId);
-      await applicationState.messageResending(message);
-      await storage.saveMessages(deviceId, applicationState.messages());
-      callbacks.newMessage();
-
-      // This will be done async
-      // TODO put all message types together
-      if (message.attributes.decryptedBody.type === "local_file_message_v1") {
-        _sendLocalFile(message)
-      } else {
-        _localMessageToServer(message);
-      }
     },
     getDevices: async function() {
       const {status, resp}= await api.getDevices(userId, 2000);
