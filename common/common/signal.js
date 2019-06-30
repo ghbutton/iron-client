@@ -14,16 +14,6 @@ let signal = (function() {
     return `session${addressString}.${deviceId}`
   }
 
-  async function _getCipher(store, address) {
-    if (ciphers[address.toString()]) {
-      return ciphers[address.toString()];
-    } else {
-      let cipher = new window.libsignal.SessionCipher(store, address);
-      ciphers[address.toString()] = cipher;
-      return cipher;
-    }
-  }
-
   async function _messagePayload(messageString) {
     return JSON.stringify({"type": "m", "version": "1", "data": messageString});
   }
@@ -71,7 +61,7 @@ let signal = (function() {
   async function _encryptMessage(store, address, messagePayload) {
     // Encode using UTF8
     let buffer = await _sToUtf8(messagePayload);
-    let sessionCipher = await _getCipher(store, address);
+    let sessionCipher = new window.libsignal.SessionCipher(store, address);;
     let message = await sessionCipher.encrypt(buffer);
     return message;
   }
@@ -238,8 +228,6 @@ let signal = (function() {
       let addressString = await utility.addressString(senderDeviceId);
       let address = new window.libsignal.SignalProtocolAddress(addressString, senderDeviceId);
       let sessionCipher = new window.libsignal.SessionCipher(store, address);
-      console.log(sessionCipher);
-      console.log(await sessionCipher.hasOpenSession());
 
       let message = null;
 
@@ -259,7 +247,7 @@ let signal = (function() {
       logger.info(`Decrypted message`);
       logger.info(encryptedMessage);
       encryptedMessage.meta = {};
-      _saveState(deviceId);
+      await _saveState(deviceId);
       return encryptedMessage;
     },
     generateDeviceInfo: async function(deviceId){
@@ -272,7 +260,7 @@ let signal = (function() {
       bundle = await window.generatePreKeyBundle(store, keyId, keyId);
 
       logger.info(bundle);
-      _saveState(deviceId);
+      await _saveState(deviceId);
       return true
     },
     getPreKeyBundle: async function() {

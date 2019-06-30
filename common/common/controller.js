@@ -24,6 +24,18 @@ const applicationState = (function() {
     }
   }
 
+  async function _getMessagesToBeSent(type) {
+    let messages = [];
+
+    for(let i = 0; i< state.messages.length; i++){
+      if (state.messages[i].meta.sent_at === null && state.messages[i].attributes.decryptedBody.type === type) {
+        messages.push(state.messages[i]);
+      }
+    }
+
+    return messages;
+  }
+
   async function insertObject(key, value) {
     state[`${key}_${value.id}`] = value;
     const all = state[`${key}`] || new Set([]);
@@ -137,16 +149,11 @@ const applicationState = (function() {
       }
       return null;
     },
+    getFilesToBeSent: async function() {
+      return _getMessagesToBeSent("local_file_message_v1");
+    },
     getMessagesToBeSent: async function() {
-      let messages = [];
-
-      for(let i = 0; i< state.messages.length; i++){
-        if (state.messages[i].meta.sent_at === null && state.messages[i].attributes.decryptedBody.type === "local_message_v1") {
-          messages.push(state.messages[i]);
-        }
-      }
-
-      return messages;
+      return _getMessagesToBeSent("local_message_v1");
     },
     addDownload: async function(path, message, basename) {
       state.downloads.push({path, message, basename});
@@ -161,33 +168,61 @@ window.applicationState = applicationState;
 window.storage = storage;
 
 const worker = (function() {
-  const SEND_MESSAGES_TIME = 500;
-  const GET_MESSAGES_TIME = 500;
+  const MESSAGES_TIME = 500;
   let needToGetMessages = false;
 
-  async function _sendMessages(time) {
-    const messages = await applicationState.getMessagesToBeSent();
-    if (messages.length > 0) {
-      console.log("Sending Messages");
+  async function _sendAndReceiveMessages(time) {
+    const {status} = await _sendMessages();
+    if (status !== "ok") {
+      // exp backoff
+      return setTimeout(_sendAndReceiveMessages, time * 2, time * 2);
     }
 
-    for (let i = 0; i < messages.length; i++) {
-      const localMessage = messages[i];
-      const {status} = await controller.localMessageToServer(localMessage);
-      if (status !== "ok") {
-        // exponential backoff
-        setTimeout(requeue, time * 2, _sendMessages, time * 2);
-        return {status: "error"};
+    const {status: statusFiles} = await _sendFiles();
+    if (statusFiles !== "ok") {
+      // exp backoff
+      return setTimeout(_sendAndReceiveMessages, time * 2, time * 2);
+    }
+
+    const {status: statusMessages} = await _getMessages();
+    if (statusMessages !== "ok") {
+      // exp backoff
+      return setTimeout(_sendAndReceiveMessages, time * 2, time * 2);
+    }
+
+    return setTimeout(_sendAndReceiveMessages, MESSAGES_TIME, MESSAGES_TIME);
+  }
+
+  async function _sendFiles() {
+    const files = await applicationState.getFilesToBeSent();
+
+    for (let i = 0; i < files.length; i++) {
+      const localFile = files[i];
+
+      if (localFile.meta.data !== undefined) {
+        controller.uploadLocalFile(localFile);
       }
     }
 
-    setTimeout(requeue, SEND_MESSAGES_TIME, _sendMessages, SEND_MESSAGES_TIME);
+    return {status: "ok"}
   }
 
-  async function _getMessages(time){
+  async function _sendMessages() {
+    const messages = await applicationState.getMessagesToBeSent();
+
+    for (let i = 0; i < messages.length; i++) {
+      const localMessage = messages[i];
+      const {status} = await controller.uploadLocalMessage(localMessage);
+      if (status !== "ok") {
+        return {status: "error"};
+      }
+    }
+    return {status: "ok"}
+  }
+
+  async function _getMessages(){
     if (needToGetMessages){
       needToGetMessages = false;
-      console.log("Getting messages");
       const messages = await api.getMessages();
 
       for(let i = 0; i < messages.length; i++) {
@@ -195,20 +230,15 @@ const worker = (function() {
         await controller.decryptMessage(encryptedMessage)
       }
       callbacks.newMessage();
-      setTimeout(requeue, GET_MESSAGES_TIME, _getMessages, GET_MESSAGES_TIME);
+      return {status: "ok"}
     } else {
-      setTimeout(requeue, GET_MESSAGES_TIME, _getMessages, GET_MESSAGES_TIME);
+      return {status: "ok"}
     }
-  }
-
-  async function requeue(f, time) {
-    f(time)
   }
 
   return {
     init: async function() {
-      requeue(_sendMessages, SEND_MESSAGES_TIME)
-      requeue(_getMessages, GET_MESSAGES_TIME)
+      _sendAndReceiveMessages(MESSAGES_TIME)
     },
     getMessages: async function() {
       needToGetMessages = true;
@@ -229,32 +259,7 @@ let controller = (function() {
     callbacks.newMessage();
   }
 
-  async function _sendLocalFile(localFileMessage) {
-    const recipientUserId = localFileMessage.relationships.receiver.data.id;
-    const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
-
-    if (!preKeyBundles) {
-      await _messageErrored(localFileMessage);
-      return;
-    }
-    const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
-
-    let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
-
-    // add to queue
-    const {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
-
-    if(status === "ok") {
-      await applicationState.messageSent(localFileMessage);
-    } else {
-      await applicationState.messageErrored(localFileMessage);
-    }
-
-    await storage.saveMessages(deviceId, applicationState.messages());
-    callbacks.newMessage();
-  }
-
-  async function _uploadLocalFile(localFileMessage) {
+  async function _uploadFileContent(localFileMessage) {
     const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
 
     const bytes = await fileSystem.readBytes(filename);
@@ -308,7 +313,7 @@ let controller = (function() {
     await applicationState.addMessage(localFileMessage);
     await storage.saveMessages(deviceId, applicationState.messages());
 
-    _uploadLocalFile(localFileMessage);
+    _uploadFileContent(localFileMessage);
     return null;
   }
 
@@ -388,11 +393,32 @@ let controller = (function() {
     inspectStore: async function() {
       return signal.inspectStore();
     },
-    // TODO get messages from API
     getMessages: async function(connectedUserId) {
       return applicationState.connectedMessages(userId, connectedUserId);
     },
-    localMessageToServer: async function(localMessage) {
+
+    uploadLocalFile: async function(localFileMessage) {
+      const recipientUserId = localFileMessage.relationships.receiver.data.id;
+      const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+
+      if (!preKeyBundles) {
+        await _messageErrored(localFileMessage);
+        return;
+      }
+      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
+
+      let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
+
+      const {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
+
+      if(status === "ok") {
+        await applicationState.messageSent(localFileMessage);
+        await storage.saveMessages(deviceId, applicationState.messages());
+        callbacks.newMessage();
+      }
+    },
+
+    uploadLocalMessage: async function(localMessage) {
       const recipientUserId = localMessage.relationships.receiver.data.id;
       const senderUserId = localMessage.relationships.sender.data.id;
       const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);

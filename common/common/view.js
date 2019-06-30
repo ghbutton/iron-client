@@ -79,7 +79,7 @@ let view = (function() {
     messageState: function(message, userId) {
       const meta = message.meta || {};
       const fromMe = this.currentUsersMessage(message, userId);
-      const fromThisDevice = (message.attributes.decryptedBody.type === "local_message_v1");
+      const fromThisDevice = (message.attributes.decryptedBody.type.startsWith("local"));
       const {downloading_at, downloaded_at, sent_at, delivered_at, errored_at, sending_at} = meta;
       const sent = !!sent_at;
       const delivered = !!delivered_at;
