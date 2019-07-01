@@ -6,13 +6,11 @@ import storage from "./storage.js"
 let signal = (function() {
   let [registrationId, keyId, store, bundle, oldDeviceInfo] = [null, null, null, null, null, null];
 
-  // Ephemeral hash to store ciphers
-  let ciphers = {};
-
   async function _addressToSessionKey(addressString, deviceId) {
     // Function of the store library
     return `session${addressString}.${deviceId}`
   }
+
 
   async function _messagePayload(messageString) {
     return JSON.stringify({"type": "m", "version": "1", "data": messageString});
@@ -61,7 +59,7 @@ let signal = (function() {
   async function _encryptMessage(store, address, messagePayload) {
     // Encode using UTF8
     let buffer = await _sToUtf8(messagePayload);
-    let sessionCipher = new window.libsignal.SessionCipher(store, address);;
+    let sessionCipher = new window.libsignal.SessionCipher(store, address);
     let message = await sessionCipher.encrypt(buffer);
     return message;
   }
@@ -231,7 +229,7 @@ let signal = (function() {
 
       let message = null;
 
-      logger.info(`Encrypted message body ${encryptedMessage.attributes.body}`)
+      logger.debug(`Encrypted message body ${encryptedMessage.attributes.body}`)
 
       if (encryptedMessage.attributes.type === 3) {
         message = await sessionCipher.decryptPreKeyWhisperMessage(encryptedMessage.attributes.body, "binary")
