@@ -40,7 +40,7 @@ let config = (function() {
       }
     },
     apiVersion: function() {
-      return 1;
+      return 2;
     },
   }
 })()
