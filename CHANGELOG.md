@@ -1,2 +1,0 @@
-- Added uploading spinning circle
-- Added downloading spinning circle
