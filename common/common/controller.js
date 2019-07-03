@@ -364,6 +364,8 @@ let controller = (function() {
       }
       const _onLoginChannelOk = async () => {
         logger.debug("Login ok");
+        let reconnecting = false;
+
         if (!!userId && deviceId === null) {
           const name = await deviceOS.deviceName();
           const osName = await deviceOS.osName();
@@ -371,8 +373,10 @@ let controller = (function() {
           let device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
-          return api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
-        } else if (userId && deviceId) {
+          await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
+        }
+
+        if (!reconnecting && userId && deviceId) {
           let loaded = await signal.loadSignalInfo(deviceId);
 
           if (!loaded && userId) {
@@ -581,7 +585,7 @@ let controller = (function() {
     },
     uploadFiles: async function(recipientUserId) {
       let fileNames = await fileSystem.multiSelectFiles();
-      if (fileNames === undefined) return;
+      if (fileNames === []) return;
 
       return await Promise.all(
         fileNames.map(

@@ -25,7 +25,11 @@ let fileSystem = (function() {
       return dialog.showOpenDialog({properties: ["openDirectory"]});
     },
     multiSelectFiles: async function() {
-      return dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
+      const files = await dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
+      if (files === undefined) {
+        return [];
+      }
+      return files;
     },
     showSaveDialog: async function(filename) {
       return dialog.showSaveDialog(null, {defaultPath: filename});
