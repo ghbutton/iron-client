@@ -186,6 +186,10 @@ let signal = (function() {
       return store;
     },
     loadSignalInfo: async function(deviceId) {
+      if (store !== null) {
+        return true;
+      }
+
       const deviceInfo = await storage.loadSignalInfo(deviceId);
       oldDeviceInfo = deviceInfo;
       if (deviceInfo === null) {
@@ -249,6 +253,10 @@ let signal = (function() {
       return encryptedMessage;
     },
     generateDeviceInfo: async function(deviceId){
+      if (store !== null) {
+        return true;
+      }
+
       registrationId = window.KeyHelper.generateRegistrationId();
       keyId = 1; // should be random?
       store = new window.SignalProtocolStore();

@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import * as qs from 'qs';
+
+import FormErrors from './FormErrors';
 import './LoginVerificationPage.css';
 
 class LoginVerificationPage extends Component {
@@ -25,14 +27,14 @@ class LoginVerificationPage extends Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    const loginResp = await window.controller.login(this.state.email, this.state.code);
+    const {status, resp} = await window.controller.login(this.state.email, this.state.code);
 
-    if (loginResp.error) {
-      this.setState({errorMessage: loginResp.error.message});
-    } else {
+    if (status === "ok") {
       this.setState({verification: ''});
       console.log('Reloading page');
       window.location.reload();
+    } else {
+      this.setState({errorMessage: resp.message});
     }
   }
 
@@ -42,11 +44,8 @@ class LoginVerificationPage extends Component {
         <Link to={`/login`} className="btn btn-outline-primary">{'< Back'}</Link>
         <div className="centeredContainer">
           <h2>Verification Page</h2>
-          {(this.state.errorMessage !== '') &&
-              <div className="alert alert-warning" role="alert">
-                {this.state.errorMessage}
-              </div>
-          }
+
+          <FormErrors message={this.state.errorMessage} />
           <form onSubmit={this.handleSubmit} className="loginForm">
             <label><b>Email</b></label>
             <input type="text" name="email" value={this.state.email} disabled/>

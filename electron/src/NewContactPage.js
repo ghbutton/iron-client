@@ -20,9 +20,9 @@ class NewContactPage extends Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    const resp = await window.controller.createNewInvitation(this.state.name, this.state.email);
+    const {status} = await window.controller.createNewInvitation(this.state.name, this.state.email);
 
-    if (resp.payload && resp.payload.data) {
+    if (status === "ok") {
       this.props.history.push(`/new_chat`);
     }
   }

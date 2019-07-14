@@ -15,7 +15,19 @@ PLING.volume = 0.75;
 class MessagesPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {connectedUser: null, connectedUserId: null, messageString: ``, userMessages: [], emojisVisible: false, emojiResults: [], downloads: [], now: new Date(), userId: null, deviceId: null};
+    this.state = {
+      connectedUser: null,
+      connectedUserId: null,
+      messageString: ``,
+      userMessages: [],
+      emojisVisible: false,
+      emojiResults: [],
+      emojiResultsIndex: 0,
+      downloads: [],
+      now: new Date(),
+      userId: null,
+      deviceId: null
+    };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyUp= this.handleKeyUp.bind(this);
@@ -71,9 +83,16 @@ class MessagesPage extends Component {
   }
 
   async handleKeyUp(event) {
-    if (event.key === 'Enter' ) {
+    if (event.key === 'Enter') {
+      const emojiResults = this.state.emojiResults;
       event.preventDefault();
-      this.handleSubmit(event);
+      if (emojiResults.length > 0) {
+        // TODO handle tabl when tabbing through emoji results
+        // Add emoji to message
+        this.selectEmoji(emojiResults[0])()
+      } else {
+        this.handleSubmit(event);
+      }
     }
   }
 
@@ -145,7 +164,7 @@ class MessagesPage extends Component {
     return async function() {
       const {messageString} = _this.state;
       const [prev, ] = _this.lastWord(messageString);
-      // TODO set focus
+      _this.focusTextInput();
       if (prev === null) {
         _this.updateMessage(`${emoji.native}`)
       } else {

@@ -6,7 +6,7 @@ import MenuFooter from './MenuFooter';
 class ChatsPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {connectedUsers: [], hasUnreadMessages: {}, userDisplay: {}};
+    this.state = {connectedUsers: [], hasUnreadMessages: {}, userDisplay: {}, connectionsLoaded: false};
     this.handleNewMessage = this.handleNewMessage.bind(this);
   }
 
@@ -23,7 +23,7 @@ class ChatsPage extends Component {
   };
 
   render() {
-    const {connectedUsers, hasUnreadMessages, userDisplay} = this.state;
+    const {connectedUsers, hasUnreadMessages, userDisplay, connectionsLoaded} = this.state;
     return (
       <div className="ChatsPage">
         <div className="container">
@@ -32,6 +32,11 @@ class ChatsPage extends Component {
           </div>
           <h1>Chats</h1>
           <hr/>
+          { (connectionsLoaded && connectedUsers.length === 0) ?
+              <div>
+                Please add some<Link to="/new_chat" className="btn btn-link">contacts</Link>😀!
+              </div>
+              :
           <div className="list-group">
             {
               connectedUsers.map((user) => {
@@ -43,6 +48,8 @@ class ChatsPage extends Component {
               })
             }
           </div>
+
+          }
         </div>
         <MenuFooter/>
       </div>
@@ -66,7 +73,7 @@ class ChatsPage extends Component {
         userDisplay[user.id] = window.view.userDisplay(user);
         hasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
       }
-      this.setState({connectedUsers, userDisplay, hasUnreadMessages});
+      this.setState({connectedUsers, userDisplay, hasUnreadMessages, connectionsLoaded: true});
     }
   }
 }

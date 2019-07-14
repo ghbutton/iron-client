@@ -168,7 +168,7 @@ window.applicationState = applicationState;
 window.storage = storage;
 
 const worker = (function() {
-  const MESSAGES_TIME = 500;
+  const MESSAGES_TIME = 100;
   let needToGetMessages = false;
 
   async function _sendAndReceiveMessages(time) {
@@ -242,6 +242,7 @@ const worker = (function() {
     },
     getMessages: async function() {
       needToGetMessages = true;
+      _getMessages();
     }
   };
 })();
@@ -547,7 +548,7 @@ let controller = (function() {
         storage.saveSession(resp.payload.data.sessions[0]);
       }
 
-      return resp
+      return {status, resp}
     },
     getConnectedUsers: async function() {
       let [connections, connectedUsers] = await api.connectedUsers(2000, userId);

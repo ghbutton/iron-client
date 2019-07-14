@@ -179,6 +179,14 @@ let api = (function() {
         });
       }
     },
+    userDeviceChannelReceiveConnections: async function(receiveConnectionsCallback){
+      if (!await hasBinding(userDeviceChannel, "POST:connections")) {
+        logger.info("Setting up receive conections");
+        userDeviceChannel.on("POST:connections", async (response) => {
+          receiveConnectionsCallback(response);
+        });
+      }
+    },
     updateUser: async function(userId, {name}) {
       await _waitForApiChannel();
 

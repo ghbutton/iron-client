@@ -3,12 +3,13 @@ import React, {Component} from 'react';
 import * as qs from 'qs';
 
 import BlankHeader from './BlankHeader';
+import FormErrors from './FormErrors';
 import './LoginPage.css';
 
 class LoginPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: ''};
+    this.state = {email: "", errorMessage: ""};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -20,11 +21,15 @@ class LoginPage extends Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    await window.controller.sendVerificationCode(this.state.email);
-    const query = {email: this.state.email};
-    const searchString = qs.stringify(query);
+    const {status, resp} = await window.controller.sendVerificationCode(this.state.email);
+    if (status === "ok") {
+      const query = {email: this.state.email};
+      const searchString = qs.stringify(query);
 
-    this.props.history.push({pathname: `/login_verification`, search: searchString});
+      this.props.history.push({pathname: `/login_verification`, search: searchString});
+    } else {
+      this.setState({errorMessage: resp.message});
+    }
   }
 
   render() {
@@ -33,6 +38,7 @@ class LoginPage extends Component {
         <BlankHeader/>
         <h2>Login Page</h2>
         <img src="/static/icon.png" height="100px" width="100px" alt=""/>
+        <FormErrors message={this.state.errorMessage} />
         <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit} className="loginForm">
           <label><b>Email</b></label>
           <br/>
