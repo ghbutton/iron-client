@@ -185,11 +185,11 @@ let signal = (function() {
     inspectStore: async function() {
       return store;
     },
-    loadSignalInfo: async function(deviceId) {
-      if (store !== null) {
-        return true;
-      }
-
+    infoLoaded: async function() {
+      return store !== null
+    },
+    loadDeviceInfoFromDisk: async function(deviceId) {
+      logger.info("Loading signal device info from disk");
       const deviceInfo = await storage.loadSignalInfo(deviceId);
       oldDeviceInfo = deviceInfo;
       if (deviceInfo === null) {
@@ -219,7 +219,7 @@ let signal = (function() {
 
             return true;
           default:
-            return false;
+            throw new Error("Do not recognize the device info version");
         }
       }
     },
@@ -253,10 +253,6 @@ let signal = (function() {
       return encryptedMessage;
     },
     generateDeviceInfo: async function(deviceId){
-      if (store !== null) {
-        return true;
-      }
-
       registrationId = window.KeyHelper.generateRegistrationId();
       keyId = 1; // should be random?
       store = new window.SignalProtocolStore();

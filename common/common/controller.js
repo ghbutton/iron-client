@@ -377,13 +377,16 @@ let controller = (function() {
           await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
         }
 
-        if (!reconnecting && userId && deviceId) {
-          let loaded = await signal.loadSignalInfo(deviceId);
+        const loaded = await signal.infoLoaded();
 
-          if (!loaded && userId) {
+        if (!loaded) {
+          const success = await signal.loadDeviceInfoFromDisk(deviceId);
+          if (!success && userId) {
             await signal.generateDeviceInfo(deviceId);
           }
+        }
 
+        if (!reconnecting && userId && deviceId) {
           await api.joinChannel("api", _onApiChannelOk);
         }
       }

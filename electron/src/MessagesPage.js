@@ -243,6 +243,8 @@ class MessagesPage extends Component {
         dateDisplay = window.view.timestampBreakDisplay(date);
       }
 
+      // TODO handle unsent file error
+
       return (
         <div key={message.id} className="message-row">
           {dateDisplay !== null ? <div className="date-container"><span className="badge badge-primary">{dateDisplay}</span></div> : null}
