@@ -365,7 +365,6 @@ let controller = (function() {
       }
       const _onLoginChannelOk = async () => {
         logger.debug("Login ok");
-        let reconnecting = false;
 
         if (!!userId && deviceId === null) {
           const name = await deviceOS.deviceName();
@@ -386,7 +385,7 @@ let controller = (function() {
           }
         }
 
-        if (!reconnecting && userId && deviceId) {
+        if (userId && deviceId) {
           await api.joinChannel("api", _onApiChannelOk);
         }
       }

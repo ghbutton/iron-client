@@ -258,9 +258,7 @@ let api = (function() {
 
       let {status, resp} = await _sendPush(apiChannel, "GET:users", {id: userId});
       if (status === "ok") {
-        let user = resp.payload.data[0];
-
-        return {status: "ok", resp: user};
+        return {status: "ok", resp: resp.payload.data[0]};
       } else {
         return {status, resp}
       }
@@ -282,7 +280,7 @@ let api = (function() {
 
       const {status, resp}= await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken, name: name, os_name: osName});
       if (status === "ok") {
-        return resp.payload.data.devices[0];
+        return resp.payload.data[0];
       } else {
         return null;
       }

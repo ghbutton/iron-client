@@ -1,5 +1,6 @@
 const isDev = (process.env.NODE_ENV === "development");
 const os = window.os;
+const API_VERSION = 2;
 
 let config = (function() {
   return {
@@ -40,7 +41,7 @@ let config = (function() {
       }
     },
     apiVersion: function() {
-      return 2;
+      return API_VERSION;
     },
   }
 })()
