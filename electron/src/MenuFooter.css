@@ -6,7 +6,16 @@ html {
 }
 
 body.withFooter {
-  margin-bottom: 80px; /* Margin bottom by footer height */
+/*  margin-bottom: 80px; /* Margin bottom by footer height */
+}
+
+div.withFooter {
+    height: auto;
+    margin: 0 auto -80px; /* footer height + space */
+    min-height: 100%;
+    padding: 0 0 80px; /* footer height + space */
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 .footer {

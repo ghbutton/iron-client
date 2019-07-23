@@ -7,7 +7,7 @@ import BlankHeader from './BlankHeader';
 class SettingsPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {currentUser: null, deviceId: null, devices: [], loggedIn: true};
+    this.state = {currentUser: null, deviceId: null, devices: [], loggedIn: true, version: ""};
 
     this.clearData = this.clearData.bind(this);
     this.updateDownloadDirectory = this.updateDownloadDirectory.bind(this);
@@ -29,12 +29,12 @@ class SettingsPage extends Component {
   }
 
   render() {
-    const {currentUser, deviceId, devices, downloadDirectory, loggedIn} = this.state;
+    const {currentUser, deviceId, devices, downloadDirectory, loggedIn, version} = this.state;
 
     return (
       <div className="SettingsPage">
         <BlankHeader/>
-        <div className="container">
+        <div className="container withFooter">
           <h1>Settings</h1>
           <hr/>
             <h2>Personal</h2>
@@ -63,6 +63,8 @@ class SettingsPage extends Component {
           </ul>
           <h2 className="sectionHeader">Private Data</h2>
           <button className="btn btn-danger" onClick={this.clearData}>{'Clear data'}</button>
+          <h2 className="sectionHeader">Misc</h2>
+          <p>Version: {version}</p>
         </div>
         <MenuFooter/>
       </div>
@@ -76,8 +78,9 @@ class SettingsPage extends Component {
     const devices = await window.controller.getDevices();
     const deviceId = await window.controller.getDeviceId();
     const downloadDirectory = await window.controller.downloadDirectory();
+    const version = await window.controller.getVersion();
 
-    this.setState({currentUser, devices, deviceId, downloadDirectory, loggedIn});
+    this.setState({currentUser, devices, deviceId, downloadDirectory, loggedIn, version});
   }
 }
 

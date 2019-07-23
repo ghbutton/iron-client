@@ -26,7 +26,7 @@ class ChatsPage extends Component {
     const {connectedUsers, hasUnreadMessages, userDisplay, connectionsLoaded} = this.state;
     return (
       <div className="ChatsPage">
-        <div className="container">
+        <div className="container withFooter">
           <div className="chatsMenu">
             <Link to="/new_chat" className="pull-right btn btn-outline-primary">New</Link>
           </div>

@@ -547,7 +547,7 @@ let controller = (function() {
       const {status, resp} = await api.login(email, code, 2000);
 
       if (status === "ok" && resp.payload) {
-        storage.saveSession(resp.payload.data.sessions[0]);
+        storage.saveSession(resp.payload.data[0]);
       }
 
       return {status, resp}
@@ -681,6 +681,9 @@ let controller = (function() {
     clearData: async function() {
       await storage.clearData();
       resetState();
+    },
+    getVersion: async function() {
+      return window.app.getVersion();
     },
   }
 })();
