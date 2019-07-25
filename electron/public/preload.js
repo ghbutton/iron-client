@@ -7,3 +7,4 @@ window.path = require('path');
 window.app = require("electron").remote.app;
 window.shell = require("electron").shell;
 window.os = require('os');
+window.exec = require('child_process').exec;
