@@ -1,5 +1,5 @@
-import {Component} from 'react';
-import {withRouter} from 'react-router-dom';
+import {Component} from "react";
+import {withRouter} from "react-router-dom";
 
 class TopLevel extends Component {
   constructor(props) {
@@ -12,12 +12,12 @@ class TopLevel extends Component {
   }
 
   async handleForceUpgrade() {
-    if (this.props.location.pathname !== `/force_upgrade`) {
-      this.props.history.push(`/force_upgrade`);
+    if (this.props.location.pathname !== "/force_upgrade") {
+      this.props.history.push("/force_upgrade");
     }
   }
   async componentDidMount() {
-    window.addEventListener('force_upgrade', this.handleForceUpgrade);
+    window.addEventListener("force_upgrade", this.handleForceUpgrade);
   }
 }
 

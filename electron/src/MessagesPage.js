@@ -1,15 +1,15 @@
-import './MessagesPage.css';
-import './App.css';
-import 'emoji-mart/css/emoji-mart.css';
+import "./MessagesPage.css";
+import "./App.css";
+import "emoji-mart/css/emoji-mart.css";
 
-import {emojiIndex, Picker} from 'emoji-mart';
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
+import {emojiIndex, Picker} from "emoji-mart";
+import React, {Component} from "react";
+import {Link} from "react-router-dom";
 
-import Dropdown from 'react-bootstrap/Dropdown';
+import Dropdown from "react-bootstrap/Dropdown";
 
 const PLING = new Audio();
-PLING.src = './static/sounds/pling.wav';
+PLING.src = "./static/sounds/pling.wav";
 PLING.volume = 0.75;
 
 class MessagesPage extends Component {
@@ -18,7 +18,7 @@ class MessagesPage extends Component {
     this.state = {
       connectedUser: null,
       connectedUserId: null,
-      messageString: ``,
+      messageString: "",
       userMessages: [],
       emojisVisible: false,
       emojiResults: [],
@@ -26,7 +26,7 @@ class MessagesPage extends Component {
       downloads: [],
       now: new Date(),
       userId: null,
-      deviceId: null
+      deviceId: null,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -60,7 +60,7 @@ class MessagesPage extends Component {
 
   async handleChange(event) {
     const messageString = event.target.value;
-    this.updateMessage(messageString)
+    this.updateMessage(messageString);
   }
 
   async updateMessage(messageString) {
@@ -69,7 +69,7 @@ class MessagesPage extends Component {
     const [, last] = this.lastWord(messageString);
     if (last.startsWith(":") && last.length > 2) {
       const emojiSearchString = last.replace(":", "");
-      const results = emojiIndex.search(emojiSearchString).slice(0,10);
+      const results = emojiIndex.search(emojiSearchString).slice(0, 10);
       this.setState({emojiResults: results});
     } else {
       this.setState({emojiResults: []});
@@ -83,13 +83,13 @@ class MessagesPage extends Component {
   }
 
   async handleKeyUp(event) {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       const emojiResults = this.state.emojiResults;
       event.preventDefault();
       if (emojiResults.length > 0) {
         // TODO handle tabl when tabbing through emoji results
         // Add emoji to message
-        this.selectEmoji(emojiResults[0])()
+        this.selectEmoji(emojiResults[0])();
       } else {
         this.handleSubmit(event);
       }
@@ -112,9 +112,9 @@ class MessagesPage extends Component {
         messageString: messageString+ emojiPic,
       });
     } else {
-      const sym = e.unified.split('-');
+      const sym = e.unified.split("-");
       const codesArray = [];
-      sym.forEach((el) => codesArray.push('0x' + el));
+      sym.forEach((el) => codesArray.push("0x" + el));
       // console.log(codesArray.length)
       // console.log(codesArray)  // ["0x1f3f3", "0xfe0f"]
       const emojiPic = String.fromCodePoint(...codesArray);
@@ -136,7 +136,7 @@ class MessagesPage extends Component {
   }
 
   async resendMessage(event) {
-    window.controller.resendMessage((event.target.getAttribute('data-id')));
+    window.controller.resendMessage((event.target.getAttribute("data-id")));
   }
 
   async uploadFile() {
@@ -163,14 +163,14 @@ class MessagesPage extends Component {
     const _this = this;
     return async function() {
       const {messageString} = _this.state;
-      const [prev, ] = _this.lastWord(messageString);
+      const [prev] = _this.lastWord(messageString);
       _this.focusTextInput();
       if (prev === null) {
-        _this.updateMessage(`${emoji.native}`)
+        _this.updateMessage(`${emoji.native}`);
       } else {
-        _this.updateMessage(`${prev} ${emoji.native}`)
+        _this.updateMessage(`${prev} ${emoji.native}`);
       }
-    }
+    };
   }
 
 
@@ -187,7 +187,7 @@ class MessagesPage extends Component {
     if (rescroll) {
       window.scroll({
         top: document.body.scrollHeight,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   }
@@ -200,10 +200,10 @@ class MessagesPage extends Component {
   }
 
   async handleSubmit(event) {
-    const {messageString} = this.state
-    if (messageString !== '') {
+    const {messageString} = this.state;
+    if (messageString !== "") {
       await window.controller.sendMessage(messageString, this.props.match.params.id);
-      this.setState({messageString: ''});
+      this.setState({messageString: ""});
       PLING.currentTime = 0;
       PLING.play();
       this.handleNewMessage();
@@ -237,7 +237,7 @@ class MessagesPage extends Component {
       let dateDisplay = null;
 
       // TODO put this in view logic
-      if (timestamp === null){
+      if (timestamp === null) {
       } else if (date === null || timestamp.getFullYear() !== date.getFullYear() || timestamp.getMonth() !== date.getMonth() || timestamp.getDate() !== date.getDate()) {
         date = timestamp;
         dateDisplay = window.view.timestampBreakDisplay(date);
@@ -249,7 +249,7 @@ class MessagesPage extends Component {
         <div key={message.id} className="message-row">
           {dateDisplay !== null ? <div className="date-container"><span className="badge badge-primary">{dateDisplay}</span></div> : null}
           {!dateDisplay && fromMeSpace && <div className="from-me-space" />}
-          <div className={fromMe ? 'from-me bubble' : 'from-them bubble'} >
+          <div className={fromMe ? "from-me bubble" : "from-them bubble"} >
             <span className="message"><span className="message-body">{body}</span><span className="message-timestamp">{timestampDisplay}</span></span>
             {(messageState === "delivered" || messageState === "sent") && <div className="bottom-right"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
             {messageState === "delivered" && <div className="delivered-checkmark"><span className="badge badge-pill badge-primary checkmark">&#10003;</span></div>}
@@ -281,11 +281,11 @@ class MessagesPage extends Component {
 
     const emojiSearchResults = (emojiResults.length > 0 &&
       <div className="emoji-results">
-      {
-        emojiResults.map((result) =>
-          <button type="button" key={result.id} className="btn btn-outline-success upload-button" onClick={this.selectEmoji(result)}><span role="img">{result.native}</span></button>
-        )
-      }
+        {
+          emojiResults.map((result) =>
+            <button type="button" key={result.id} className="btn btn-outline-success upload-button" onClick={this.selectEmoji(result)}><span role="img">{result.native}</span></button>
+          )
+        }
       </div>
     );
 
@@ -294,10 +294,10 @@ class MessagesPage extends Component {
         <div className="clickable-background" onClick={this.clickBackground}></div>
         <div className="sticky-header color1">
           <div className="header-line-1">
-            <Link className="btn btn-outline-primary" to={`/`}>{'< Back'}</Link>
+            <Link className="btn btn-outline-primary" to={"/"}>{"< Back"}</Link>
             {downloadDropdown}
           </div>
-          <h2>{connectedUser === null ? `` : `${window.view.userDisplay(connectedUser)}`}</h2>
+          <h2>{connectedUser === null ? "" : `${window.view.userDisplay(connectedUser)}`}</h2>
         </div>
         <section className="message-display">
           {messages}
@@ -319,8 +319,8 @@ class MessagesPage extends Component {
 
   async componentWillUnmount() {
     // you need to unbind the same listener that was binded.
-    window.removeEventListener('new_message', this.handleNewMessage);
-    window.removeEventListener('new_download', this.handleNewDownload);
+    window.removeEventListener("new_message", this.handleNewMessage);
+    window.removeEventListener("new_download", this.handleNewDownload);
   }
 
   async componentDidMount() {
@@ -337,8 +337,8 @@ class MessagesPage extends Component {
       top: document.body.scrollHeight,
     });
 
-    window.addEventListener('new_message', this.handleNewMessage);
-    window.addEventListener('new_download', this.handleNewDownload);
+    window.addEventListener("new_message", this.handleNewMessage);
+    window.addEventListener("new_download", this.handleNewDownload);
 
     // Api call, slow
     const connectedUser = await window.controller.getUserById(connectedUserId);

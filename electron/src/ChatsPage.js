@@ -1,7 +1,7 @@
-import './ChatsPage.css';
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
-import MenuFooter from './MenuFooter';
+import "./ChatsPage.css";
+import React, {Component} from "react";
+import {Link} from "react-router-dom";
+import MenuFooter from "./MenuFooter";
 
 class ChatsPage extends Component {
   constructor(props) {
@@ -58,16 +58,16 @@ class ChatsPage extends Component {
 
   async componentWillUnmount() {
     // you need to unbind the same listener that was binded.
-    window.removeEventListener('new_message', this.handleNewMessage);
+    window.removeEventListener("new_message", this.handleNewMessage);
   }
 
   async componentDidMount() {
     if (await window.controller.notLoggedIn()) {
-      this.props.history.push(`/login`);
+      this.props.history.push("/login");
     } else {
       const connectedUsers = await window.controller.getConnectedUsers();
       const [hasUnreadMessages, userDisplay] = [{}, {}];
-      window.addEventListener('new_message', this.handleNewMessage);
+      window.addEventListener("new_message", this.handleNewMessage);
       for (let i = 0; i < connectedUsers.length; i++) {
         const user = connectedUsers[i];
         userDisplay[user.id] = window.view.userDisplay(user);

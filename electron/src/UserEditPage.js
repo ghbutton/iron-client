@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom'
+import React, {useEffect, useState} from "react";
+import {Link} from "react-router-dom";
 
 function UserEditPage(props) {
   const [name, setName] = useState("");
@@ -7,18 +7,18 @@ function UserEditPage(props) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const {status}= await window.controller.updateUser({name})
+    const {status}= await window.controller.updateUser({name});
 
     if (status === "ok") {
-      props.history.push(`/settings`)
+      props.history.push("/settings");
     }
-  }
+  };
 
   const handleChange = async (event) => {
     if (event.target.name === "name") {
-      setName(event.target.value)
+      setName(event.target.value);
     }
-  }
+  };
 
   useEffect(() => {
     const getUser = async () => {
@@ -32,7 +32,7 @@ function UserEditPage(props) {
 
   return (
     <div className="userEditPage container">
-      <Link className="btn btn-outline-primary" to={`/settings`}>{"< Back"}</Link>
+      <Link className="btn btn-outline-primary" to={"/settings"}>{"< Back"}</Link>
       <h1>Edit User</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">

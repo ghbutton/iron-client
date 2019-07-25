@@ -1,16 +1,16 @@
-import React, {Component} from 'react';
-import './App.css';
-import ChatsPage from './ChatsPage';
-import ForceUpgradePage from './ForceUpgradePage';
-import MessagesPage from './MessagesPage';
-import LoginPage from './LoginPage';
-import LoginVerificationPage from './LoginVerificationPage';
-import SettingsPage from './SettingsPage';
-import NewChatPage from './NewChatPage';
-import NewContactPage from './NewContactPage';
-import TopLevel from './TopLevel';
-import UserEditPage from './UserEditPage';
-import {HashRouter as Router, Route} from 'react-router-dom';
+import React, {Component} from "react";
+import "./App.css";
+import ChatsPage from "./ChatsPage";
+import ForceUpgradePage from "./ForceUpgradePage";
+import MessagesPage from "./MessagesPage";
+import LoginPage from "./LoginPage";
+import LoginVerificationPage from "./LoginVerificationPage";
+import SettingsPage from "./SettingsPage";
+import NewChatPage from "./NewChatPage";
+import NewContactPage from "./NewContactPage";
+import TopLevel from "./TopLevel";
+import UserEditPage from "./UserEditPage";
+import {HashRouter as Router, Route} from "react-router-dom";
 
 class App extends Component {
   render() {

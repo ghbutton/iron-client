@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 function FormErrors(props) {
   const {message} = props;
@@ -10,8 +10,8 @@ function FormErrors(props) {
       <div className="alert alert-warning fade show" role="alert">
         {message}
       </div>
-    )
+    );
   }
 }
 
-export default FormErrors
+export default FormErrors;

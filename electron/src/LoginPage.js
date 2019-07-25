@@ -1,10 +1,10 @@
 
-import React, {Component} from 'react';
-import * as qs from 'qs';
+import React, {Component} from "react";
+import * as qs from "qs";
 
-import BlankHeader from './BlankHeader';
-import FormErrors from './FormErrors';
-import './LoginPage.css';
+import BlankHeader from "./BlankHeader";
+import FormErrors from "./FormErrors";
+import "./LoginPage.css";
 
 class LoginPage extends Component {
   constructor(props) {
@@ -26,7 +26,7 @@ class LoginPage extends Component {
       const query = {email: this.state.email};
       const searchString = qs.stringify(query);
 
-      this.props.history.push({pathname: `/login_verification`, search: searchString});
+      this.props.history.push({pathname: "/login_verification", search: searchString});
     } else {
       this.setState({errorMessage: resp.message});
     }
@@ -52,8 +52,8 @@ class LoginPage extends Component {
 
   async componentDidMount() {
     if (!await window.controller.notLoggedIn()) {
-      console.log('Redirecting to chats');
-      this.props.history.push(`/`);
+      console.log("Redirecting to chats");
+      this.props.history.push("/");
     }
   }
 }

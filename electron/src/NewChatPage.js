@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
+import React, {Component} from "react";
+import {Link} from "react-router-dom";
 
 class NewChatPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {search: '', results: []};
+    this.state = {search: "", results: []};
 
     this.handleChange = this.handleChange.bind(this);
   }
@@ -24,11 +24,11 @@ class NewChatPage extends Component {
   render() {
     return (
       <div className="newChatPage container">
-        <Link className="btn btn-outline-primary" to={`/`}>{'< Back'}</Link>
+        <Link className="btn btn-outline-primary" to={"/"}>{"< Back"}</Link>
         <h1>New Chat</h1>
 
         <div>
-          <Link to={`/new_contact`}>{'+ New Contact'}</Link>
+          <Link to={"/new_contact"}>{"+ New Contact"}</Link>
         </div>
         <br/>
 

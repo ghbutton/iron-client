@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, {Component} from "react";
 
-import BlankHeader from './BlankHeader';
+import BlankHeader from "./BlankHeader";
 
 class ForceUpgradePage extends Component {
   constructor(props) {
@@ -9,7 +9,7 @@ class ForceUpgradePage extends Component {
   }
 
   async onClick() {
-    window.controller.openExternal('https://www.ironnotice.com/app');
+    window.controller.openExternal("https://www.ironnotice.com/app");
   }
 
   render() {

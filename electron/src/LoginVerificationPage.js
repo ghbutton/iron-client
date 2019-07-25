@@ -1,14 +1,14 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
-import * as qs from 'qs';
+import React, {Component} from "react";
+import {Link} from "react-router-dom";
+import * as qs from "qs";
 
-import FormErrors from './FormErrors';
-import './LoginVerificationPage.css';
+import FormErrors from "./FormErrors";
+import "./LoginVerificationPage.css";
 
 class LoginVerificationPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: '', code: '', errorMessage: ''};
+    this.state = {email: "", code: "", errorMessage: ""};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -16,7 +16,7 @@ class LoginVerificationPage extends Component {
   }
 
   async handleChange(event) {
-    if (event.target.name === 'code') {
+    if (event.target.name === "code") {
       this.setState({code: event.target.value});
     }
   }
@@ -30,8 +30,8 @@ class LoginVerificationPage extends Component {
     const {status, resp} = await window.controller.login(this.state.email, this.state.code);
 
     if (status === "ok") {
-      this.setState({verification: ''});
-      console.log('Reloading page');
+      this.setState({verification: ""});
+      console.log("Reloading page");
       window.location.reload();
     } else {
       this.setState({errorMessage: resp.message});
@@ -41,7 +41,7 @@ class LoginVerificationPage extends Component {
   render() {
     return (
       <div>
-        <Link to={`/login`} className="btn btn-outline-primary">{'< Back'}</Link>
+        <Link to={"/login"} className="btn btn-outline-primary">{"< Back"}</Link>
         <div className="centeredContainer">
           <h2>Verification Page</h2>
 
@@ -68,8 +68,8 @@ class LoginVerificationPage extends Component {
     this.setState({email: queryParams.email});
 
     if (!await window.controller.notLoggedIn()) {
-      console.log('Redirecting to chats');
-      this.props.history.push(`/`);
+      console.log("Redirecting to chats");
+      this.props.history.push("/");
     }
   }
 }

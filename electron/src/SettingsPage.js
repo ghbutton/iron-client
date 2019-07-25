@@ -1,8 +1,8 @@
-import './SettingsPage.css';
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
-import MenuFooter from './MenuFooter';
-import BlankHeader from './BlankHeader';
+import "./SettingsPage.css";
+import React, {Component} from "react";
+import {Link} from "react-router-dom";
+import MenuFooter from "./MenuFooter";
+import BlankHeader from "./BlankHeader";
 
 class SettingsPage extends Component {
   constructor(props) {
@@ -14,10 +14,10 @@ class SettingsPage extends Component {
   }
 
   async clearData() {
-    if (window.confirm('Are you sure you want to wipe all data from this device?')) {
+    if (window.confirm("Are you sure you want to wipe all data from this device?")) {
       await window.controller.clearData();
       // TODO have a central place for routes;
-      this.props.history.push(`/login`);
+      this.props.history.push("/login");
     }
   }
 
@@ -37,22 +37,22 @@ class SettingsPage extends Component {
         <div className="container withFooter">
           <h1>Settings</h1>
           <hr/>
-            <h2>Personal</h2>
-            { currentUser &&
+          <h2>Personal</h2>
+          { currentUser &&
               <div>
                 <p>Name: {currentUser.attributes.name}</p>
                 <p>Email: {currentUser.attributes.email}</p>
-                <Link className="btn btn-primary" to={`/user_edit`}>{'Edit'}</Link>
+                <Link className="btn btn-primary" to={"/user_edit"}>{"Edit"}</Link>
               </div>
-            }
-            {
-              loggedIn &&
+          }
+          {
+            loggedIn &&
                 <div>
                   <h2 className="sectionHeader">Download directory</h2>
                   <p>Path: {downloadDirectory}</p>
-                  <button className="btn btn-primary" onClick={this.updateDownloadDirectory}>{'Update'}</button>
+                  <button className="btn btn-primary" onClick={this.updateDownloadDirectory}>{"Update"}</button>
                 </div>
-            }
+          }
           <h2 className="sectionHeader">Devices</h2>
           <ul>
             {
@@ -62,7 +62,7 @@ class SettingsPage extends Component {
             }
           </ul>
           <h2 className="sectionHeader">Private Data</h2>
-          <button className="btn btn-danger" onClick={this.clearData}>{'Clear data'}</button>
+          <button className="btn btn-danger" onClick={this.clearData}>{"Clear data"}</button>
           <h2 className="sectionHeader">Misc</h2>
           <p>Version: {version}</p>
         </div>
