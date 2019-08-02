@@ -35,11 +35,11 @@ let storage = (function() {
     });
   }
   async function userSessionKey() {
-    return `ironUserSession`;
+    return "ironUserSession";
   }
 
   async function downloadDirectoryKey() {
-    return `ironDownloadDirectory`;
+    return "ironDownloadDirectory";
   }
 
   async function lastReadKey(deviceId) {

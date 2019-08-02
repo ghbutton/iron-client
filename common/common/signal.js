@@ -91,8 +91,8 @@ let signal = (function() {
 
   // Also used as the idempotency key
   async function _localMessageId(deviceId){
-    const random_piece = Math.random().toString(36).substr(2).substring(0, 4);
-    return `${deviceId}_${random_piece}_${Math.floor(Date.now() / 1000)}`
+    const randomPiece = Math.random().toString(36).substr(2).substring(0, 4);
+    return `${deviceId}_${randomPiece}_${Math.floor(Date.now() / 1000)}`
   }
 
   async function _saveState(deviceId) {
