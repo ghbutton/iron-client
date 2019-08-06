@@ -1,3 +1,3 @@
 # Install ios
 cd ios
-git clone # libsignal-protocol-swift
+git clone # libsignal-protocol-swift ssh
