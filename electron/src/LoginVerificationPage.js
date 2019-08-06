@@ -44,18 +44,20 @@ class LoginVerificationPage extends Component {
         <Link to={"/login"} className="btn btn-outline-primary">{"< Back"}</Link>
         <div className="centeredContainer">
           <h2>Verification Page</h2>
+          <img src="/static/icon.png" height="100px" width="100px" alt=""/>
 
           <FormErrors message={this.state.errorMessage} />
           <form onSubmit={this.handleSubmit} className="loginForm">
             <label><b>Email</b></label>
+            <br/>
             <input type="text" name="email" value={this.state.email} disabled/>
             <br/>
             <label><b>Verification Code</b></label>
+            <br/>
             <input type="text" placeholder="Enter Code" name="code" onChange={this.handleChange} required/>
             <br/>
             <input type="submit" className="btn btn-primary submit-btn" value="Submit" />
             <br/>
-            <button onClick={this.sendVerificationCode} className="btn btn-info resend-btn">Resend Code</button>
           </form>
           <br/>
         </div>

@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 class NewChatPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {search: "", results: []};
+    this.state = {search: "", results: [], resultsReady: false};
 
     this.handleChange = this.handleChange.bind(this);
   }
@@ -14,10 +14,9 @@ class NewChatPage extends Component {
     this.setState({search: searchString});
     if (searchString.length > 3) {
       const users = await window.controller.connectedUsersSearch(searchString);
-      this.setState({results: users});
+      this.setState({results: users, resultsReady: true});
     } else {
-      const users = [];
-      this.setState({results: users});
+      this.setState({results: [], resultsReady: false});
     }
   }
 
@@ -36,13 +35,23 @@ class NewChatPage extends Component {
           <input type="text" placeholder="Search" name="email" onChange={this.handleChange} required/>
         </form>
 
-        <ul>
-          {
-            this.state.results.map((user) => {
-              return (<li key={user.id}><Link to={`/connections/${user.id}/messages`}>{window.view.userDisplay(user)}</Link></li>);
-            })
-          }
-        </ul>
+        {
+          this.state.resultsReady ? (
+            this.state.results.length > 0 ? (
+              <ul>
+                {
+                  this.state.results.map((user) => {
+                    return (<li key={user.id}><Link to={`/connections/${user.id}/messages`}>{window.view.userDisplay(user)}</Link></li>);
+                  })
+                }
+              </ul>
+            ) : (
+              <h5>No results</h5>
+            )
+          ) : (
+            null
+          )
+        }
       </div>
     );
   }

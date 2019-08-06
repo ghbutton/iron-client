@@ -26,15 +26,15 @@ class ChatsPage extends Component {
     const {connectedUsers, hasUnreadMessages, userDisplay, connectionsLoaded} = this.state;
     return (
       <div className="ChatsPage">
-        <div className="chatsMenu">
-          <Link to="/new_chat" className="pull-right btn btn-outline-primary">New</Link>
-        </div>
         <div className="container withFooter">
+          <div className="chatsMenu">
+            <Link to="/new_chat" className="pull-right btn btn-outline-primary">New</Link>
+          </div>
           <h1>Chats</h1>
           <hr/>
           { (connectionsLoaded && connectedUsers.length === 0) ?
               <div>
-                Please add some<Link to="/new_chat" className="btn btn-link">contacts</Link>😀!
+                No chats. Please add some<Link to="/new_chat" className="btn btn-link">contacts</Link>😀!
               </div>
               :
           <div className="list-group">

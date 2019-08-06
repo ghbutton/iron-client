@@ -292,7 +292,7 @@ class MessagesPage extends Component {
     return (
       <div>
         <div className="clickable-background" onClick={this.clickBackground}></div>
-        <div className="sticky-header color1">
+        <div className="sticky-header color1 container">
           <div className="header-line-1">
             <Link className="btn btn-outline-primary" to={"/"}>{"< Back"}</Link>
             {downloadDropdown}
