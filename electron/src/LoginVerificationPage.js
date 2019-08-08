@@ -44,7 +44,7 @@ class LoginVerificationPage extends Component {
         <Link to={"/login"} className="btn btn-outline-primary">{"< Back"}</Link>
         <div className="centeredContainer">
           <h2>Verification Page</h2>
-          <img src="/static/icon.png" height="100px" width="100px" alt=""/>
+          <img src="./static/icon.png" height="100px" width="100px" alt=""/>
 
           <FormErrors message={this.state.errorMessage} />
           <form onSubmit={this.handleSubmit} className="loginForm">

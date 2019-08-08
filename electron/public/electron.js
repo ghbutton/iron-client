@@ -7,6 +7,7 @@ const fs = require('fs');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+const devTools = isDev;
 
 function createWindow () {
   // Create the browser window.
@@ -18,7 +19,7 @@ var remote = require('electron').remote;
       nodeIntegration: false,
       preload: __dirname + '/preload.js',
       contextIsolation: false,
-      devTools: isDev,
+      devTools: devTools,
     }
   })
 
@@ -26,7 +27,7 @@ var remote = require('electron').remote;
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, 'index.html')}`);
 
   // Open the DevTools.
-  if (isDev) {
+  if (devTools) {
     mainWindow.webContents.openDevTools()
   }
 

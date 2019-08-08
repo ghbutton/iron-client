@@ -37,7 +37,7 @@ class LoginPage extends Component {
       <div className="centeredContainer">
         <BlankHeader/>
         <h2>Login Page</h2>
-        <img src="/static/icon.png" height="100px" width="100px" alt=""/>
+        <img src="./static/icon.png" height="100px" width="100px" alt=""/>
         <FormErrors message={this.state.errorMessage} />
         <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit} className="loginForm">
           <label><b>Email</b></label>
