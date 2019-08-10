@@ -1,3 +1,5 @@
+import localStorage from "./local_storage.js";
+
 const isDev = (process.env.NODE_ENV === "development");
 const os = window.os;
 const API_VERSION = 2;
@@ -30,8 +32,8 @@ let config = (function() {
     },
     basePath: function() {
       if (isDev) {
-        if (window.localStorage.getItem("basePath")) {
-          return window.localStorage.getItem("basePath");
+        if (localStorage.basePath()) {
+          return localStorage.basePath();
         } else {
           return "/tmp/iron/storage";
         }

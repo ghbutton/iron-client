@@ -332,6 +332,7 @@ let controller = (function() {
       let device = await storage.loadDevice(userId);
 
       if (device) {
+        logger.debug("Device present");
         deviceId = device.id;
         deviceSecret = device.secret;
       }

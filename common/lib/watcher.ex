@@ -36,8 +36,20 @@ defmodule Watcher do
 
   defp copy_javascript() do
     IO.puts "Copying common javascript"
-    System.cmd("cp", ["-R", "common", "../electron/src"])
-    System.cmd("cp", ["-R", "common", "../native"])
+    files = File.ls!("./common")
+    Enum.each(files, fn(file) ->
+      cond do
+        String.contains?(file, ".electron") ->
+          filename = String.replace(file, ".electron", "")
+          File.copy!("./common/#{file}", "../electron/src/common/#{filename}")
+        String.contains?(file, ".native") ->
+          filename = String.replace(file, ".native", "")
+          File.copy!("./common/#{file}", "../native/common/#{filename}")
+        true ->
+          File.copy!("./common/#{file}", "../electron/src/common/#{file}")
+          File.copy!("./common/#{file}", "../native/common/#{file}")
+      end
+    end)
   end
 
 

@@ -9,6 +9,6 @@ import {name as appName} from './app.json';
 import controller from './common/controller.js';
 
 window.controller = controller;
-controller.asyncCall();
+controller.init();
 
 AppRegistry.registerComponent(appName, () => App);
