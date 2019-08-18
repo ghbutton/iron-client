@@ -19,7 +19,7 @@ let storage = (function() {
     }
   }
 
-  async function getItem(key) {
+  async function _getItem(key) {
     return new Promise(function(resolve, reject) {
       fs.readFile(`${basePath}/${key}`, (err, data) => {
         if (err) {
@@ -61,7 +61,7 @@ let storage = (function() {
   return {
     loadMessages: async function(deviceId) {
       const key = await messagesKey(deviceId);
-      const messagesPayload = await getItem(key);
+      const messagesPayload = await _getItem(key);
       if (await utility.nullOrUndefined(messagesPayload)) {
         return [];
       } else {
@@ -70,7 +70,7 @@ let storage = (function() {
     },
     loadLastRead: async function(deviceId) {
       const key = await lastReadKey(deviceId);
-      const messagesPayload = await getItem(key);
+      const messagesPayload = await _getItem(key);
 
       if (await utility.nullOrUndefined(messagesPayload)) {
         return {};
@@ -109,7 +109,7 @@ let storage = (function() {
     },
     loadCurrentSession: async function() {
       const key = await userSessionKey();
-      const sessionPayload = await getItem(key);
+      const sessionPayload = await _getItem(key);
 
       if (sessionPayload) {
         let session = JSON.parse(sessionPayload);
@@ -124,7 +124,7 @@ let storage = (function() {
     },
     loadSignalInfo: async function(deviceId) {
       const key = await signalInfoKey(deviceId);
-      const deviceInfoPayload = await getItem(key);
+      const deviceInfoPayload = await _getItem(key);
       if (await utility.nullOrUndefined(deviceInfoPayload)) {
         return null;
       } else {
@@ -138,7 +138,7 @@ let storage = (function() {
     },
     loadDevice: async function(userId) {
       const key = await deviceKey(userId);
-      const devicePayload = await getItem(key);
+      const devicePayload = await _getItem(key);
       const device = JSON.parse(devicePayload);
       return (device) || null;
     },
@@ -163,7 +163,7 @@ let storage = (function() {
     },
     loadDownloadDirectory: async function() {
       const key = await downloadDirectoryKey();
-      const directoryPayload = await getItem(key);
+      const directoryPayload = await _getItem(key);
       const downloadDirectory = JSON.parse(directoryPayload);
       return (downloadDirectory) || null;
     }
