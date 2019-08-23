@@ -1,7 +1,9 @@
 import utility from "./utility.js";
 import config from "./config.js";
 import logger from "./logger.js";
-const { Socket } = require('phoenix-channels')
+import socket from "./socket.js";
+
+const Socket = socket.socket();
 
 let api = (function() {
   let [socket, userDeviceChannel, apiChannel, loginChannel] = [null, null, null, null];
@@ -44,7 +46,7 @@ let api = (function() {
     return false;
   }
 
-  async function waitForLoginChannel(_timeout) {
+  async function _waitForLoginChannel(_timeout) {
     while (true) {
       if (loginChannelReady || failedToJoin) {
         return true;
@@ -80,11 +82,11 @@ let api = (function() {
       socket = new Socket(url,
         {
           params: {
-            user_id: userId,
-            session_token: userSessionToken,
+            user_id: userId || "",
+            session_token: userSessionToken || "",
             api_version: apiVersion,
-            device_id: deviceId,
-            device_secret: deviceSecret
+            device_id: deviceId || "",
+            device_secret: deviceSecret || ""
           }
         }
       );
@@ -96,7 +98,7 @@ let api = (function() {
       socket.onOpen(() =>
         onSocketOpen()
       );
-      //      socket.onError( () => console.log("Error"));
+      socket.onError( (err) => console.log(err));
       socket.onClose( () => {
         apiChannelReady = false;
         loginChannelReady = false;
@@ -223,7 +225,7 @@ let api = (function() {
       return _sendPush(apiChannel, "POST:pre_key_bundles", payload);
     },
     sendVerificationCode: async function(email, timeout) {
-      await waitForLoginChannel(timeout);
+      await _waitForLoginChannel(timeout);
 
       return _sendPush(loginChannel, "POST:email_verifications", {email: email});
     },
@@ -245,7 +247,7 @@ let api = (function() {
       return _sendPush(apiChannel, "POST:invitations", payload);
     },
     login: async function(email, code, timeout) {
-      await waitForLoginChannel(timeout);
+      await _waitForLoginChannel(timeout);
 
       return _sendPush(loginChannel, "POST:sessions", {email: email, code: code});
     },
@@ -276,7 +278,7 @@ let api = (function() {
       }
     },
     createDevice: async function(userId, userSessionToken, name, osName, timeout) {
-      await waitForLoginChannel(timeout);
+      await _waitForLoginChannel(timeout);
 
       const {status, resp}= await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken, name: name, os_name: osName});
       if (status === "ok") {

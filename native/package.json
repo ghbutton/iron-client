@@ -7,15 +7,18 @@
     "test": "jest"
   },
   "dependencies": {
+    "phoenix": "^1.4.9",
     "react": "^16.8.6",
     "react-native": "^0.60.0",
-    "react-native-fs": "^2.14.1"
+    "react-native-fs": "^2.14.1",
+    "react-native-navigation": "^2.27.1"
   },
   "devDependencies": {
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "24.1.0",
     "jest": "24.1.0",
     "metro-react-native-babel-preset": "0.51.1",
+    "react-devtools": "^3.6.3",
     "react-test-renderer": "16.6.3"
   },
   "jest": {

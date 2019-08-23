@@ -1,26 +1,25 @@
 import utility from "./utility.js"
 import config from "./config.js"
+const RNFS = require('react-native-fs');
 
 let basePath = config.basePath();
 
+const UTF8 = "utf8";
+
 let storage = (function() {
   async function _getItem(key) {
-    return new Promise(function(resolve, reject) {
-      fs.readFile(`${basePath}/${key}`, (err, data) => {
-        if (err) {
-          if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
-            resolve(null);
-          } else {
-            throw(err);
-          }
-        } else {
-          resolve(data);
-        }
-      });
-    });
+    try {
+      return await RNFS.readFile(RNFS.DocumentDirectoryPath + `/${key}`, UTF8);
+    } catch (err) {
+      if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
+        return null
+      } else {
+        throw(err);
+      }
+    }
   }
 
-  async function userSessionKey() {
+  async function _userSessionKey() {
     return "ironUserSession";
   }
 
@@ -37,14 +36,20 @@ let storage = (function() {
     saveMessages: async function(deviceId, messages) {
     },
     loadCurrentSession: async function() {
-      const key = await userSessionKey();
-      const sessionPayload = await getItem(key);
+      const key = await _userSessionKey();
+      const sessionPayload = await _getItem(key);
 
-      return [null, null];
+      if (sessionPayload) {
+        // TODO fix
+        return [null, null];
+      } else {
+        return [null, null];
+      }
     },
     saveSession: async function(session) {
     },
     loadSignalInfo: async function(deviceId) {
+      return null;
     },
     saveSignalInfo: async function(deviceId, payload) {
     },
