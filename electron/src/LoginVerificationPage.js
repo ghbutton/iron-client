@@ -12,17 +12,12 @@ class LoginVerificationPage extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.sendVerificationCode = this.sendVerificationCode.bind(this);
   }
 
   async handleChange(event) {
     if (event.target.name === "code") {
       this.setState({code: event.target.value});
     }
-  }
-
-  async sendVerificationCode(event) {
-    await window.controller.sendVerificationCode(this.state.email);
   }
 
   async handleSubmit(event) {

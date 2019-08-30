@@ -10,7 +10,6 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
- #import <ReactNativeNavigation/ReactNativeNavigation.h>
 
 @implementation AppDelegate
 
@@ -19,7 +18,6 @@
   NSURL *jsCodeLocation;
 
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-  [ReactNativeNavigation bootstrap:jsCodeLocation launchOptions:launchOptions];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"libsignal"
@@ -27,8 +25,8 @@
                                                    launchOptions:launchOptions];
   rootView.backgroundColor = [UIColor blackColor];
   
-  Bridge * sis = [[Bridge alloc] init];
-  [sis initialize];
+//  Bridge * sis = [[Bridge alloc] init];
+//  [sis initialize];
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [UIViewController new];

@@ -4,9 +4,9 @@
  */
 
 import {AppRegistry} from 'react-native';
-import {Navigation} from 'react-native-navigation';
-import {registerScreens} from './screens';
 import {name as appName} from './app.json';
+import App from './App';
+import LoginScreen from './components/LoginScreen.js';
 import controller from './common/controller.js';
 
 window.controller = controller;
@@ -16,16 +16,6 @@ async function init() {
   await controller.connectToServer();
 }
 
-console.log("Init");
+AppRegistry.registerComponent(appName, () => App);
 
 init();
-registerScreens();
-Navigation.events().registerAppLaunchedListener(() => {
-  Navigation.setRoot({
-    root: {
-      component: {
-        name: 'LoginScreen'
-      }
-    },
-  });
-});

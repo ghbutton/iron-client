@@ -3,7 +3,7 @@ import logger from "./logger.js"
 import storage from "./storage.js"
 
 // Rename to Crypto
-let signal = (function() {
+export default (function() {
   let [registrationId, keyId, store, bundle, oldDeviceInfo] = [null, null, null, null, null, null];
 
   async function _addressToSessionKey(addressString, deviceId) {
@@ -360,5 +360,3 @@ let signal = (function() {
     }
   }
 })()
-
-export default signal;

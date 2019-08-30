@@ -10,8 +10,11 @@
     "phoenix": "^1.4.9",
     "react": "^16.8.6",
     "react-native": "^0.60.0",
+    "react-native-device-info": "^2.3.2",
     "react-native-fs": "^2.14.1",
-    "react-native-navigation": "^2.27.1"
+    "react-native-gesture-handler": "^1.4.1",
+    "react-native-reanimated": "^1.2.0",
+    "react-navigation": "^3.12.0"
   },
   "devDependencies": {
     "babel-core": "^7.0.0-bridge.0",

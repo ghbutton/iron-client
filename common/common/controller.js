@@ -368,6 +368,7 @@ let controller = (function() {
         logger.debug("Login ok");
 
         if (!!userId && deviceId === null) {
+          // TODO fix for native
           const name = await deviceOS.deviceName();
           const osName = await deviceOS.osName();
 
@@ -598,6 +599,7 @@ let controller = (function() {
         )
       )
     },
+    // Only used by Electron
     downloadDirectory: async function(){
       const downloadDirectory = await storage.loadDownloadDirectory();
       if (!downloadDirectory) {
