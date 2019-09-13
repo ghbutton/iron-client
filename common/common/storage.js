@@ -84,7 +84,7 @@ let storage = (function() {
     },
     saveSignalInfo: async function(deviceId, payload) {
       const key = await signalInfoKey(deviceId);
-      return engine.setItem(key, payload);
+      return engine.setItem(key, JSON.stringify(payload));
     },
     loadDevice: async function(userId) {
       const key = await _deviceKey(userId);

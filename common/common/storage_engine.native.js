@@ -20,7 +20,10 @@ export default (function() {
       // TODO
     },
     clearAllData: async function() {
-      // TODO
+      const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+      for(let file of files) {
+        await RNFS.unlink(RNFS.DocumentDirectoryPath + `/${file.name}`)
+      }
     },
     init: async function() {
       // Do nothing

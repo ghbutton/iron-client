@@ -15,13 +15,13 @@ export default function LoginVerificationScreen(props) {
 
     if (status === "ok") {
       console.log("Logging in");
+      props.navigation.navigate('ChatsScreen')
     } else {
       setError(resp.message);
     }
   }
 
   useEffect(() => {
-    console.log(props.navigation);
     const navEmail = props.navigation.getParam("email", "");
     setEmail(navEmail);
   }, []);

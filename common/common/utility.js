@@ -3,6 +3,17 @@ let utility = (function() {
     sleep: async function(milliseconds) {
       return new Promise(resolve => setTimeout(resolve, milliseconds))
     },
+    pollForCondition: async function(condition, _timeout) {
+      while (true) {
+        // Condition needs to be a function since it needs to update the value every time it is
+        // called to make sure it has the latest value
+        if (condition()) {
+          return true;
+        } else {
+          await utility.sleep(10);
+        }
+      }
+    },
     nullOrUndefined: async function(value) {
       return value === undefined || value === null;
     },

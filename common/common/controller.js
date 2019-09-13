@@ -248,10 +248,10 @@ const worker = (function() {
 })();
 
 let controller = (function() {
-  let [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
+  let [userId, userSessionToken, deviceId, deviceSecret, initialized] = [null, null, null, null, null, false];
 
   async function resetState(){
-    [userId, userSessionToken, deviceId, deviceSecret] = [null, null, null, null, null];
+    [userId, userSessionToken, deviceId, deviceSecret, initialized] = [null, null, null, null, null, false];
   }
 
   async function _messageErrored(message) {
@@ -326,10 +326,12 @@ let controller = (function() {
       logger.debug("Worker");
       worker.init();
 
-      logger.info("Storaged initialized");
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
       let device = await storage.loadDevice(userId);
+
+      logger.info("Storaged initialized");
+      initialized = true;
 
       if (device) {
         logger.debug("Device present");
@@ -524,6 +526,7 @@ let controller = (function() {
       }
     },
     notLoggedIn: async function() {
+      await utility.pollForCondition(() => initialized, 5000)
       return userId === null;
     },
     getUserById: async function(userId) {
@@ -555,6 +558,7 @@ let controller = (function() {
       return {status, resp}
     },
     getConnectedUsers: async function() {
+      console.log("GET CONNECTED USERS");
       let [connections, connectedUsers] = await api.connectedUsers(2000, userId);
       for(let i = 0; i < connections.length; i++) {
         await applicationState.insertConnection(connections[i]);

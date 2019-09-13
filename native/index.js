@@ -8,8 +8,10 @@ import {name as appName} from './app.json';
 import App from './App';
 import LoginScreen from './components/LoginScreen.js';
 import controller from './common/controller.js';
+import view from './common/view.js';
 
 window.controller = controller;
+window.view = view;
 
 async function init() {
   await controller.init();

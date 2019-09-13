@@ -47,23 +47,11 @@ let api = (function() {
   }
 
   async function _waitForLoginChannel(_timeout) {
-    while (true) {
-      if (loginChannelReady || failedToJoin) {
-        return true;
-      } else {
-        await utility.sleep(10);
-      }
-    }
+    await utility.pollForCondition(() => loginChannelReady || failedToJoin, _timeout);
   }
 
   async function _waitForApiChannel(_timeout) {
-    while (true) {
-      if  (apiChannelReady || failedToJoin) {
-        return true;
-      } else {
-        await utility.sleep(10);
-      }
-    }
+    await utility.pollForCondition(() => apiChannelReady || failedToJoin, _timeout);
   }
 
   return {
@@ -384,6 +372,7 @@ let api = (function() {
     },
     connectedUsers: async function(timeout, userId){
       await _waitForApiChannel(timeout);
+
       let connections = [];
 
       const {status, resp: connectionsResp} = await _sendPush(apiChannel, "GET:connections", {});

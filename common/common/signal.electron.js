@@ -142,7 +142,7 @@ export default (function() {
       payload: storagePayload
     };
 
-    await storage.saveSignalInfo(deviceId, JSON.stringify(ironStorage));
+    await storage.saveSignalInfo(deviceId, ironStorage);
     oldDeviceInfo = ironStorage;
   }
 
