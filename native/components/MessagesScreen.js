@@ -19,37 +19,40 @@ export default function MessagesScreen(props) {
     setMessageString(newMessage);
   }
 
-  const handleSubmit = () => {
-    console.log("SUBMIT");
+  const handleSubmit = async () => {
+    if (messageString !== "") {
+      await window.controller.sendMessage(messageString, connectedUserId);
+      setMessageString("");
+    }
+  }
+
+  const init = async () => {
+    const newConnectedUserId = props.navigation.getParam("userId", null);
+    setConnectedUserId(newConnectedUserId);
+
+    const newUserMessages = await window.controller.getMessages(newConnectedUserId);
+    const newDownloads = await window.controller.getDownloads();
+    const newUserId = window.controller.currentUserId();
+    const newDeviceId = window.controller.currentDeviceId();
+
+    setUserId(newUserId);
+
+    setUserMessages(newUserMessages);
+    setDownloads(newDownloads);
+    setDeviceId(newDeviceId);
+    window.controller.setLastRead(newConnectedUserId);
+
+    //    window.addEventListener("new_message", this.handleNewMessage);
+    //    window.addEventListener("new_download", this.handleNewDownload);
+
+    // Api call, slow
+    const newConnectedUser = await window.controller.getUserById(newConnectedUserId);
+    if (newConnectedUser) {
+      setConnectedUser(newConnectedUser);
+    }
   }
 
   useEffect(() => {
-    async function init() {
-      console.log(props.navigation);
-      const newConnectedUserId = props.navigation.getParam("userId", null);
-      console.log(newConnectedUserId);
-;
-      const newUserMessages = await window.controller.getMessages(newConnectedUserId);
-      const newDownloads = await window.controller.getDownloads();
-      const newUserId = window.controller.currentUserId();
-      const newDeviceId = window.controller.currentDeviceId();
-
-      setUserMessages(newUserMessages);
-      setConnectedUserId(newConnectedUserId);
-      setDownloads(newDownloads);
-      setUserId(newUserId);
-      setDeviceId(newDeviceId);
-      window.controller.setLastRead(connectedUserId);
-
-      //    window.addEventListener("new_message", this.handleNewMessage);
-      //    window.addEventListener("new_download", this.handleNewDownload);
-
-      // Api call, slow
-      const newConnectedUser = await window.controller.getUserById(newConnectedUserId);
-      if (newConnectedUser) {
-        setConnectedUser(newConnectedUser);
-      }
-    }
     init();
   }, []);
 
@@ -87,7 +90,7 @@ export default function MessagesScreen(props) {
     // TODO handle unsent file error
 
     return (
-      <Text >{body}</Text>
+      <Text key={message.id}>{body}</Text>
     );
   });
 

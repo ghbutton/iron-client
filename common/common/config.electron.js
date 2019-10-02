@@ -1,8 +1,8 @@
 import localStorage from "./local_storage.js";
 
 const isDev = (process.env.NODE_ENV === "development");
-const os = window.os;
-const API_VERSION = 2;
+const app = window.app;
+const API_VERSION = 3;
 
 let config = (function() {
   return {
@@ -38,8 +38,7 @@ let config = (function() {
           return "/tmp/iron/storage";
         }
       } else {
-        // TODO make this different for windows and os x
-        return `${os.homedir()}/Library/Application Support/Iron/Storage`;
+        return `${window.app.getPath("userData")}/storage`;
       }
     },
     apiVersion: function() {

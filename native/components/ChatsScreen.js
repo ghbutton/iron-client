@@ -12,7 +12,6 @@ export default function ChatsScreen(props) {
   }
 
   const handleConnectedUserPress = (userId) => {
-    console.log(userId);
     props.navigation.navigate('MessagesScreen', {userId: userId})
   }
 

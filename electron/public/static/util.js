@@ -18,6 +18,32 @@ function generateIdentity(store) {
     });
 }
 
+function generateSignedPreKey(store, signedPreKeyId) {
+    return Promise.all([
+        store.getIdentityKeyPair(),
+        store.getLocalRegistrationId()
+    ]).then(function(result) {
+        var identity = result[0];
+        var registrationId = result[1];
+
+        return Promise.all([
+            KeyHelper.generateSignedPreKey(identity, signedPreKeyId),
+        ]).then(function(keys) {
+            var signedPreKey = keys[0];
+
+            store.storeSignedPreKey(signedPreKeyId, signedPreKey.keyPair);
+
+            return {
+                signedPreKey: {
+                    keyId     : signedPreKeyId,
+                    publicKey : signedPreKey.keyPair.pubKey,
+                    signature : signedPreKey.signature
+                }
+            };
+        });
+    });
+}
+
 function generatePreKeyBundle(store, preKeyId, signedPreKeyId) {
     return Promise.all([
         store.getIdentityKeyPair(),

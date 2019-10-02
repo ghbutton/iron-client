@@ -173,6 +173,7 @@ const worker = (function() {
 
   async function _sendAndReceiveMessages(time) {
     const {status} = await _sendMessages();
+
     if (status !== "ok") {
       // exp backoff
       return setTimeout(_sendAndReceiveMessages, time * 2, time * 2);
@@ -307,6 +308,34 @@ let controller = (function() {
     callbacks.newMessage();
   };
 
+  async function _buildSession(recipientDeviceId, myDeviceId) {
+    console.log(`No session for device id ${recipientDeviceId}`);
+    const identityKey = await api.getIdentityKey(recipientDeviceId);
+    const signedPreKey = await api.getSignedPreKey(recipientDeviceId);
+    const preKey = await api.getPreKey(recipientDeviceId);
+    await signal.buildSession(recipientDeviceId, identityKey, signedPreKey, preKey, myDeviceId);
+  }
+
+  async function _recipientDevices(recipientUserId, senderUserId, myDeviceId) {
+    const devices = await api.getDevicesByUserId(recipientUserId);
+    const myDevices = await api.getDevicesByUserId(senderUserId);
+
+    if (!devices || !myDevices) {
+      return null;
+    }
+
+    // Send message to all of my other devices as well
+    let extraDevices = [];
+    for(let i = 0; i < myDevices.length; i++) {
+      // Dont send it to this device
+      if (!await utility.idsEqual(myDevices[i].id, myDeviceId)) {
+        extraDevices.push(myDevices[i]);
+      }
+    }
+
+    return devices.concat(extraDevices);
+  }
+
   async function _uploadFile(filename, recipientUserId) {
     logger.debug(`Sending file ${filename} to ${recipientUserId}`);
     let basename = await fileSystem.basename(filename);
@@ -322,9 +351,6 @@ let controller = (function() {
     init: async function(){
       logger.debug("Init");
       await storage.init();
-
-      logger.debug("Worker");
-      worker.init();
 
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
@@ -357,8 +383,44 @@ let controller = (function() {
       const _onApiChannelOk = async (resp) => {
         logger.debug("Joined api channel successfully", resp);
         // Create pre key bundle before joining device channel
-        let bundle = await signal.getPreKeyBundle();
-        await api.sendPreKeyBundle(bundle);
+        let preKeyStatus = await api.getPreKeyStatus();
+
+        const loaded = await signal.infoLoaded();
+
+        if (!loaded) {
+          const success = await signal.loadDeviceInfoFromDisk(deviceId);
+          if (!success && userId) {
+            await signal.generateDeviceInfo(deviceId);
+          }
+        }
+
+        // TODO
+        // Needs to be successful before sending messages...
+        if (preKeyStatus.attributes.need_identity_key === true) {
+          const publicKey = await signal.getIdentityPublicKey();
+          const registrationId = await signal.getRegistrationId();
+
+          // TODO: Make sure this succeeds
+          await api.sendIdentityKey(publicKey, registrationId, 5000);
+        }
+
+        if (preKeyStatus.attributes.need_signed_pre_key === true) {
+          // generate and upload signed pre key
+          const {keyId, signature, publicKey} = await signal.generateSignedPreKey(deviceId);
+          await api.sendSignedPreKey(publicKey, keyId, signature, 5000);
+        }
+
+        if (preKeyStatus.attributes.need_pre_keys === true) {
+          // generate and upload 100 pre keys
+          const preKeys = await signal.generatePreKeys(deviceId, 100);
+          for(let i = 0; i < preKeys.length; i++) {
+            const preKey = preKeys[i];
+            await api.sendPreKey(preKey.publicKey, preKey.keyId, 5000);
+          }
+        }
+
+        logger.debug("Worker");
+        worker.init();
 
         await api.joinChannel("userDevice", _userDeviceChannelCallback);
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
@@ -378,15 +440,6 @@ let controller = (function() {
           await storage.saveDevice(userId, device);
           deviceId = device.id;
           await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
-        }
-
-        const loaded = await signal.infoLoaded();
-
-        if (!loaded) {
-          const success = await signal.loadDeviceInfoFromDisk(deviceId);
-          if (!success && userId) {
-            await signal.generateDeviceInfo(deviceId);
-          }
         }
 
         if (userId && deviceId) {
@@ -410,15 +463,23 @@ let controller = (function() {
 
     uploadLocalFile: async function(localFileMessage) {
       const recipientUserId = localFileMessage.relationships.receiver.data.id;
-      const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
+      const senderUserId = localFileMessage.relationships.sender.data.id;
+      const combinedDevices = await _recipientDevices(recipientUserId, senderUserId, deviceId);
 
-      if (!preKeyBundles) {
-        await _messageErrored(localFileMessage);
-        return;
+      // Send to receiver
+      for(let i = 0; i < combinedDevices.length; i++) {
+        if (!await signal.hasSession(combinedDevices[i].id)) {
+          await _buildSession(combinedDevices[i].id, deviceId)
+        }
       }
-      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
 
-      let encryptedMessages = await signal.encryptFileMessages(preKeyBundles, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
+      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
+      let encryptedMessages = [];
+
+      for(let i = 0; i < combinedDevices.length; i++) {
+        let encryptedMessage = await signal.encryptFileMessage(combinedDevices[i].id, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
+        encryptedMessages.push(encryptedMessage);
+      }
 
       const {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
 
@@ -432,26 +493,22 @@ let controller = (function() {
     uploadLocalMessage: async function(localMessage) {
       const recipientUserId = localMessage.relationships.receiver.data.id;
       const senderUserId = localMessage.relationships.sender.data.id;
-      const preKeyBundles = await api.getPreKeyBundlesByUserId(recipientUserId);
-      const myBundles = await api.getPreKeyBundlesByUserId(senderUserId);
+      const combinedDevices = await _recipientDevices(recipientUserId, senderUserId, deviceId);
 
-      if (!preKeyBundles || !myBundles) {
-        return {status: "error"};
-      }
-
-      // Send message to all of my other devices as well
-      let extraBundles = [];
-      for(let i = 0; i < myBundles.length; i++) {
-        // Dont send it to this device
-        if (! await utility.idsEqual(myBundles[i].relationships.device.data.id, deviceId)) {
-          extraBundles.push(myBundles[i]);
+      // Send to receiver
+      for(let i = 0; i < combinedDevices.length; i++) {
+        if (!await signal.hasSession(combinedDevices[i].id)) {
+          await _buildSession(combinedDevices[i].id, deviceId)
         }
       }
 
-      const combinedBundles = preKeyBundles.concat(extraBundles);
+      let encryptedMessages = []
 
-      // Send to receiver
-      let encryptedMessages = await signal.encryptMessages(combinedBundles, localMessage.attributes.decryptedBody.data, deviceId);
+      for(let i = 0; i < combinedDevices.length; i++) {
+        let encryptedMessage = await signal.encryptMessage(combinedDevices[i].id, localMessage.attributes.decryptedBody.data, deviceId);
+        encryptedMessages.push(encryptedMessage);
+      }
+
       let {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
 
       if(status === "ok") {
@@ -541,9 +598,6 @@ let controller = (function() {
     updateUser: async function(params) {
       return api.updateUser(userId, params);
     },
-    getPreKeyBundlesById: async function(id) {
-      return null;
-    },
     sendVerificationCode: async function(email) {
       const resp = await api.sendVerificationCode(email, 2000);
       return resp;
@@ -558,8 +612,8 @@ let controller = (function() {
       return {status, resp}
     },
     getConnectedUsers: async function() {
-      console.log("GET CONNECTED USERS");
       let [connections, connectedUsers] = await api.connectedUsers(2000, userId);
+      console.log(connectedUsers);
       for(let i = 0; i < connections.length; i++) {
         await applicationState.insertConnection(connections[i]);
       }
@@ -670,7 +724,6 @@ let controller = (function() {
       let localMessage = await signal.localMessage(messageString, userId, recipientUserId, deviceId)
       await applicationState.addMessage(localMessage);
       await storage.saveMessages(deviceId, applicationState.messages());
-
 
       return null;
     },

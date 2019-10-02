@@ -4,7 +4,7 @@ let callbacks = (function() {
   return {
     newMessage: function() {
       const event = new CustomEvent("new_message", {});
-      logger.debug("Callback - New message event");
+     logger.debug("Callback - New message event");
       // Dispatch the event.
       window.dispatchEvent(event);
     },

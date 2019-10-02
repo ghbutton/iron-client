@@ -1,3 +1,5 @@
+// Attach to window
+
 window.libsignal = libsignal;
 window.uuidv4 = uuidv4;
 window.util = util;

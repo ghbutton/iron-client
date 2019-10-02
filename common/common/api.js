@@ -209,13 +209,25 @@ let api = (function() {
 
       return _sendPush(apiChannel, `PATCH:messages:${messageId}`, payload);
     },
-    sendPreKeyBundle: async function(payload){
-      return _sendPush(apiChannel, "POST:pre_key_bundles", payload);
-    },
     sendVerificationCode: async function(email, timeout) {
       await _waitForLoginChannel(timeout);
 
       return _sendPush(loginChannel, "POST:email_verifications", {email: email});
+    },
+    sendIdentityKey: async function(publicKey, registrationId, timeout) {
+      await _waitForApiChannel(timeout);
+
+      return _sendPush(apiChannel, "POST:identity_keys", {data: {attributes: {public_key: publicKey, registration_id: registrationId}, type: "identity_key"}});
+    },
+    sendSignedPreKey: async function(publicKey, keyId, signature, timeout) {
+      await _waitForApiChannel(timeout);
+
+      return _sendPush(apiChannel, "POST:signed_pre_keys", {data: {attributes: {public_key: publicKey, key_id: keyId, signature}, type: "signed_pre_key"}});
+    },
+    sendPreKey: async function(publicKey, keyId, timeout) {
+      await _waitForApiChannel(timeout);
+
+      return _sendPush(apiChannel, "POST:pre_keys", {data: {attributes: {public_key: publicKey, key_id: keyId}, type: "pre_key"}});
     },
     sendInvitation: async function(name, email, timeout) {
       await _waitForApiChannel(timeout);
@@ -275,10 +287,40 @@ let api = (function() {
         return null;
       }
     },
-    getPreKeyBundlesById: async function(id) {
+    getPreKeyStatus: async function() {
       await _waitForApiChannel();
 
-      const {status, resp} = await _sendPush(apiChannel, "GET:pre_key_bundles", {"id": id});
+      const {status, resp} = await _sendPush(apiChannel, "GET:pre_key_statuses", {});
+      if (status === "ok") {
+        return resp.payload.data[0]
+      } else {
+        return null;
+      }
+    },
+    getIdentityKey: async function(deviceId) {
+      await _waitForApiChannel();
+
+      const {status, resp} = await _sendPush(apiChannel, "GET:identity_keys", {"device_id": deviceId});
+      if (status === "ok") {
+        return resp.payload.data[0]
+      } else {
+        return null;
+      }
+    },
+    getSignedPreKey: async function(deviceId) {
+      await _waitForApiChannel();
+
+      const {status, resp} = await _sendPush(apiChannel, "GET:signed_pre_keys", {"device_id": deviceId});
+      if (status === "ok") {
+        return resp.payload.data[0]
+      } else {
+        return null;
+      }
+    },
+    getPreKey: async function(deviceId) {
+      await _waitForApiChannel();
+
+      const {status, resp} = await _sendPush(apiChannel, "GET:pre_keys", {"device_id": deviceId});
       if (status === "ok") {
         return resp.payload.data[0]
       } else {
@@ -295,22 +337,12 @@ let api = (function() {
         return [];
       }
     },
-    getPreKeyBundlesByUserId: async function(userId) {
+    getDevicesByUserId: async function(userId) {
       await _waitForApiChannel();
 
-      const {status, resp} = await _sendPush(apiChannel, "GET:pre_key_bundles", {"user_id": userId});
+      const {status, resp} = await _sendPush(apiChannel, "GET:devices", {"user_id": userId});
       if (status === "ok") {
         return resp.payload.data
-      } else {
-        return null;
-      }
-    },
-    getUserByPreKeyBundleId: async function(preKeyBundleId){
-      await _waitForApiChannel()
-
-      const {status, resp}= await _sendPush(apiChannel, "GET:users", {pre_key_bundle_id: preKeyBundleId});
-      if (status === "ok") {
-        return resp.payload.data[0];
       } else {
         return null;
       }
@@ -378,6 +410,7 @@ let api = (function() {
       const {status, resp: connectionsResp} = await _sendPush(apiChannel, "GET:connections", {});
 
       if (status === "ok") {
+        console.log(connectionsResp);
         const connectedUsers = await Promise.all(connectionsResp.payload.data.map(async (connection) => {
           connections.push(connection);
 
