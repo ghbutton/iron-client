@@ -663,7 +663,6 @@ let controller = (function() {
     },
     readAvatar: async function(filename) {
       const base64 = await fileSystem.readBase64(filename);
-      console.log(base64);
       const extname = await fileSystem.extname(filename);
       if ([".jpg", ".png"].includes(extname.toLowerCase())) {
         return {status: "ok", bytes: base64, extname};

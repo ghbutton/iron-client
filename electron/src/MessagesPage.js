@@ -223,9 +223,6 @@ class MessagesPage extends Component {
     let lastMessageFromMe = true;
     const {userId, userMessages, downloads, connectedUser, emojisVisible, emojiResults, messageString, organization, organizationMembership} = this.state;
 
-    console.log(organizationMembership);
-    console.log(organization);
-
     const messages = userMessages.map((message, index) => {
       let body = null;
 
