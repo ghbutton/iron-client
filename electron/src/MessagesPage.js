@@ -2,11 +2,12 @@ import "./MessagesPage.css";
 import "./App.css";
 import "emoji-mart/css/emoji-mart.css";
 
+import Dropdown from "react-bootstrap/Dropdown";
 import {emojiIndex, Picker} from "emoji-mart";
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
 
-import Dropdown from "react-bootstrap/Dropdown";
+import UserAvatar from "./UserAvatar";
 
 const PLING = new Audio();
 PLING.src = "./static/sounds/pling.wav";
@@ -18,15 +19,17 @@ class MessagesPage extends Component {
     this.state = {
       connectedUser: null,
       connectedUserId: null,
-      messageString: "",
-      userMessages: [],
       emojisVisible: false,
       emojiResults: [],
       emojiResultsIndex: 0,
-      downloads: [],
-      now: new Date(),
-      userId: null,
       deviceId: null,
+      downloads: [],
+      messageString: "",
+      now: new Date(),
+      organization: null,
+      organizationMembership: null,
+      userMessages: [],
+      userId: null,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -141,7 +144,12 @@ class MessagesPage extends Component {
 
   async uploadFile() {
     const {connectedUserId} = this.state;
-    await window.controller.uploadFiles(connectedUserId);
+    const fileNames = await window.controller.selectFiles();
+
+    if (fileNames !== []) {
+      await window.controller.uploadFiles(connectedUserId, fileNames);
+    }
+
     this.handleNewMessage();
   }
 
@@ -213,7 +221,11 @@ class MessagesPage extends Component {
   render() {
     let date = null;
     let lastMessageFromMe = true;
-    const {userId, userMessages, downloads, connectedUser, emojisVisible, emojiResults, messageString} = this.state;
+    const {userId, userMessages, downloads, connectedUser, emojisVisible, emojiResults, messageString, organization, organizationMembership} = this.state;
+
+    console.log(organizationMembership);
+    console.log(organization);
+
     const messages = userMessages.map((message, index) => {
       let body = null;
 
@@ -292,12 +304,22 @@ class MessagesPage extends Component {
     return (
       <div>
         <div className="clickable-background" onClick={this.clickBackground}></div>
-        <div className="sticky-header color1 container">
+        <div className="sticky-header color1">
           <div className="header-line-1">
             <Link className="btn btn-outline-primary" to={"/"}>{"< Back"}</Link>
             {downloadDropdown}
           </div>
-          <h2>{connectedUser === null ? "" : `${window.view.userDisplay(connectedUser)}`}</h2>
+          { connectedUser === null ? null : (
+            <div className="messagesUser" >
+              <UserAvatar user={connectedUser} className="smallAvatar" />
+              <div className="messagesDetails">
+                <h2>{`${window.view.userDisplay(connectedUser)}`}</h2>
+                { organization === null ? null : (
+                  <h4>{organization.attributes.name} {organizationMembership.attributes.verified && "☑"}</h4>
+                )}
+              </div>
+            </div>
+          ) }
         </div>
         <section className="message-display">
           {messages}
@@ -344,6 +366,11 @@ class MessagesPage extends Component {
     const connectedUser = await window.controller.getUserById(connectedUserId);
     if (connectedUser) {
       this.setState({connectedUser});
+      const organizationMembership = await window.controller.getOrganizationMembershipByUserId(connectedUserId);
+      if (organizationMembership) {
+        const organization = await window.controller.getOrganizationById(organizationMembership.relationships.organization.data.id);
+        this.setState({organizationMembership, organization})
+      }
     }
   }
 }

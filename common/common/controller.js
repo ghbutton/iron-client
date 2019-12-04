@@ -595,6 +595,22 @@ let controller = (function() {
         return null;
       }
     },
+    getOrganizationMembershipByUserId: async function(userId) {
+      let {status, resp} = await api.getOrganizationMembershipByUserId(userId, 2000);
+      if (status === "ok") {
+        return resp;
+      } else {
+        return null;
+      }
+    },
+    getOrganizationById: async function(id) {
+      let {status, resp} = await api.getOrganizationById(id, 2000);
+      if (status === "ok") {
+        return resp;
+      } else {
+        return null;
+      }
+    },
     updateUser: async function(params) {
       return api.updateUser(userId, params);
     },
@@ -613,7 +629,6 @@ let controller = (function() {
     },
     getConnectedUsers: async function() {
       let [connections, connectedUsers] = await api.connectedUsers(2000, userId);
-      console.log(connectedUsers);
       for(let i = 0; i < connections.length; i++) {
         await applicationState.insertConnection(connections[i]);
       }
@@ -646,14 +661,31 @@ let controller = (function() {
     createNewInvitation: async function(name, email) {
       return api.sendInvitation(name, email, 2000);
     },
-    uploadFiles: async function(recipientUserId) {
-      let fileNames = await fileSystem.multiSelectFiles();
-      if (fileNames === []) return;
+    readAvatar: async function(filename) {
+      const base64 = await fileSystem.readBase64(filename);
+      console.log(base64);
+      const extname = await fileSystem.extname(filename);
+      if ([".jpg", ".png"].includes(extname.toLowerCase())) {
+        return {status: "ok", bytes: base64, extname};
+      } else {
+        return {status: "error", resp: "only support .jpg and .png files."};
+      }
+    },
+    selectFiles: async function() {
+      let filenames = await fileSystem.multiSelectFiles();
+      return filenames;
+    },
+    selectFile: async function() {
+      let filename = await fileSystem.selectFile();
+      return filename;
+    },
+    uploadFiles: async function(recipientUserId, filenames) {
+      if (filenames === []) return;
 
       return await Promise.all(
-        fileNames.map(
-          fileName =>
-            _uploadFile(fileName, recipientUserId)
+        filenames.map(
+          filename =>
+            _uploadFile(filename, recipientUserId)
         )
       )
     },

@@ -177,16 +177,14 @@ let api = (function() {
         });
       }
     },
-    updateUser: async function(userId, {name}) {
+    updateUser: async function(userId, attributes) {
       await _waitForApiChannel();
 
       let payload = {
         payload: {
           data: {
             type: "user",
-            attributes: {
-              name: name
-            }
+            attributes: attributes,
           }
         }
       }
@@ -259,6 +257,26 @@ let api = (function() {
       await _waitForApiChannel(timeout);
 
       let {status, resp} = await _sendPush(apiChannel, "GET:users", {id: userId});
+      if (status === "ok") {
+        return {status: "ok", resp: resp.payload.data[0]};
+      } else {
+        return {status, resp}
+      }
+    },
+    getOrganizationMembershipByUserId: async function(userId, timeout) {
+      await _waitForApiChannel(timeout);
+
+      let {status, resp} = await _sendPush(apiChannel, "GET:organization_memberships", {user_id: userId});
+      if (status === "ok") {
+        return {status: "ok", resp: resp.payload.data[0]};
+      } else {
+        return {status, resp}
+      }
+    },
+    getOrganizationById: async function(id, timeout) {
+      await _waitForApiChannel(timeout);
+
+      let {status, resp} = await _sendPush(apiChannel, "GET:organizations", {id: id});
       if (status === "ok") {
         return {status: "ok", resp: resp.payload.data[0]};
       } else {
@@ -410,7 +428,6 @@ let api = (function() {
       const {status, resp: connectionsResp} = await _sendPush(apiChannel, "GET:connections", {});
 
       if (status === "ok") {
-        console.log(connectionsResp);
         const connectedUsers = await Promise.all(connectionsResp.payload.data.map(async (connection) => {
           connections.push(connection);
 

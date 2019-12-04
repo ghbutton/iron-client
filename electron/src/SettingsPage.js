@@ -3,6 +3,7 @@ import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import MenuFooter from "./MenuFooter";
 import BlankHeader from "./BlankHeader";
+import UserAvatar from "./UserAvatar";
 
 class SettingsPage extends Component {
   constructor(props) {
@@ -39,7 +40,8 @@ class SettingsPage extends Component {
           <hr/>
           <h2>Personal</h2>
           { currentUser &&
-              <div>
+            <div>
+              <UserAvatar user={currentUser}/>
                 <p>Name: {currentUser.attributes.name}</p>
                 <p>Email: {currentUser.attributes.email}</p>
                 <Link className="btn btn-primary" to={"/user_edit"}>{"Edit"}</Link>

@@ -38,7 +38,7 @@ let config = (function() {
           return "/tmp/iron/storage";
         }
       } else {
-        return `${window.app.getPath("userData")}/storage`;
+        return `${app.getPath("userData")}/storage`;
       }
     },
     apiVersion: function() {

@@ -54,16 +54,16 @@ let view = (function() {
     },
     deviceDisplay: function(device, deviceId) {
       let osDisplayName;
-      if (device.os_name === "Darwin") {
+      if (device.attributes.os_name === "Darwin") {
         osDisplayName = "OS X";
-      } else if (device.os_name === "Windows_NT") {
+      } else if (device.attributes.os_name === "Windows_NT") {
         osDisplayName = "Windows";
       }
 
-      if (!device.os_name) {
+      if (!device.attributes.os_name) {
         return "Unknown";
       } else {
-        return `${osDisplayName} - ${device.name} ${device.id === deviceId ? "(this)" : ""}`
+        return `${osDisplayName} - ${device.attributes.name} ${device.id === deviceId ? "(this)" : ""}`
       }
     },
     currentUsersMessage: function(message, userId) {

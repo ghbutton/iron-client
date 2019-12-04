@@ -97,7 +97,6 @@ export default (function() {
       }
       // save the current identity keys
       if (key.startsWith("identityKey") && key !== "identityKey"){
-        console.log(key);
         identityKeys[key] = await _bToS(store.store[key]);
       }
 

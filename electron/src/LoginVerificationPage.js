@@ -2,13 +2,13 @@ import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import * as qs from "qs";
 
-import FormErrors from "./FormErrors";
+import UserMessages from "./UserMessages";
 import "./LoginVerificationPage.css";
 
 class LoginVerificationPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: "", code: "", errorMessage: ""};
+    this.state = {email: "", code: "", errorMessage: "", message: "An email has been sent to verify your address"};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -41,8 +41,8 @@ class LoginVerificationPage extends Component {
           <h2>Verification Page</h2>
           <img src="./static/icon.png" height="100px" width="100px" alt=""/>
 
-          <FormErrors message={this.state.errorMessage} />
           <form onSubmit={this.handleSubmit} className="loginForm">
+            <UserMessages warning={this.state.errorMessage} message={this.state.message} />
             <label><b>Email</b></label>
             <br/>
             <input type="text" name="email" value={this.state.email} disabled/>

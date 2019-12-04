@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import * as qs from "qs";
 
 import BlankHeader from "./BlankHeader";
-import FormErrors from "./FormErrors";
+import UserMessages from "./UserMessages";
 import "./LoginPage.css";
 
 class LoginPage extends Component {
@@ -38,7 +38,7 @@ class LoginPage extends Component {
         <BlankHeader/>
         <h2>Login Page</h2>
         <img src="./static/icon.png" height="100px" width="100px" alt=""/>
-        <FormErrors message={this.state.errorMessage} />
+        <UserMessages warning={this.state.errorMessage}/>
         <form action="/#/login_verification" method="get" onSubmit={this.handleSubmit} className="loginForm">
           <label><b>Email</b></label>
           <br/>
