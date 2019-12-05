@@ -38,6 +38,10 @@ export default (function() {
     let buffer = await _sToUtf8(messagePayload);
     let sessionCipher = new libsignal.SessionCipher(store, address);
     let message = await sessionCipher.encrypt(buffer);
+
+    // Change body to base64
+    message.body = await _sTo64(message.body);
+
     return message;
   }
 
@@ -49,21 +53,45 @@ export default (function() {
     return `${deviceId}`
   }
 
-  async function _keyToS(key) {
-    return {pubKey: await _bToS(key.pubKey), privKey: (await _bToS(key.privKey))}
+  async function _keyTo64(key) {
+    return {pubKey: await _bTo64(key.pubKey), privKey: (await _bTo64(key.privKey))}
   }
 
   async function _keyToB(key) {
-    return {pubKey: await _sToB(key.pubKey), privKey: await _sToB(key.privKey)}
+    return {pubKey: await _64ToB(key.pubKey), privKey: await _64ToB(key.privKey)}
   }
 
   async function _bToS(binary) {
-    let string = window.util.toString(binary);
-    return string;
+    return window.util.toString(binary);
   }
 
   async function _sToB(string) {
     return window.util.toArrayBuffer(string);
+  }
+
+  async function _sTo64(string) {
+    let buff = new Buffer(string);
+    let base64data = buff.toString("base64");
+    return base64data;
+  }
+
+  async function _64ToS(base64) {
+    let buff = new Buffer(base64, "base64");
+    let string = buff.toString();
+    return string;
+  }
+
+  async function _bTo64(binary) {
+    let string = window.util.toString(binary);
+    let buff = new Buffer(string);
+    let base64data = buff.toString("base64");
+    return base64data;
+  }
+
+  async function _64ToB(string) {
+    let buff = new Buffer(string, "base64");
+    let ascii = buff.toString();
+    return window.util.toArrayBuffer(ascii);
   }
 
   async function _sToUtf8(string) {
@@ -97,16 +125,16 @@ export default (function() {
       }
       // save the current identity keys
       if (key.startsWith("identityKey") && key !== "identityKey"){
-        identityKeys[key] = await _bToS(store.store[key]);
+        identityKeys[key] = await _bTo64(store.store[key]);
       }
 
       // save the current identity keys
       if (key.startsWith("25519KeysignedKey")){
-        signedKeys[key] = await _keyToS(store.store[key]);
+        signedKeys[key] = await _keyTo64(store.store[key]);
       }
 
       if (key.startsWith("25519KeypreKey")) {
-        preKeys[key] = await _keyToS(store.store[key]);
+        preKeys[key] = await _keyTo64(store.store[key]);
       }
     }
 
@@ -116,8 +144,8 @@ export default (function() {
       registrationId,
       signedKeys,
       preKeys,
-      idPubKey: await _bToS(idKeyPair.pubKey),
-      idPrivKey: await _bToS(idKeyPair.privKey),
+      idPubKey: await _bTo64(idKeyPair.pubKey),
+      idPrivKey: await _bTo64(idKeyPair.privKey),
       deviceId: deviceId,
       addressString: await utility.addressString(deviceId),
       sessions: sessions,
@@ -142,29 +170,29 @@ export default (function() {
         true, //whether the key is extractable (i.e. can be used in exportKey)
         ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
       )
-      let aesExported = await _bToS(await window.crypto.subtle.exportKey("raw", aesKey));
+      let aesExported = await _bTo64(await window.crypto.subtle.exportKey("raw", aesKey));
       let iv = window.crypto.getRandomValues(new Uint8Array(16));
-      let sIv = await _bToS(iv);
+      let sIv = await _bTo64(iv);
       let bEncrypted = await window.crypto.subtle.encrypt( { name: "AES-CBC", iv: iv}, aesKey, await _sToB(data));
-      let encrypted = await _bToS(bEncrypted);
+      let encrypted = await _bTo64(bEncrypted);
 
       let hmacKey = await window.crypto.subtle.generateKey({name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
-      let hmacExported = await _bToS(await window.crypto.subtle.exportKey("raw", hmacKey));
-      let signature = await _bToS(await window.crypto.subtle.sign({name: "HMAC"}, hmacKey, bEncrypted));
+      let hmacExported = await _bTo64(await window.crypto.subtle.exportKey("raw", hmacKey));
+      let signature = await _bTo64(await window.crypto.subtle.sign({name: "HMAC"}, hmacKey, bEncrypted));
 
       return {encrypted, hmacExported, sIv, signature, aesExported}
     },
     aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
-      let hmacKey = await window.crypto.subtle.importKey("raw", await _sToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
-      let verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _sToB(signature), await _sToB(encrypted));
+      let hmacKey = await window.crypto.subtle.importKey("raw", await _64ToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
+      let verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _64ToB(signature), await _64ToB(encrypted));
 
       if (!verified) {
         throw new Error("Error, file not verified.");
       }
 
-      let aesKey = await window.crypto.subtle.importKey("raw", await _sToB(aesExported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
-      let decrypted = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: await _sToB(sIv)}, aesKey, await _sToB(encrypted));
+      let aesKey = await window.crypto.subtle.importKey("raw", await _64ToB(aesExported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
+      let decrypted = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: await _64ToB(sIv)}, aesKey, await _64ToB(encrypted));
       let sDecrypted = await _bToS(decrypted);
       return sDecrypted;
     },
@@ -189,9 +217,7 @@ export default (function() {
             store.put("currentSignedKeyId", payload.currentSignedKeyId);
             store.put("currentPreKeyId", payload.currentPreKeyId);
             store.put("registrationId", payload.registrationId);
-            store.put("identityKey", {pubKey: await _sToB(payload.idPubKey), privKey: await _sToB(payload.idPrivKey)});
-            //            store.storePreKey(keyId, {pubKey: await _sToB(payload.preKeyPub), privKey: await _sToB(payload.preKeyPriv)});
-            //            store.storeSignedPreKey(keyId, {pubKey: await _sToB(payload.signedPreKeyPub), privKey: await _sToB(payload.signedPreKeyPriv)});
+            store.put("identityKey", {pubKey: await _64ToB(payload.idPubKey), privKey: await _64ToB(payload.idPrivKey)});
 
             // restore the saved sessions
             for(let key of Object.keys(payload.sessions)){
@@ -200,7 +226,7 @@ export default (function() {
 
             // restore the identity keys
             for(let key of Object.keys(payload.identityKeys)){
-              store.put(key, await _sToB(payload.identityKeys[key]));
+              store.put(key, await _64ToB(payload.identityKeys[key]));
             }
 
             for(let key of Object.keys(payload.signedKeys)){
@@ -229,6 +255,10 @@ export default (function() {
 
       logger.debug(`Encrypted message body ${encryptedMessage.attributes.body}`)
 
+
+
+      // Change body from base64 to binary
+      encryptedMessage.attributes.body = await _64ToS(encryptedMessage.attributes.body);
       if (encryptedMessage.attributes.type === 3) {
         message = await sessionCipher.decryptPreKeyWhisperMessage(encryptedMessage.attributes.body, "binary")
       } else {
@@ -257,7 +287,7 @@ export default (function() {
     },
     getIdentityPublicKey: async function(){
       const idKeyPair = await store.getIdentityKeyPair();
-      return await _bToS(idKeyPair.pubKey)
+      return await _bTo64(idKeyPair.pubKey)
     },
     generateSignedPreKey: async function(deviceId){
       const currentSignedKeyId = store.get("currentSignedKeyId");
@@ -265,7 +295,7 @@ export default (function() {
       store.put("currentSignedKeyId", currentSignedKeyId + 1);
 
       await _saveState(deviceId);
-      return {keyId, signature: await _bToS(signature), publicKey: await _bToS(publicKey)}
+      return {keyId, signature: await _bTo64(signature), publicKey: await _bTo64(publicKey)}
     },
     generatePreKeys: async function(deviceId, number){
       const currentPreKeyId = store.get("currentPreKeyId");
@@ -273,7 +303,7 @@ export default (function() {
 
       for(let i = 0; i < number; i++) {
         const key = await KeyHelper.generatePreKey(currentPreKeyId + i);
-        keys.push({keyId: key.keyId, publicKey: await _bToS(key.keyPair.pubKey)});
+        keys.push({keyId: key.keyId, publicKey: await _bTo64(key.keyPair.pubKey)});
         store.storePreKey(currentPreKeyId + i, key.keyPair);
 
       }
@@ -372,17 +402,17 @@ export default (function() {
       let sessionBuilder = new libsignal.SessionBuilder(store, address);
       let attributes = {
         registrationId: identityKey.attributes.registration_id,
-        identityKey: await _sToB(identityKey.attributes.public_key),
+        identityKey: await _64ToB(identityKey.attributes.public_key),
         signedPreKey: {
           keyId     : signedPreKey.attributes.key_id,
-          publicKey : await _sToB(signedPreKey.attributes.public_key),
-          signature : await _sToB(signedPreKey.attributes.signature)
+          publicKey : await _64ToB(signedPreKey.attributes.public_key),
+          signature : await _64ToB(signedPreKey.attributes.signature)
         },
       }
       if (preKey) {
         attributes.preKey = {
           keyId     : preKey.attributes.key_id,
-          publicKey : await _sToB(preKey.attributes.public_key)
+          publicKey : await _64ToB(preKey.attributes.public_key)
         }
       }
       await sessionBuilder.processPreKey(attributes);
