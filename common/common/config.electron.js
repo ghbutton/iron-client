@@ -2,7 +2,7 @@ import localStorage from "./local_storage.js";
 
 const isDev = (process.env.NODE_ENV === "development");
 const app = window.app;
-const API_VERSION = 3;
+const API_VERSION = 4;
 
 let config = (function() {
   return {
