@@ -243,7 +243,6 @@ const worker = (function() {
     },
     getMessages: async function() {
       needToGetMessages = true;
-      _getMessages();
     }
   };
 })();
