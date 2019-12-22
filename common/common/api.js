@@ -320,9 +320,9 @@ let api = (function() {
 
       const {status, resp} = await _sendPush(apiChannel, "GET:identity_keys", {"device_id": deviceId});
       if (status === "ok") {
-        return resp.payload.data[0]
+        return {status, identityKey: resp.payload.data[0]}
       } else {
-        return null;
+        return {status};
       }
     },
     getSignedPreKey: async function(deviceId) {
@@ -330,9 +330,9 @@ let api = (function() {
 
       const {status, resp} = await _sendPush(apiChannel, "GET:signed_pre_keys", {"device_id": deviceId});
       if (status === "ok") {
-        return resp.payload.data[0]
+        return {status, signedPreKey: resp.payload.data[0]}
       } else {
-        return null;
+        return {status};
       }
     },
     getPreKey: async function(deviceId) {
@@ -340,9 +340,9 @@ let api = (function() {
 
       const {status, resp} = await _sendPush(apiChannel, "GET:pre_keys", {"device_id": deviceId});
       if (status === "ok") {
-        return resp.payload.data[0]
+        return {status, preKey: resp.payload.data[0]}
       } else {
-        return null;
+        return {status};
       }
     },
     getMessages: async function() {
@@ -360,9 +360,9 @@ let api = (function() {
 
       const {status, resp} = await _sendPush(apiChannel, "GET:devices", {"user_id": userId});
       if (status === "ok") {
-        return resp.payload.data
+        return {status: "ok", devices: resp.payload.data}
       } else {
-        return null;
+        return {status: "error"};
       }
     },
     sendEncryptedMessages: async function(encryptedMessages, senderDeviceId, senderUserId, receiverUserId, idempotencyKey) {

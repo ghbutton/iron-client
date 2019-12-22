@@ -298,5 +298,6 @@ section.message-display {
 }
 
 .messagesDetails {
+  padding-left: 10px;
   flex-direction: column;
 }

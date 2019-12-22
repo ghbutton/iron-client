@@ -310,18 +310,24 @@ let controller = (function() {
 
   async function _buildSession(recipientDeviceId, myDeviceId) {
     console.log(`No session for device id ${recipientDeviceId}`);
-    const identityKey = await api.getIdentityKey(recipientDeviceId);
-    const signedPreKey = await api.getSignedPreKey(recipientDeviceId);
-    const preKey = await api.getPreKey(recipientDeviceId);
-    await signal.buildSession(recipientDeviceId, identityKey, signedPreKey, preKey, myDeviceId);
+    const {status: statusIdentity, identityKey} = await api.getIdentityKey(recipientDeviceId);
+    const {status: statusSigned, signedPreKey} = await api.getSignedPreKey(recipientDeviceId);
+    const {status: statusPre, preKey} = await api.getPreKey(recipientDeviceId);
+
+    if (statusIdentity === "ok" && statusSigned === "ok" && statusPre === "ok") {
+      await signal.buildSession(recipientDeviceId, identityKey, signedPreKey, preKey, myDeviceId);
+      return {status: "ok"}
+    } else {
+      return {status: "error"}
+    }
   }
 
   async function _recipientDevices(recipientUserId, senderUserId, myDeviceId) {
-    const devices = await api.getDevicesByUserId(recipientUserId);
-    const myDevices = await api.getDevicesByUserId(senderUserId);
+    const {status: devicesStatus, devices} = await api.getDevicesByUserId(recipientUserId);
+    const {status: myDevicesStatus, devices: myDevices} = await api.getDevicesByUserId(senderUserId);
 
-    if (!devices || !myDevices) {
-      return null;
+    if (devicesStatus !== "ok" || myDevicesStatus !== "ok") {
+      return {status: "error"};
     }
 
     // Send message to all of my other devices as well
@@ -333,7 +339,7 @@ let controller = (function() {
       }
     }
 
-    return devices.concat(extraDevices);
+    return {status: "ok", devices: devices.concat(extraDevices)};
   }
 
   async function _uploadFile(filename, recipientUserId) {
@@ -464,12 +470,19 @@ let controller = (function() {
     uploadLocalFile: async function(localFileMessage) {
       const recipientUserId = localFileMessage.relationships.receiver.data.id;
       const senderUserId = localFileMessage.relationships.sender.data.id;
-      const combinedDevices = await _recipientDevices(recipientUserId, senderUserId, deviceId);
+      const {status, devices: combinedDevices} = await _recipientDevices(recipientUserId, senderUserId, deviceId);
+
+      if (status !== "ok") {
+        return {status}
+      }
 
       // Send to receiver
       for(let i = 0; i < combinedDevices.length; i++) {
         if (!await signal.hasSession(combinedDevices[i].id)) {
-          await _buildSession(combinedDevices[i].id, deviceId)
+          const {status: sessionStatus} = await _buildSession(combinedDevices[i].id, deviceId);
+          if (sessionStatus !== "ok") {
+            return {status: sessionStatus};
+          }
         }
       }
 
@@ -481,9 +494,9 @@ let controller = (function() {
         encryptedMessages.push(encryptedMessage);
       }
 
-      const {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
+      const {status: messageStatus} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localFileMessage.id);
 
-      if(status === "ok") {
+      if (messageStatus === "ok") {
         await applicationState.messageSent(localFileMessage);
         await storage.saveMessages(deviceId, applicationState.messages());
         callbacks.newMessage();
@@ -493,12 +506,20 @@ let controller = (function() {
     uploadLocalMessage: async function(localMessage) {
       const recipientUserId = localMessage.relationships.receiver.data.id;
       const senderUserId = localMessage.relationships.sender.data.id;
-      const combinedDevices = await _recipientDevices(recipientUserId, senderUserId, deviceId);
+      const {status, devices: combinedDevices} = await _recipientDevices(recipientUserId, senderUserId, deviceId);
+
+      if (status !== "ok") {
+        return {status}
+      }
 
       // Send to receiver
       for(let i = 0; i < combinedDevices.length; i++) {
         if (!await signal.hasSession(combinedDevices[i].id)) {
-          await _buildSession(combinedDevices[i].id, deviceId)
+          const {status: sessionStatus} = await _buildSession(combinedDevices[i].id, deviceId);
+
+          if (sessionStatus !== "ok") {
+            return {status: sessionStatus};
+          }
         }
       }
 
@@ -509,9 +530,9 @@ let controller = (function() {
         encryptedMessages.push(encryptedMessage);
       }
 
-      let {status} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
+      let {status: messageStatus} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
 
-      if(status === "ok") {
+      if(messageStatus === "ok") {
         await applicationState.messageSent(localMessage);
         await storage.saveMessages(deviceId, applicationState.messages());
         callbacks.newMessage();
