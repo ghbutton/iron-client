@@ -102,6 +102,7 @@ export default (function() {
     return new TextDecoder().decode(buffer);
   }
 
+  // TODO, move this non signal stuff out of this module
   // Also used as the idempotency key
   async function _localMessageId(deviceId){
     const randomPiece = Math.random().toString(36).substr(2).substring(0, 4);

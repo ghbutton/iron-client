@@ -170,6 +170,7 @@ window.storage = storage;
 const worker = (function() {
   const MESSAGES_TIME = 100;
   let needToGetMessages = false;
+  let initialized = false;
 
   async function _sendAndReceiveMessages(time) {
     const {status} = await _sendMessages();
@@ -239,10 +240,15 @@ const worker = (function() {
 
   return {
     init: async function() {
-      _sendAndReceiveMessages(MESSAGES_TIME)
+      needToGetMessages = true;
+      if (!initialized) {
+        initialized = true;
+        _sendAndReceiveMessages(MESSAGES_TIME)
+      }
     },
     getMessages: async function() {
       needToGetMessages = true;
+      // Messages will be handled by the worker thread, just set the flag
     }
   };
 })();
@@ -448,6 +454,9 @@ let controller = (function() {
         }
 
         if (userId && deviceId) {
+          // TODO
+          // This should only run once or should be idempotent
+          // Or have some kind of clean up because it is called multiple times
           await api.joinChannel("api", _onApiChannelOk);
         }
       }
