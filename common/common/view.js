@@ -43,7 +43,7 @@ let view = (function() {
       }
     },
     timestampBreakDisplay: function(timestamp) {
-      return `${timestamp.getMonth().toString().padStart(2, "0")}/${timestamp.getDate().toString().padStart(2, "0")}/${timestamp.getFullYear()}`
+      return `${(timestamp.getMonth() + 1).toString().padStart(2, "0")}/${timestamp.getDate().toString().padStart(2, "0")}/${timestamp.getFullYear()}`
     },
     messageHasLink: function(message) {
       if (message.attributes.decryptedBody.type === "fm") {
