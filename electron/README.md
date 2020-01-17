@@ -1,3 +1,5 @@
+Electron client application for OS X and Windows.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
@@ -5,8 +7,6 @@ You can find the most recent version of this guide [here](https://github.com/fac
 
 Yarn commands:
 - `yarn install` install dependencies
-- `yarn start` run the server
-- `yarn build` create a production build
 - `yarn electron` start an electron app
 
 
