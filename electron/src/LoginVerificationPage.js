@@ -8,7 +8,7 @@ import "./LoginVerificationPage.css";
 class LoginVerificationPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {email: "", code: "", errorMessage: "", message: "An email has been sent to verify your address"};
+    this.state = {email: "", code: "", errorMessage: "", message: "An email has been sent to verify your address (check spam)"};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
