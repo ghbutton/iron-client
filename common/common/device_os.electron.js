@@ -1,11 +1,11 @@
 const os = window.os;
 const exec = window.exec;
 
-const DARWIN = "Darwin"
+const DARWIN = "Darwin";
 
-let deviceOS = (function() {
+const deviceOS = (function() {
   function isOSX() {
-    return os.type() === DARWIN
+    return os.type() === DARWIN;
   }
 
   function execute(command) {
@@ -14,7 +14,7 @@ let deviceOS = (function() {
         if (error) {
           console.warn(error);
         }
-      resolve(stdout? stdout : stderr);
+        resolve(stdout? stdout : stderr);
       });
     });
   };
@@ -36,8 +36,8 @@ let deviceOS = (function() {
     },
     osName: async function() {
       return os.type();
-    }
-  }
-})()
+    },
+  };
+})();
 
 export default deviceOS;

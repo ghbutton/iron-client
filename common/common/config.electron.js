@@ -4,7 +4,7 @@ const isDev = (process.env.NODE_ENV === "development");
 const app = window.app;
 const API_VERSION = 4;
 
-let config = (function() {
+const config = (function() {
   return {
     isDev: function() {
       return isDev;
@@ -13,14 +13,14 @@ let config = (function() {
       if (isDev) {
         return process.env.REACT_APP_IRON_WS_PROTOCOL;
       } else {
-        return `wss`;
+        return "wss";
       }
     },
     wsUrl: function() {
       if (isDev) {
         return process.env.REACT_APP_IRON_WS_URL;
       } else {
-        return `www.ironnotice.com`;
+        return "www.ironnotice.com";
       }
     },
     wsPort: function() {
@@ -44,7 +44,7 @@ let config = (function() {
     apiVersion: function() {
       return API_VERSION;
     },
-  }
-})()
+  };
+})();
 
 export default config;

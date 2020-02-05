@@ -1,11 +1,11 @@
-const { Socket } = require('phoenix-channels')
+const {Socket} = require("phoenix-channels");
 
-let socket = (function() {
+const socket = (function() {
   return {
     socket: function() {
       return Socket;
-    }
-  }
-})()
+    },
+  };
+})();
 
 export default socket;

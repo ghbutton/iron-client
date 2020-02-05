@@ -42,10 +42,10 @@ class SettingsPage extends Component {
           { currentUser &&
             <div>
               <UserAvatar user={currentUser}/>
-                <p>Name: {currentUser.attributes.name}</p>
-                <p>Email: {currentUser.attributes.email}</p>
-                <Link className="btn btn-primary" to={"/user_edit"}>{"Edit"}</Link>
-              </div>
+              <p>Name: {currentUser.attributes.name}</p>
+              <p>Email: {currentUser.attributes.email}</p>
+              <Link className="btn btn-primary" to={"/user_edit"}>{"Edit"}</Link>
+            </div>
           }
           {
             loggedIn &&

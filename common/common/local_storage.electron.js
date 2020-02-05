@@ -1,9 +1,9 @@
-let localStorage = (function() {
+const localStorage = (function() {
   return {
     basePath: function() {
       return window.localStorage.getItem("basePath");
-    }
-  }
-})()
+    },
+  };
+})();
 
 export default localStorage;

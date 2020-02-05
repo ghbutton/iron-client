@@ -1,7 +1,7 @@
-import utility from "./utility.js"
-import engine from "./storage_engine.js"
+import utility from "./utility.js";
+import engine from "./storage_engine.js";
 
-let storage = (function() {
+const storage = (function() {
   async function _userSessionKey() {
     return "ironUserSession";
   }
@@ -99,7 +99,7 @@ let storage = (function() {
     clearData: async function() {
       return engine.clearAllData();
     },
-    saveDownloadDirectory: async function(directory){
+    saveDownloadDirectory: async function(directory) {
       const key = await downloadDirectoryKey();
       return engine.setItem(key, JSON.stringify(directory));
     },
@@ -112,8 +112,8 @@ let storage = (function() {
       const directoryPayload = await engine.getItem(key);
       const downloadDirectory = JSON.parse(directoryPayload);
       return (downloadDirectory) || null;
-    }
-  }
-})()
+    },
+  };
+})();
 
 export default storage;

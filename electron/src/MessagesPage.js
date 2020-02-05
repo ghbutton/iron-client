@@ -366,7 +366,7 @@ class MessagesPage extends Component {
       const organizationMembership = await window.controller.getOrganizationMembershipByUserId(connectedUserId);
       if (organizationMembership) {
         const organization = await window.controller.getOrganizationById(organizationMembership.relationships.organization.data.id);
-        this.setState({organizationMembership, organization})
+        this.setState({organizationMembership, organization});
       }
     }
   }

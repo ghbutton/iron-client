@@ -9,7 +9,7 @@ function UserMessages(props) {
         {warning}
       </div>
     );
-  } else if (message !== "" && message != null){
+  } else if (message !== "" && message != null) {
     return (
       <div className="alert alert-primary fade show userMessages" role="alert">
         {message}

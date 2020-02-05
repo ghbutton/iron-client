@@ -1,7 +1,7 @@
-import config from "./config.js"
+import config from "./config.js";
 
 const fs = window.fs;
-let basePath = config.basePath();
+const basePath = config.basePath();
 
 export default (function() {
   async function createDirectory(currentPath) {
@@ -25,25 +25,25 @@ export default (function() {
     clearAllData: async function() {
       const files = fs.readdirSync(basePath);
 
-      for(let file of files) {
+      for (const file of files) {
         fs.unlinkSync(`${basePath}/${file}`);
       }
     },
     init: async function() {
-      let folders = basePath.split("/");
+      const folders = basePath.split("/");
       let currentPath = "";
       if (folders[0] === "") {
         // Remove the leading slash
         folders.shift();
 
-        let first = folders.shift();
-        currentPath= `/${first}`
+        const first = folders.shift();
+        currentPath= `/${first}`;
       } else {
-        currentPath = `${folders.shift()}`
+        currentPath = `${folders.shift()}`;
       }
 
-      while(folders.length > 0) {
-        let current = folders.shift();
+      while (folders.length > 0) {
+        const current = folders.shift();
         currentPath = `${currentPath}/${current}`;
         createDirectory(currentPath);
       }
@@ -55,7 +55,7 @@ export default (function() {
             if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
               resolve(null);
             } else {
-              throw(err);
+              throw (err);
             }
           } else {
             resolve(data);
@@ -63,5 +63,5 @@ export default (function() {
         });
       });
     },
-  }
-})()
+  };
+})();

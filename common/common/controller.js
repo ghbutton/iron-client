@@ -8,7 +8,7 @@ import storage from "./storage.js";
 import utility from "./utility.js";
 
 const applicationState = (function() {
-  let state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []}
+  const state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []};
 
   async function addDedup(list, object) {
     let isDup = false;
@@ -25,9 +25,9 @@ const applicationState = (function() {
   }
 
   async function _getMessagesToBeSent(type) {
-    let messages = [];
+    const messages = [];
 
-    for(let i = 0; i< state.messages.length; i++){
+    for (let i = 0; i< state.messages.length; i++) {
       if (state.messages[i].meta.sent_at === null && state.messages[i].attributes.decryptedBody.type === type) {
         messages.push(state.messages[i]);
       }
@@ -43,10 +43,10 @@ const applicationState = (function() {
   }
 
   return {
-    insertUser: async function(user){
+    insertUser: async function(user) {
       return insertObject("users", user);
     },
-    insertConnection: async function(connection){
+    insertConnection: async function(connection) {
       return insertObject("connections", connection);
     },
     connectedUser: async function(user) {
@@ -56,17 +56,17 @@ const applicationState = (function() {
       return state.connectedUsers;
     },
     connectedMessages: function(userId, connectedUserId) {
-      let connectedMessages = [];
+      const connectedMessages = [];
 
       for (let i = 0; i < state.messages.length; i++) {
-        let message = state.messages[i];
-        if(message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
+        const message = state.messages[i];
+        if (message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
           if (message.relationships.receiver.data.id === connectedUserId.toString()) {
             connectedMessages.push(message);
           }
         } else {
-          let senderUserId = message.relationships.sender_user.data.id;
-          let receiverUserId = message.relationships.receiver_user.data.id;
+          const senderUserId = message.relationships.sender_user.data.id;
+          const receiverUserId = message.relationships.receiver_user.data.id;
 
           if (senderUserId === connectedUserId.toString() || (senderUserId === userId.toString() && receiverUserId === connectedUserId.toString())) {
             connectedMessages.push(message);
@@ -90,7 +90,7 @@ const applicationState = (function() {
       }
     },
     addMessage: async function(message) {
-      state.messages.push(message)
+      state.messages.push(message);
     },
     initMessages: async function(messages) {
       state.messages = messages;
@@ -99,10 +99,12 @@ const applicationState = (function() {
       state.lastRead = lastRead;
     },
     hasMessage: async function(message) {
-      return state.messages.some((thisMessage) => { return thisMessage.id === message.id })
+      return state.messages.some((thisMessage) => {
+        return thisMessage.id === message.id;
+      });
     },
     addMessageMetadata: async function(localMessage, metaData) {
-      for(let i = 0; i< state.messages.length; i++){
+      for (let i = 0; i< state.messages.length; i++) {
         if (localMessage.id === state.messages[i].id) {
           state.messages[i].meta.data = metaData;
         }
@@ -110,14 +112,14 @@ const applicationState = (function() {
     },
     messageSent: async function(localMessage) {
       // TODO, should the server send something back to say the message has been received?
-      for(let i = 0; i< state.messages.length; i++){
+      for (let i = 0; i< state.messages.length; i++) {
         if (localMessage.id === state.messages[i].id) {
           state.messages[i].meta.sent_at = Date.now();
         }
       }
     },
     messageDelivered: async function(id) {
-      for(let i = 0; i< state.messages.length; i++){
+      for (let i = 0; i< state.messages.length; i++) {
         if (id === state.messages[i].id) {
           state.messages[i].meta.delivered_at = Date.now();
         }
@@ -125,7 +127,7 @@ const applicationState = (function() {
     },
     // TODO refactor for loops into a single method.
     messageDownloadFinished: async function(message) {
-      for(let i = 0; i< state.messages.length; i++){
+      for (let i = 0; i< state.messages.length; i++) {
         if (message.id === state.messages[i].id) {
           state.messages[i].meta.downloading_at = null;
           state.messages[i].meta.downloaded_at = Date.now();
@@ -134,7 +136,7 @@ const applicationState = (function() {
     },
     // TODO refactor for loops into a single method.
     messageDownloading: async function(message) {
-      for(let i = 0; i< state.messages.length; i++){
+      for (let i = 0; i< state.messages.length; i++) {
         if (message.id === state.messages[i].id) {
           state.messages[i].meta = state.messages[i].meta || {};
           state.messages[i].meta.downloading_at = Date.now();
@@ -142,7 +144,7 @@ const applicationState = (function() {
       }
     },
     getMessageById: async function(id) {
-      for(let i = 0; i< state.messages.length; i++){
+      for (let i = 0; i< state.messages.length; i++) {
         if (id === state.messages[i].id) {
           return state.messages[i];
         }
@@ -160,8 +162,8 @@ const applicationState = (function() {
     },
     downloads: async function() {
       return state.downloads;
-    }
-  }
+    },
+  };
 })();
 
 window.applicationState = applicationState;
@@ -206,7 +208,7 @@ const worker = (function() {
       }
     }
 
-    return {status: "ok"}
+    return {status: "ok"};
   }
 
   async function _sendMessages() {
@@ -219,22 +221,22 @@ const worker = (function() {
         return {status: "error"};
       }
     }
-    return {status: "ok"}
+    return {status: "ok"};
   }
 
-  async function _getMessages(){
-    if (needToGetMessages){
+  async function _getMessages() {
+    if (needToGetMessages) {
       needToGetMessages = false;
       const messages = await api.getMessages();
 
-      for(let i = 0; i < messages.length; i++) {
+      for (let i = 0; i < messages.length; i++) {
         const encryptedMessage = messages[i];
-        await controller.decryptMessage(encryptedMessage)
+        await controller.decryptMessage(encryptedMessage);
       }
       callbacks.newMessage();
-      return {status: "ok"}
+      return {status: "ok"};
     } else {
-      return {status: "ok"}
+      return {status: "ok"};
     }
   }
 
@@ -243,20 +245,20 @@ const worker = (function() {
       needToGetMessages = true;
       if (!initialized) {
         initialized = true;
-        _sendAndReceiveMessages(MESSAGES_TIME)
+        _sendAndReceiveMessages(MESSAGES_TIME);
       }
     },
     getMessages: async function() {
       needToGetMessages = true;
       // Messages will be handled by the worker thread, just set the flag
-    }
+    },
   };
 })();
 
-let controller = (function() {
+const controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret, initialized] = [null, null, null, null, null, false];
 
-  async function resetState(){
+  async function resetState() {
     [userId, userSessionToken, deviceId, deviceSecret, initialized] = [null, null, null, null, null, false];
   }
 
@@ -280,7 +282,7 @@ let controller = (function() {
       return;
     }
 
-    await applicationState.addMessageMetadata(localFileMessage, {encrypted, hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id})
+    await applicationState.addMessageMetadata(localFileMessage, {encrypted, hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id});
     await storage.saveMessages(deviceId, applicationState.messages());
   }
 
@@ -302,12 +304,20 @@ let controller = (function() {
     worker.getMessages();
   }
 
+  async function _userChannelCallback(resp) {
+    logger.debug("Joined user successfully", resp);
+  }
+
   async function _receiveMessagesCallback(response) {
     worker.getMessages();
   };
 
+  async function _receiveConnectionsCallback(response) {
+    callbacks.newConnection();
+  };
+
   async function _receiveMessagePackagesCallback(response) {
-    let messagePackage = response.payload.data[0]
+    const messagePackage = response.payload.data[0];
 
     _markDelivered(messagePackage.attributes.idempotency_key);
     callbacks.newMessage();
@@ -321,9 +331,9 @@ let controller = (function() {
 
     if (statusIdentity === "ok" && statusSigned === "ok" && statusPre === "ok") {
       await signal.buildSession(recipientDeviceId, identityKey, signedPreKey, preKey, myDeviceId);
-      return {status: "ok"}
+      return {status: "ok"};
     } else {
-      return {status: "error"}
+      return {status: "error"};
     }
   }
 
@@ -336,8 +346,8 @@ let controller = (function() {
     }
 
     // Send message to all of my other devices as well
-    let extraDevices = [];
-    for(let i = 0; i < myDevices.length; i++) {
+    const extraDevices = [];
+    for (let i = 0; i < myDevices.length; i++) {
       // Dont send it to this device
       if (!await utility.idsEqual(myDevices[i].id, myDeviceId)) {
         extraDevices.push(myDevices[i]);
@@ -349,8 +359,8 @@ let controller = (function() {
 
   async function _uploadFile(filename, recipientUserId) {
     logger.debug(`Sending file ${filename} to ${recipientUserId}`);
-    let basename = await fileSystem.basename(filename);
-    let localFileMessage = await signal.localFileMessage({basename, filename}, userId, recipientUserId, deviceId);
+    const basename = await fileSystem.basename(filename);
+    const localFileMessage = await signal.localFileMessage({basename, filename}, userId, recipientUserId, deviceId);
     await applicationState.addMessage(localFileMessage);
     await storage.saveMessages(deviceId, applicationState.messages());
 
@@ -359,13 +369,13 @@ let controller = (function() {
   }
 
   return {
-    init: async function(){
+    init: async function() {
       logger.debug("Init");
       await storage.init();
 
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
-      let device = await storage.loadDevice(userId);
+      const device = await storage.loadDevice(userId);
 
       logger.info("Storaged initialized");
       initialized = true;
@@ -389,12 +399,12 @@ let controller = (function() {
       const _onSocketOpen = async () => {
         logger.info("Socket open");
         api.joinChannel("login", _onLoginChannelOk, _onLoginChannelError);
-      }
+      };
 
       const _onApiChannelOk = async (resp) => {
         logger.debug("Joined api channel successfully", resp);
         // Create pre key bundle before joining device channel
-        let preKeyStatus = await api.getPreKeyStatus();
+        const preKeyStatus = await api.getPreKeyStatus();
 
         const loaded = await signal.infoLoaded();
 
@@ -424,7 +434,7 @@ let controller = (function() {
         if (preKeyStatus.attributes.need_pre_keys === true) {
           // generate and upload 100 pre keys
           const preKeys = await signal.generatePreKeys(deviceId, 100);
-          for(let i = 0; i < preKeys.length; i++) {
+          for (let i = 0; i < preKeys.length; i++) {
             const preKey = preKeys[i];
             await api.sendPreKey(preKey.publicKey, preKey.keyId, 5000);
           }
@@ -434,11 +444,12 @@ let controller = (function() {
         worker.init();
 
         await api.joinChannel("userDevice", _userDeviceChannelCallback);
+        await api.joinChannel("user", _userChannelCallback);
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
         await api.userDeviceChannelReceiveMessagePackages(_receiveMessagePackagesCallback);
+        await api.userChannelReceiveConnections(_receiveConnectionsCallback);
         logger.debug("Done with api channel");
-
-      }
+      };
       const _onLoginChannelOk = async () => {
         logger.debug("Login ok");
 
@@ -447,7 +458,7 @@ let controller = (function() {
           const name = await deviceOS.deviceName();
           const osName = await deviceOS.osName();
 
-          let device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
+          const device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
           await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
@@ -459,13 +470,13 @@ let controller = (function() {
           // Or have some kind of clean up because it is called multiple times
           await api.joinChannel("api", _onApiChannelOk);
         }
-      }
+      };
       const _onLoginChannelError = async (resp) => {
         logger.debug("Login error", resp);
         if (resp.type === "force_upgrade") {
           callbacks.forceUpgrade();
         }
-      }
+      };
       await api.connect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
     },
     inspectStore: async function() {
@@ -481,11 +492,11 @@ let controller = (function() {
       const {status, devices: combinedDevices} = await _recipientDevices(recipientUserId, senderUserId, deviceId);
 
       if (status !== "ok") {
-        return {status}
+        return {status};
       }
 
       // Send to receiver
-      for(let i = 0; i < combinedDevices.length; i++) {
+      for (let i = 0; i < combinedDevices.length; i++) {
         if (!await signal.hasSession(combinedDevices[i].id)) {
           const {status: sessionStatus} = await _buildSession(combinedDevices[i].id, deviceId);
           if (sessionStatus !== "ok") {
@@ -495,10 +506,10 @@ let controller = (function() {
       }
 
       const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
-      let encryptedMessages = [];
+      const encryptedMessages = [];
 
-      for(let i = 0; i < combinedDevices.length; i++) {
-        let encryptedMessage = await signal.encryptFileMessage(combinedDevices[i].id, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
+      for (let i = 0; i < combinedDevices.length; i++) {
+        const encryptedMessage = await signal.encryptFileMessage(combinedDevices[i].id, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
         encryptedMessages.push(encryptedMessage);
       }
 
@@ -517,11 +528,11 @@ let controller = (function() {
       const {status, devices: combinedDevices} = await _recipientDevices(recipientUserId, senderUserId, deviceId);
 
       if (status !== "ok") {
-        return {status}
+        return {status};
       }
 
       // Send to receiver
-      for(let i = 0; i < combinedDevices.length; i++) {
+      for (let i = 0; i < combinedDevices.length; i++) {
         if (!await signal.hasSession(combinedDevices[i].id)) {
           const {status: sessionStatus} = await _buildSession(combinedDevices[i].id, deviceId);
 
@@ -531,16 +542,16 @@ let controller = (function() {
         }
       }
 
-      let encryptedMessages = []
+      const encryptedMessages = [];
 
-      for(let i = 0; i < combinedDevices.length; i++) {
-        let encryptedMessage = await signal.encryptMessage(combinedDevices[i].id, localMessage.attributes.decryptedBody.data, deviceId);
+      for (let i = 0; i < combinedDevices.length; i++) {
+        const encryptedMessage = await signal.encryptMessage(combinedDevices[i].id, localMessage.attributes.decryptedBody.data, deviceId);
         encryptedMessages.push(encryptedMessage);
       }
 
-      let {status: messageStatus} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
+      const {status: messageStatus} = await api.sendEncryptedMessages(encryptedMessages, deviceId, userId, recipientUserId, localMessage.id);
 
-      if(messageStatus === "ok") {
+      if (messageStatus === "ok") {
         await applicationState.messageSent(localMessage);
         await storage.saveMessages(deviceId, applicationState.messages());
         callbacks.newMessage();
@@ -550,13 +561,13 @@ let controller = (function() {
       }
     },
     decryptMessage: async function(encryptedMessage) {
-      let senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
+      const senderDeviceId = encryptedMessage.relationships.sender_device.data.id;
 
       logger.debug(`Got a message from ${senderDeviceId}`);
 
       // Dedup messages that we already have
       if (!await applicationState.hasMessage(encryptedMessage)) {
-        let message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
+        const message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
         // Needs to happen atomically
         await applicationState.addMessage(message);
         await storage.saveMessages(deviceId, applicationState.messages());
@@ -569,7 +580,7 @@ let controller = (function() {
       const lastRead = applicationState.userLastRead(connectedUserId);
       const messages = applicationState.connectedMessages(userId, connectedUserId);
 
-      for(let i = 0; i < messages.length; i++) {
+      for (let i = 0; i < messages.length; i++) {
         const message = messages[i];
         if (message.attributes.inserted_at) {
           const insertedAt = new Date(message.attributes.inserted_at).getTime() / 1000;
@@ -584,7 +595,7 @@ let controller = (function() {
       let lastRead = applicationState.userLastRead(connectedUserId);
       const messages = applicationState.connectedMessages(userId, connectedUserId);
 
-      for(let i = 0; i < messages.length; i++) {
+      for (let i = 0; i < messages.length; i++) {
         const message = messages[i];
         if (message.attributes.inserted_at) {
           const insertedAt = new Date(message.attributes.inserted_at).getTime() / 1000;
@@ -612,11 +623,11 @@ let controller = (function() {
       }
     },
     notLoggedIn: async function() {
-      await utility.pollForCondition(() => initialized, 5000)
+      await utility.pollForCondition(() => initialized, 5000);
       return userId === null;
     },
     getUserById: async function(userId) {
-      let {status, resp} = await api.getUserById(userId, 2000);
+      const {status, resp} = await api.getUserById(userId, 2000);
       if (status === "ok") {
         await applicationState.insertUser(resp);
         return resp;
@@ -625,7 +636,7 @@ let controller = (function() {
       }
     },
     getOrganizationMembershipByUserId: async function(userId) {
-      let {status, resp} = await api.getOrganizationMembershipByUserId(userId, 2000);
+      const {status, resp} = await api.getOrganizationMembershipByUserId(userId, 2000);
       if (status === "ok") {
         return resp;
       } else {
@@ -633,7 +644,7 @@ let controller = (function() {
       }
     },
     getOrganizationById: async function(id) {
-      let {status, resp} = await api.getOrganizationById(id, 2000);
+      const {status, resp} = await api.getOrganizationById(id, 2000);
       if (status === "ok") {
         return resp;
       } else {
@@ -654,15 +665,15 @@ let controller = (function() {
         storage.saveSession(resp.payload.data[0]);
       }
 
-      return {status, resp}
+      return {status, resp};
     },
     getConnectedUsers: async function() {
-      let [connections, connectedUsers] = await api.connectedUsers(2000, userId);
-      for(let i = 0; i < connections.length; i++) {
+      const [connections, connectedUsers] = await api.connectedUsers(2000, userId);
+      for (let i = 0; i < connections.length; i++) {
         await applicationState.insertConnection(connections[i]);
       }
 
-      for(let i = 0; i < connectedUsers.length; i++) {
+      for (let i = 0; i < connectedUsers.length; i++) {
         await applicationState.insertUser(connectedUsers[i]);
         await applicationState.connectedUser(connectedUsers[i]);
       }
@@ -670,15 +681,15 @@ let controller = (function() {
       return applicationState.connectedUsers();
     },
     connectedUsersSearch: async function(searchString) {
-      let connectedUsers = await this.getConnectedUsers();
+      const connectedUsers = await this.getConnectedUsers();
       searchString = searchString.toLowerCase();
       searchString = searchString.replace(/\s+/g, "");
 
 
-      let searchResults = [];
+      const searchResults = [];
 
-      for(let i = 0; i < connectedUsers.length; i++) {
-        let user = connectedUsers[i];
+      for (let i = 0; i < connectedUsers.length; i++) {
+        const user = connectedUsers[i];
 
         if (await _searchIncludes(user.attributes.name, searchString) || await _searchIncludes(user.attributes.email, searchString)) {
           searchResults.push(user);
@@ -700,25 +711,25 @@ let controller = (function() {
       }
     },
     selectFiles: async function() {
-      let filenames = await fileSystem.multiSelectFiles();
+      const filenames = await fileSystem.multiSelectFiles();
       return filenames;
     },
     selectFile: async function() {
-      let filename = await fileSystem.selectFile();
+      const filename = await fileSystem.selectFile();
       return filename;
     },
     uploadFiles: async function(recipientUserId, filenames) {
       if (filenames === []) return;
 
       return await Promise.all(
-        filenames.map(
-          filename =>
-            _uploadFile(filename, recipientUserId)
-        )
-      )
+          filenames.map(
+              (filename) =>
+                _uploadFile(filename, recipientUserId)
+          )
+      );
     },
     // Only used by Electron
-    downloadDirectory: async function(){
+    downloadDirectory: async function() {
       const downloadDirectory = await storage.loadDownloadDirectory();
       if (!downloadDirectory) {
         const defaultDirectory = await fileSystem.defaultDownloadDirectory();
@@ -734,7 +745,7 @@ let controller = (function() {
       }
       const directory = directories[0];
       const defaultDirectory = await fileSystem.defaultDownloadDirectory();
-      if(directory === defaultDirectory) {
+      if (directory === defaultDirectory) {
         await storage.deleteDownloadDirectory();
       } else {
         await storage.saveDownloadDirectory(directory);
@@ -757,7 +768,7 @@ let controller = (function() {
       await storage.saveMessages(deviceId, applicationState.messages());
       callbacks.newDownload();
 
-      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data
+      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data;
       const fileUpload = await api.downloadFile(fileUploadId);
 
       const decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
@@ -777,11 +788,11 @@ let controller = (function() {
         // TODO throw error
       }
     },
-    sendMessage: async function(messageString, recipientUserId){
+    sendMessage: async function(messageString, recipientUserId) {
       logger.info(`Sending message ${messageString} to ${recipientUserId}`);
 
       // Save a local version to memory and storage
-      let localMessage = await signal.localMessage(messageString, userId, recipientUserId, deviceId)
+      const localMessage = await signal.localMessage(messageString, userId, recipientUserId, deviceId);
       await applicationState.addMessage(localMessage);
       await storage.saveMessages(deviceId, applicationState.messages());
 
@@ -805,7 +816,7 @@ let controller = (function() {
     getVersion: async function() {
       return window.app.getVersion();
     },
-  }
+  };
 })();
 
 export default controller;

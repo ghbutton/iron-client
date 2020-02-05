@@ -1,7 +1,7 @@
-let utility = (function() {
+const utility = (function() {
   return {
     sleep: async function(milliseconds) {
-      return new Promise(resolve => setTimeout(resolve, milliseconds))
+      return new Promise((resolve) => setTimeout(resolve, milliseconds));
     },
     pollForCondition: async function(condition, _timeout) {
       while (true) {
@@ -17,16 +17,16 @@ let utility = (function() {
     nullOrUndefined: async function(value) {
       return value === undefined || value === null;
     },
-    randomInteger: async function(){
+    randomInteger: async function() {
       return Math.floor(Math.random() * 1000000);
     },
-    addressString: async function (deviceId) {
-      return `${deviceId}`
+    addressString: async function(deviceId) {
+      return `${deviceId}`;
     },
     idsEqual: async function(id1, id2) {
-      return `${id1}` === `${id2}`
-    }
-  }
-})()
+      return `${id1}` === `${id2}`;
+    },
+  };
+})();
 
 export default utility;

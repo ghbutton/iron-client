@@ -1,12 +1,12 @@
-let view = (function() {
+const view = (function() {
   return {
     userDisplay: function(user) {
-      let name = user.attributes.name;
+      const name = user.attributes.name;
 
       if (name === null || name === "") {
         return user.attributes.email;
       } else {
-        return name
+        return name;
       }
     },
     messageDisplay: function(message) {
@@ -14,7 +14,7 @@ let view = (function() {
         return message.attributes.decryptedBody.data.basename;
       } else if (message.attributes.decryptedBody.type === "local_file_message_v1") {
         return `FILE - ${message.attributes.decryptedBody.data.basename}`;
-        } else if (message.attributes.decryptedBody.type === "local_message_v1") {
+      } else if (message.attributes.decryptedBody.type === "local_message_v1") {
         return message.attributes.decryptedBody.data;
       } else if (message.attributes.decryptedBody.type === "m") {
         return message.attributes.decryptedBody.data;
@@ -39,11 +39,11 @@ let view = (function() {
       if (timestamp === null) {
         return null;
       } else {
-        return `${timestamp.getHours().toString().padStart(2, '0')} ${timestamp.getMinutes().toString().padStart(2, '0')}`;
+        return `${timestamp.getHours().toString().padStart(2, "0")} ${timestamp.getMinutes().toString().padStart(2, "0")}`;
       }
     },
     timestampBreakDisplay: function(timestamp) {
-      return `${(timestamp.getMonth() + 1).toString().padStart(2, "0")}/${timestamp.getDate().toString().padStart(2, "0")}/${timestamp.getFullYear()}`
+      return `${(timestamp.getMonth() + 1).toString().padStart(2, "0")}/${timestamp.getDate().toString().padStart(2, "0")}/${timestamp.getFullYear()}`;
     },
     messageHasLink: function(message) {
       if (message.attributes.decryptedBody.type === "fm") {
@@ -63,7 +63,7 @@ let view = (function() {
       if (!device.attributes.os_name) {
         return "Unknown";
       } else {
-        return `${osDisplayName} - ${device.attributes.name} ${device.id === deviceId ? "(this)" : ""}`
+        return `${osDisplayName} - ${device.attributes.name} ${device.id === deviceId ? "(this)" : ""}`;
       }
     },
     currentUsersMessage: function(message, userId) {
@@ -103,7 +103,7 @@ let view = (function() {
         return null;
       }
     },
-  }
-})()
+  };
+})();
 
 export default view;

@@ -8,6 +8,23 @@ class ChatsPage extends Component {
     super(props);
     this.state = {connectedUsers: [], hasUnreadMessages: {}, userDisplay: {}, connectionsLoaded: false};
     this.handleNewMessage = this.handleNewMessage.bind(this);
+    this.refreshConnections = this.refreshConnections.bind(this);
+    this.handleNewConnection = this.handleNewConnection.bind(this);
+  }
+
+  async refreshConnections() {
+    const connectedUsers = await window.controller.getConnectedUsers();
+    const [hasUnreadMessages, userDisplay] = [{}, {}];
+    for (let i = 0; i < connectedUsers.length; i++) {
+      const user = connectedUsers[i];
+      userDisplay[user.id] = window.view.userDisplay(user);
+      hasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
+    }
+    this.setState({connectedUsers, userDisplay, hasUnreadMessages, connectionsLoaded: true});
+  }
+
+  async handleNewConnection() {
+    this.refreshConnections();
   }
 
   async handleNewMessage() {
@@ -59,21 +76,17 @@ class ChatsPage extends Component {
   async componentWillUnmount() {
     // you need to unbind the same listener that was binded.
     window.removeEventListener("new_message", this.handleNewMessage);
+    window.removeEventListener("new_connection", this.handleNewConnection);
   }
 
   async componentDidMount() {
     if (await window.controller.notLoggedIn()) {
       this.props.history.push("/login");
     } else {
-      const connectedUsers = await window.controller.getConnectedUsers();
-      const [hasUnreadMessages, userDisplay] = [{}, {}];
       window.addEventListener("new_message", this.handleNewMessage);
-      for (let i = 0; i < connectedUsers.length; i++) {
-        const user = connectedUsers[i];
-        userDisplay[user.id] = window.view.userDisplay(user);
-        hasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
-      }
-      this.setState({connectedUsers, userDisplay, hasUnreadMessages, connectionsLoaded: true});
+      window.addEventListener("new_connection", this.handleNewConnection);
+
+      this.refreshConnections();
     }
   }
 }

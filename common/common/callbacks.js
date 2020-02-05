@@ -1,10 +1,16 @@
 import logger from "./logger.js";
 
-let callbacks = (function() {
+const callbacks = (function() {
   return {
     newMessage: function() {
       const event = new CustomEvent("new_message", {});
-     logger.debug("Callback - New message event");
+      logger.debug("Callback - New message event");
+      // Dispatch the event.
+      window.dispatchEvent(event);
+    },
+    newConnection: function() {
+      const event = new CustomEvent("new_connection", {});
+      logger.debug("Callback - New connection event");
       // Dispatch the event.
       window.dispatchEvent(event);
     },
@@ -20,7 +26,7 @@ let callbacks = (function() {
       // Dispatch the event.
       window.dispatchEvent(event);
     },
-  }
-})()
+  };
+})();
 
 export default callbacks;

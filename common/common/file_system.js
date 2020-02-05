@@ -4,7 +4,7 @@ const dialog = window.dialog;
 const app = window.app;
 const shell = window.shell;
 
-let fileSystem = (function() {
+const fileSystem = (function() {
   return {
     openItem(path) {
       shell.openItem(path);
@@ -31,14 +31,14 @@ let fileSystem = (function() {
       return dialog.showOpenDialog({properties: ["openDirectory"]});
     },
     selectFile: async function() {
-      const file = await dialog.showOpenDialog({properties: ['openFile']});
+      const file = await dialog.showOpenDialog({properties: ["openFile"]});
       if (file === undefined || file.length !== 1) {
         return null;
       }
       return file[0];
     },
     multiSelectFiles: async function() {
-      const files = await dialog.showOpenDialog({properties: ['openFile', 'multiSelections']});
+      const files = await dialog.showOpenDialog({properties: ["openFile", "multiSelections"]});
       if (files === undefined) {
         return [];
       }
@@ -55,8 +55,8 @@ let fileSystem = (function() {
       if (fs.existsSync(fullPath)) {
         const {name, ext} = fs_path.parse(basename);
         for (let i = 1; i < 100; i++) {
-          const newBasename = `${name} (${i})${ext}`
-          const newFullpath = `${directory}/${newBasename}`
+          const newBasename = `${name} (${i})${ext}`;
+          const newFullpath = `${directory}/${newBasename}`;
           if (!fs.existsSync(newFullpath)) {
             return {type: "ok", path: newFullpath, basename: newBasename};
           }
@@ -65,12 +65,11 @@ let fileSystem = (function() {
       } else {
         return {type: "ok", path: `${directory}/${basename}`, basename: basename};
       }
-
     },
     downloadFinished: async function(path) {
       app.dock.downloadFinished(path);
     },
-  }
-})()
+  };
+})();
 
 export default fileSystem;
