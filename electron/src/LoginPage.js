@@ -53,7 +53,7 @@ class LoginPage extends Component {
   async componentDidMount() {
     if (!await window.controller.notLoggedIn()) {
       console.log("Redirecting to chats");
-      this.props.history.push("/");
+      this.props.history.push("/chats");
     }
   }
 }

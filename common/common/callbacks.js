@@ -26,6 +26,18 @@ const callbacks = (function() {
       // Dispatch the event.
       window.dispatchEvent(event);
     },
+    loadedNoUser: function() {
+      const event = new CustomEvent("loaded_no_user", {});
+      logger.debug("Callback - Loaded no user event");
+      // Dispatch the event.
+      window.dispatchEvent(event);
+    },
+    loadedWithUser: function() {
+      const event = new CustomEvent("loaded_with_user", {});
+      logger.debug("Callback - Loaded with user event");
+      // Dispatch the event.
+      window.dispatchEvent(event);
+    }
   };
 })();
 

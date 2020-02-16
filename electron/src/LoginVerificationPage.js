@@ -65,8 +65,14 @@ class LoginVerificationPage extends Component {
     this.setState({email: queryParams.email});
 
     if (!await window.controller.notLoggedIn()) {
-      console.log("Redirecting to chats");
-      this.props.history.push("/");
+      const currentUser = await window.controller.currentUser();
+      if (currentUser && (currentUser.attributes.name === "" || currentUser.attributes.name == null)) {
+        console.log("Redirecting update user wizard");
+        this.props.history.push("/user_edit_wizard");
+      } else {
+        console.log("Redirecting to chats");
+        this.props.history.push("/chats");
+      }
     }
   }
 }

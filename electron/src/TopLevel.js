@@ -16,7 +16,13 @@ class TopLevel extends Component {
       this.props.history.push("/force_upgrade");
     }
   }
+
   async componentDidMount() {
+    // When the top level loads, go to the loading screen
+    if (this.props.location.pathname === "/") {
+      this.props.history.push("/loading");
+    }
+
     window.addEventListener("force_upgrade", this.handleForceUpgrade);
   }
 }

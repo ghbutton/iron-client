@@ -8,7 +8,7 @@ class MenuFooter extends Component {
       <footer className="footer">
         <div className="container-fluid">
           <ul id="menu-main-nav" style={{"listStyle": "none", "margin": "2px", "padding": 0, "display": "flex", "justifyContent": "space-around"}}>
-            <li><Link to={"/"} className="btn btn-outline-primary">Chats</Link></li>
+            <li><Link to={"/chats"} className="btn btn-outline-primary">Chats</Link></li>
             <li><Link to={"/settings"} className="btn btn-outline-primary">Settings</Link></li>
           </ul>
         </div>

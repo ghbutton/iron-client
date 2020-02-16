@@ -80,14 +80,10 @@ class ChatsPage extends Component {
   }
 
   async componentDidMount() {
-    if (await window.controller.notLoggedIn()) {
-      this.props.history.push("/login");
-    } else {
-      window.addEventListener("new_message", this.handleNewMessage);
-      window.addEventListener("new_connection", this.handleNewConnection);
+    window.addEventListener("new_message", this.handleNewMessage);
+    window.addEventListener("new_connection", this.handleNewConnection);
 
-      this.refreshConnections();
-    }
+    this.refreshConnections();
   }
 }
 

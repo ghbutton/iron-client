@@ -448,6 +448,7 @@ const controller = (function() {
         await api.userDeviceChannelReceiveMessages(_receiveMessagesCallback);
         await api.userDeviceChannelReceiveMessagePackages(_receiveMessagePackagesCallback);
         await api.userChannelReceiveConnections(_receiveConnectionsCallback);
+        callbacks.loadedWithUser();
         logger.debug("Done with api channel");
       };
       const _onLoginChannelOk = async () => {
@@ -469,6 +470,8 @@ const controller = (function() {
           // This should only run once or should be idempotent
           // Or have some kind of clean up because it is called multiple times
           await api.joinChannel("api", _onApiChannelOk);
+        } else {
+          callbacks.loadedNoUser();
         }
       };
       const _onLoginChannelError = async (resp) => {
@@ -615,7 +618,7 @@ const controller = (function() {
     currentDeviceId: function() {
       return deviceId;
     },
-    currentUser: async function(message) {
+    currentUser: async function() {
       if (await this.notLoggedIn()) {
         return null;
       } else {
