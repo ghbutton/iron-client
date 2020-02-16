@@ -14,7 +14,12 @@ class LoadingPage extends Component {
   }
 
   async handleLoggedIn() {
-    this.props.history.push("/chats");
+    const currentUser = await window.controller.currentUser();
+    if (currentUser && (currentUser.attributes.name === "" || currentUser.attributes.name == null)) {
+      this.props.history.push("/user_edit_wizard");
+    } else {
+      this.props.history.push("/chats");
+    }
   }
 
   async componentDidMount() {
