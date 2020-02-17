@@ -303,7 +303,7 @@ class MessagesPage extends Component {
         <div className="clickable-background" onClick={this.clickBackground}></div>
         <div className="sticky-header color1">
           <div className="header-line-1">
-            <Link className="btn btn-outline-primary" to={"/"}>{"< Back"}</Link>
+            <Link className="btn btn-outline-primary" to={"/chats"}>{"< Back"}</Link>
             {downloadDropdown}
           </div>
           { connectedUser === null ? null : (

@@ -51,7 +51,7 @@ class ChatsPage extends Component {
           <hr/>
           { (connectionsLoaded && connectedUsers.length === 0) ?
               <div>
-                No chats. Please add some<Link to="/new_chat" className="btn btn-link">contacts</Link>😀!
+                No chats. Please add some<Link to="/new_contact" className="btn btn-link">contacts</Link>😀!
               </div>
               :
           <div className="list-group">

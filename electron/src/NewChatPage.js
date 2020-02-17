@@ -23,7 +23,7 @@ class NewChatPage extends Component {
   render() {
     return (
       <div className="newChatPage container">
-        <Link className="btn btn-outline-primary" to={"/"}>{"< Back"}</Link>
+        <Link className="btn btn-outline-primary" to={"/chats"}>{"< Back"}</Link>
         <h1>New Chat</h1>
 
         <div>
