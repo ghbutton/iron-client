@@ -271,9 +271,8 @@ const controller = (function() {
   async function _uploadFileContent(localFileMessage) {
     const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
 
-    const bytes = await fileSystem.readBytes(filename);
-    const {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(bytes);
-
+    const data64 = await fileSystem.readBase64(filename);
+    const {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(data64);
 
     const fileUpload = await api.uploadFile({encrypted, deviceId});
 
@@ -324,7 +323,7 @@ const controller = (function() {
   };
 
   async function _buildSession(recipientDeviceId, myDeviceId) {
-    console.log(`No session for device id ${recipientDeviceId}`);
+    logger.info(`No session for device id ${recipientDeviceId}`);
     const {status: statusIdentity, identityKey} = await api.getIdentityKey(recipientDeviceId);
     const {status: statusSigned, signedPreKey} = await api.getSignedPreKey(recipientDeviceId);
     const {status: statusPre, preKey} = await api.getPreKey(recipientDeviceId);
@@ -405,7 +404,6 @@ const controller = (function() {
         logger.debug("Joined api channel successfully", resp);
         // Create pre key bundle before joining device channel
         const preKeyStatus = await api.getPreKeyStatus();
-
         const loaded = await signal.infoLoaded();
 
         if (!loaded) {
@@ -418,6 +416,7 @@ const controller = (function() {
         // TODO
         // Needs to be successful before sending messages...
         if (preKeyStatus.attributes.need_identity_key === true) {
+          // TODO make idempotent, dont generate a bunch of keys and throw an error
           const publicKey = await signal.getIdentityPublicKey();
           const registrationId = await signal.getRegistrationId();
 
@@ -427,12 +426,14 @@ const controller = (function() {
 
         if (preKeyStatus.attributes.need_signed_pre_key === true) {
           // generate and upload signed pre key
+          // TODO make idempotent, dont generate a bunch of keys and throw an error
           const {keyId, signature, publicKey} = await signal.generateSignedPreKey(deviceId);
           await api.sendSignedPreKey(publicKey, keyId, signature, 5000);
         }
 
         if (preKeyStatus.attributes.need_pre_keys === true) {
           // generate and upload 100 pre keys
+          // TODO make idempotent, dont generate a bunch of keys and throw an error
           const preKeys = await signal.generatePreKeys(deviceId, 100);
           for (let i = 0; i < preKeys.length; i++) {
             const preKey = preKeys[i];
@@ -666,6 +667,7 @@ const controller = (function() {
 
       if (status === "ok" && resp.payload) {
         storage.saveSession(resp.payload.data[0]);
+        callbacks.loggedIn();
       }
 
       return {status, resp};
@@ -774,13 +776,13 @@ const controller = (function() {
       const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data;
       const fileUpload = await api.downloadFile(fileUploadId);
 
-      const decrypted = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
+      const decrypted64 = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
       const directory = await this.downloadDirectory();
       const {type, path, basename: newBasename} = await fileSystem.fileDownloadPath(directory, basename);
 
 
       if (type === "ok") {
-        await fileSystem.writeBytes(path, decrypted);
+        await fileSystem.writeBase64(path, decrypted64);
         await applicationState.messageDownloadFinished(message);
         await storage.saveMessages(deviceId, applicationState.messages());
         await applicationState.addDownload(path, message, newBasename);

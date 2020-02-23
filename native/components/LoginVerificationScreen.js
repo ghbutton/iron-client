@@ -1,7 +1,7 @@
 import React, {Component, useEffect} from 'react';
 import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
-export default function LoginVerificationScreen(props) {
+export default function LoginVerificationScreen({navigation, route}) {
   const [email, setEmail] = React.useState("");
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState("");
@@ -15,14 +15,13 @@ export default function LoginVerificationScreen(props) {
 
     if (status === "ok") {
       console.log("Logging in");
-      props.navigation.navigate('ChatsScreen')
     } else {
       setError(resp.message);
     }
   }
 
   useEffect(() => {
-    const navEmail = props.navigation.getParam("email", "");
+    const navEmail = route.params.email;
     setEmail(navEmail);
   }, []);
 

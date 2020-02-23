@@ -1,7 +1,7 @@
 import React, {Component, useEffect} from 'react';
 import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
-export default function LoginScreen(props) {
+export default function LoginScreen({navigation}) {
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
   const handleEmailChange = (newEmail) => {
@@ -11,13 +11,11 @@ export default function LoginScreen(props) {
   const handleSubmit = async () => {
     const {status, resp} = await window.controller.sendVerificationCode(email);
     if (status === "ok") {
-      props.navigation.navigate('LoginVerificationScreen', {email: email})
+      navigation.navigate('LoginVerificationScreen', {email: email})
     } else {
       setError(resp.message)
     }
   }
-
-  useEffect(() => console.log(props), []);
 
   return (
     <View style={styles.container}>

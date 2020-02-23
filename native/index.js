@@ -3,10 +3,10 @@
  * @lint-ignore-every XPLATJSCOPYRIGHT1
  */
 
+import 'react-native-gesture-handler';
 import {AppRegistry} from 'react-native';
 import {name as appName} from './app.json';
 import App from './App';
-import LoginScreen from './components/LoginScreen.js';
 import controller from './common/controller.js';
 import view from './common/view.js';
 

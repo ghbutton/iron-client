@@ -94,6 +94,7 @@ export default (function() {
     loadDeviceInfoFromDisk: async function(deviceId) {
       logger.info("Loading signal device info from disk");
       const deviceInfo = await storage.loadSignalInfo(deviceId);
+      console.log(deviceInfo);
       if (deviceInfo === null) {
         return false;
       } else {

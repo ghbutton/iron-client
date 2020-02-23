@@ -17,23 +17,19 @@ export default function ChatsScreen(props) {
 
   useEffect(() => {
     async function checkUser() {
-      if (await window.controller.notLoggedIn()) {
-        props.navigation.navigate('LoginScreen')
-      } else {
-        const newConnectedUsers = await window.controller.getConnectedUsers();
-        const [newHasUnreadMessages, newUserDisplay] = [{}, {}];
-        // AppState.addEventListener("new_message", handleNewMessage);
-        for (let i = 0; i < newConnectedUsers.length; i++) {
-          const user = newConnectedUsers[i];
-          newUserDisplay[user.id] = window.view.userDisplay(user);
-          newHasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
-        }
-
-        setUserDisplay(newUserDisplay);
-        setConnectedUsers(newConnectedUsers);
-        setHasUnreadMessages(newHasUnreadMessages);
-        setConnectionsLoaded(true);
+      const newConnectedUsers = await window.controller.getConnectedUsers();
+      const [newHasUnreadMessages, newUserDisplay] = [{}, {}];
+      // AppState.addEventListener("new_message", handleNewMessage);
+      for (let i = 0; i < newConnectedUsers.length; i++) {
+        const user = newConnectedUsers[i];
+        newUserDisplay[user.id] = window.view.userDisplay(user);
+        newHasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
       }
+
+      setUserDisplay(newUserDisplay);
+      setConnectedUsers(newConnectedUsers);
+      setHasUnreadMessages(newHasUnreadMessages);
+      setConnectionsLoaded(true);
     }
     checkUser();
 

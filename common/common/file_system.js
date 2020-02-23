@@ -12,14 +12,11 @@ const fileSystem = (function() {
     openExternal(webpage) {
       shell.openExternal(webpage);
     },
-    readBytes: async function(path) {
-      return fs.readFileSync(path, {encoding: "binary"});
-    },
     readBase64: async function(path) {
       return fs.readFileSync(path, {encoding: "base64"});
     },
-    writeBytes: async function(path, bytes) {
-      return fs.writeFileSync(path, bytes, {encoding: "binary"});
+    writeBase64: async function(path, bytes) {
+      return fs.writeFileSync(path, bytes, {encoding: "base64"});
     },
     basename: async function(path) {
       return fs_path.basename(path);

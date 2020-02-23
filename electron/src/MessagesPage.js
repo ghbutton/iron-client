@@ -274,7 +274,7 @@ class MessagesPage extends Component {
 
     const downloadDropdown = (downloads.length > 0 &&
       <Dropdown>
-        <Dropdown.Toggle className="btn btn-outline-primary download-button">
+        <Dropdown.Toggle className="download-button">
           <span role="img" aria-label="arrow">⇩</span>
         </Dropdown.Toggle>
 

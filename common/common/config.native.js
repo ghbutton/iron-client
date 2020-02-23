@@ -1,5 +1,5 @@
 const isDev = __DEV__;
-const API_VERSION = 4;
+const API_VERSION = 5;
 
 let config = (function() {
   return {

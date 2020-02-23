@@ -5,7 +5,7 @@ import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacit
 // PLING.src = "./static/sounds/pling.wav";
 // PLING.volume = 0.75;
 
-export default function MessagesScreen(props) {
+export default function MessagesScreen({navigation, route}) {
   const [connectedUser, setConnectedUser] = React.useState(null);
   const [connectedUserId, setConnectedUserId] = React.useState(null);
   const [messageString, setMessageString] = React.useState("");
@@ -27,7 +27,7 @@ export default function MessagesScreen(props) {
   }
 
   const init = async () => {
-    const newConnectedUserId = props.navigation.getParam("userId", null);
+    const newConnectedUserId = route.params.userId;
     setConnectedUserId(newConnectedUserId);
 
     const newUserMessages = await window.controller.getMessages(newConnectedUserId);

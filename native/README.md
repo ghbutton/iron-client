@@ -3,8 +3,12 @@
 # Install ios
 $ cd ios
 $ git clone git@github.com:christophhagen/libsignal-protocol-swift.git
+$ cd ..
 
 # Running iOS
 $ yarn start
-# use xcode to launch
+$ cd ios
+$ pod install
+$ cd ..
+## use xcode to launch
 
