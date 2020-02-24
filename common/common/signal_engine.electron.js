@@ -32,12 +32,18 @@ const engine = (function() {
     return base64data;
   }
 
-
   async function _sTo64(string) {
     const buff = new Buffer(string, "binary");
     const base64data = buff.toString("base64");
     return base64data;
   }
+
+  async function _deprecated64ToB(string) {
+    const buff = new Buffer(string, "base64");
+    const ascii = buff.toString();
+    return window.util.toArrayBuffer(ascii);
+  }
+
 
   return {
     encryptMessage: async function(toDeviceId, messagePayload) {
@@ -224,18 +230,19 @@ const engine = (function() {
       return sDecrypted;
     },
     loadFromDisk: async function(payload) {
+      let __64ToB = _64ToB;
+
       // HACK for invalid key store
       const buff = new Buffer(payload.idPubKey, "base64");
-
       if (buff.length > 33) {
+        __64ToB = _deprecated64ToB;
       }
-      console.log();
 
       store = new window.SignalProtocolStore();
       store.put("currentSignedKeyId", payload.currentSignedKeyId);
       store.put("currentPreKeyId", payload.currentPreKeyId);
       store.put("registrationId", payload.registrationId);
-      store.put("identityKey", {pubKey: await _64ToB(payload.idPubKey), privKey: await _64ToB(payload.idPrivKey)});
+      store.put("identityKey", {pubKey: await __64ToB(payload.idPubKey), privKey: await __64ToB(payload.idPrivKey)});
 
       // restore the saved sessions
       for (const key of Object.keys(payload.sessions)) {
@@ -244,16 +251,16 @@ const engine = (function() {
 
       // restore the identity keys
       for (const key of Object.keys(payload.identityKeys)) {
-        store.put(key, await _64ToB(payload.identityKeys[key]));
+        store.put(key, await __64ToB(payload.identityKeys[key]));
       }
 
       for (const key of Object.keys(payload.signedKeys)) {
-        const value = {pubKey: await _64ToB(payload.signedKeys[key].pubKey), privKey: await _64ToB(payload.signedKeys[key].privKey)}
+        const value = {pubKey: await __64ToB(payload.signedKeys[key].pubKey), privKey: await __64ToB(payload.signedKeys[key].privKey)}
         store.put(key, value);
       }
 
       for (const key of Object.keys(payload.preKeys)) {
-        const value = {pubKey: await _64ToB(payload.preKeys[key].pubKey), privKey: await _64ToB(payload.preKeys[key].privKey)}
+        const value = {pubKey: await __64ToB(payload.preKeys[key].pubKey), privKey: await __64ToB(payload.preKeys[key].privKey)}
         store.put(key, value);
       }
     }
