@@ -1,5 +1,7 @@
-import React, {Component, useEffect} from 'react';
-import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, {Component, useEffect} from "react";
+import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {NativeEventEmitter, NativeModules} from "react-native";
+const {EventManager} = NativeModules;
 
 // const PLING = new Audio();
 // PLING.src = "./static/sounds/pling.wav";
@@ -7,7 +9,6 @@ import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacit
 
 export default function MessagesScreen({navigation, route}) {
   const [connectedUser, setConnectedUser] = React.useState(null);
-  const [connectedUserId, setConnectedUserId] = React.useState(null);
   const [messageString, setMessageString] = React.useState("");
   const [userMessages, setUserMessages] = React.useState([]);
   const [downloads, setDownloads] = React.useState([]);
@@ -15,22 +16,27 @@ export default function MessagesScreen({navigation, route}) {
   const [userId, setUserId] = React.useState(null);
   const [deviceId, setDeviceId] = React.useState(null);
 
+  const connectedUserIdRef = React.useRef(null);
+
   const handleMessageChange = (newMessage) => {
     setMessageString(newMessage);
-  }
+  };
 
   const handleSubmit = async () => {
     if (messageString !== "") {
-      await window.controller.sendMessage(messageString, connectedUserId);
+      await window.controller.sendMessage(messageString, connectedUserIdRef.current);
       setMessageString("");
     }
-  }
+  };
+
+  const handleNewMessage = async () => {
+    const newUserMessages = await window.controller.getMessages(connectedUserIdRef.current);
+
+    setUserMessages(newUserMessages);
+  };
 
   const init = async () => {
-    const newConnectedUserId = route.params.userId;
-    setConnectedUserId(newConnectedUserId);
-
-    const newUserMessages = await window.controller.getMessages(newConnectedUserId);
+    const newUserMessages = await window.controller.getMessages(connectedUserIdRef.current);
     const newDownloads = await window.controller.getDownloads();
     const newUserId = window.controller.currentUserId();
     const newDeviceId = window.controller.currentDeviceId();
@@ -40,29 +46,36 @@ export default function MessagesScreen({navigation, route}) {
     setUserMessages(newUserMessages);
     setDownloads(newDownloads);
     setDeviceId(newDeviceId);
-    window.controller.setLastRead(newConnectedUserId);
-
-    //    window.addEventListener("new_message", this.handleNewMessage);
-    //    window.addEventListener("new_download", this.handleNewDownload);
+    window.controller.setLastRead(connectedUserIdRef.current);
 
     // Api call, slow
-    const newConnectedUser = await window.controller.getUserById(newConnectedUserId);
+    const newConnectedUser = await window.controller.getUserById(connectedUserIdRef.current);
     if (newConnectedUser) {
       setConnectedUser(newConnectedUser);
     }
-  }
+  };
 
   useEffect(() => {
+    connectedUserIdRef.current = route.params.userId;
+
     init();
+
+    // TODO use a constants file for the callback names
+    const eventEmitter = new NativeEventEmitter(EventManager);
+    const listenerNewMessage = eventEmitter.addListener("new_message", handleNewMessage);
+
+    return function cleanup() {
+      listenerNewMessage.remove();
+    };
   }, []);
 
-    let date = null;
-    let lastMessageFromMe = true;
-    const messages = userMessages.map((message, index) => {
+  let date = null;
+  let lastMessageFromMe = true;
+  const messages = userMessages.map((message, index) => {
     let body = null;
 
     if (window.view.messageHasLink(message)) {
-      body = <Text style={styles.saveButtonText}>Download - {window.view.messageDisplay(message)}</Text>
+      body = <Text style={styles.saveButtonText}>Download - {window.view.messageDisplay(message)}</Text>;
     } else {
       body = window.view.messageDisplay(message);
     }
@@ -88,9 +101,10 @@ export default function MessagesScreen({navigation, route}) {
     }
 
     // TODO handle unsent file error
+    const style = fromMe ? {alignSelf: 'flex-end'} : {}
 
     return (
-      <Text key={message.id}>{body}</Text>
+      <Text key={message.id} style={style}>{body}</Text>
     );
   });
 
@@ -99,9 +113,9 @@ export default function MessagesScreen({navigation, route}) {
       <Text style={styles.header}>{connectedUser === null ? "" : `${window.view.userDisplay(connectedUser)}`}</Text>
 
       <View>
-      {messages}
-    </View>
-    <TextInput
+        {messages}
+      </View>
+      <TextInput
         style={styles.textInput}
         placeholder="Message"
         maxLength={50}
@@ -120,40 +134,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 45,
-    backgroundColor: '#F5FCFF',
+    backgroundColor: "#F5FCFF",
   },
   header: {
     fontSize: 25,
-    textAlign: 'center',
+    textAlign: "center",
     margin: 10,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   inputContainer: {
-    paddingTop: 15
+    paddingTop: 15,
   },
   textInput: {
-    borderColor: '#CCCCCC',
+    borderColor: "#CCCCCC",
     borderTopWidth: 1,
     borderBottomWidth: 1,
     height: 50,
     fontSize: 25,
     paddingLeft: 20,
-    paddingRight: 20
+    paddingRight: 20,
   },
   saveButton: {
     borderWidth: 1,
-    borderColor: '#007BFF',
-    backgroundColor: '#007BFF',
+    borderColor: "#007BFF",
+    backgroundColor: "#007BFF",
     padding: 15,
-    margin: 5
+    margin: 5,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 20,
-    textAlign: 'center'
+    textAlign: "center",
   },
   rootError: {
-    color: 'red',
+    color: "red",
     fontSize: 20,
   },
 });

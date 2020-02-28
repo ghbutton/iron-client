@@ -71,7 +71,7 @@ export default (function() {
       if (deviceId === senderDeviceId) {
         throw new Error("We should never send a message the same device");
       }
-      const message = await engine.decryptMessage(deviceId, senderDeviceId, encryptedMessage)
+      const message = await engine.decryptMessage(senderDeviceId, encryptedMessage)
       delete encryptedMessage.attributes.body;
 
       encryptedMessage.attributes.decryptedBody = message;

@@ -1,5 +1,5 @@
-import React, {Component, useEffect} from 'react';
-import {AppState, Button, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, {Component, useEffect} from "react";
+import {AppState, Button, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 
 export default function ChatsScreen(props) {
   const [connectedUsers, setConnectedUsers] = React.useState([]);
@@ -9,11 +9,11 @@ export default function ChatsScreen(props) {
 
   const handleNewMessage = () => {
     console.log("NEW MESSAGE");
-  }
+  };
 
   const handleConnectedUserPress = (userId) => {
-    props.navigation.navigate('MessagesScreen', {userId: userId})
-  }
+    props.navigation.navigate("MessagesScreen", {userId: userId});
+  };
 
   useEffect(() => {
     async function checkUser() {
@@ -36,15 +36,14 @@ export default function ChatsScreen(props) {
     return function cleanup() {
       // you need to unbind the same listener that was binded.
       //      AppState.removeEventListener("new_message", handleNewMessage);
-    }
+    };
   }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Chats</Text>
-        { (connectionsLoaded && connectedUsers.length === 0) ?
-        <Text>No chats.</Text>
-            :
+      { (connectionsLoaded && connectedUsers.length === 0) ?
+        <Text>No chats.</Text> :
             <FlatList
               data={connectedUsers}
               renderItem={ ({item: user}) =>
@@ -53,7 +52,7 @@ export default function ChatsScreen(props) {
                 </TouchableOpacity>
               }
             />
-        }
+      }
     </View>
   );
 }
@@ -62,40 +61,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 45,
-    backgroundColor: '#F5FCFF',
+    backgroundColor: "#F5FCFF",
   },
   header: {
     fontSize: 25,
-    textAlign: 'center',
+    textAlign: "center",
     margin: 10,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   inputContainer: {
-    paddingTop: 15
+    paddingTop: 15,
   },
   textInput: {
-    borderColor: '#CCCCCC',
+    borderColor: "#CCCCCC",
     borderTopWidth: 1,
     borderBottomWidth: 1,
     height: 50,
     fontSize: 25,
     paddingLeft: 20,
-    paddingRight: 20
+    paddingRight: 20,
   },
   saveButton: {
     borderWidth: 1,
-    borderColor: '#007BFF',
-    backgroundColor: '#007BFF',
+    borderColor: "#007BFF",
+    backgroundColor: "#007BFF",
     padding: 15,
-    margin: 5
+    margin: 5,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 20,
-    textAlign: 'center'
+    textAlign: "center",
   },
   rootError: {
-    color: 'red',
+    color: "red",
     fontSize: 20,
   },
 });

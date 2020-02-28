@@ -163,6 +163,9 @@ const applicationState = (function() {
     downloads: async function() {
       return state.downloads;
     },
+    inspectState: async function() {
+      return state;
+    }
   };
 })();
 
@@ -483,8 +486,13 @@ const controller = (function() {
       };
       await api.connect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
     },
-    inspectStore: async function() {
+    inspectSignalStore: async function() {
+      // Debugging only
       return signal.inspectStore();
+    },
+    inspectApplicationState: async function() {
+      // Debugging only
+      return applicationState.inspectState();
     },
     getMessages: async function(connectedUserId) {
       return applicationState.connectedMessages(userId, connectedUserId);

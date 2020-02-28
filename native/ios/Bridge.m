@@ -26,13 +26,16 @@ RCT_EXTERN_METHOD(
                   )
 
 RCT_EXTERN_METHOD(
-                  decryptPayload: (NSString *)payload
+                  decryptMessage: (NSInteger)senderDeviceId
+                  payload: (NSString *)payload
+                  type: (NSInteger)type
                   resolver: (RCTPromiseResolveBlock)resolve
                   rejecter: (RCTPromiseRejectBlock)reject
                   )
 
 RCT_EXTERN_METHOD(
                   encryptPayload: (NSString *)payload
+                  deviceId: (NSInteger)deviceId
                   resolver: (RCTPromiseResolveBlock)resolve
                   rejecter: (RCTPromiseRejectBlock)reject
                   )

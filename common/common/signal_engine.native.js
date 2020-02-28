@@ -66,47 +66,22 @@ const engine = (function() {
 
   return {
     encryptMessage: async function(toDeviceId, messagePayload) {
-      const addressString = await _addressString(toDeviceId);
-      const address = new libsignal.SignalProtocolAddress(addressString, toDeviceId);
-      // Encode using UTF8
-      const buffer = await _sToUtf8(messagePayload);
-      const sessionCipher = new libsignal.SessionCipher(store, address);
-      const message = await sessionCipher.encrypt(buffer);
-
-      // Change body to base64
-      message.body = await _sTo64(message.body);
-
-      return message;
+      const response = JSON.parse(await NativeModules.Bridge.encryptPayload(messagePayload, Number(toDeviceId)));
+      return response;
     },
     getState: async function(deviceId) {
       const state = await NativeModules.Bridge.getState();
       return state;
     },
 
-    decryptMessage: async function(deviceId, senderDeviceId, encryptedMessage) {
-      const addressString = await utility.addressString(senderDeviceId);
-      const address = new libsignal.SignalProtocolAddress(addressString, senderDeviceId);
-      const sessionCipher = new libsignal.SessionCipher(store, address);
-
-      let message = null;
-
-      logger.debug(`Encrypted message body ${encryptedMessage.attributes.body}`);
-
-      // Change body from base64 to binary
-      encryptedMessage.attributes.body = await _64ToS(encryptedMessage.attributes.body);
-      if (encryptedMessage.attributes.type === 3) {
-        message = await sessionCipher.decryptPreKeyWhisperMessage(encryptedMessage.attributes.body, "binary");
-      } else {
-        message = await sessionCipher.decryptWhisperMessage(encryptedMessage.attributes.body, "binary");
-      }
-
-      // Decode using UTF8
-      message = JSON.parse(await _utf8ToS(message));
-      return message;
+    decryptMessage: async function(senderDeviceId, encryptedMessage) {
+      const message = await NativeModules.Bridge.decryptMessage(Number(senderDeviceId), encryptedMessage.attributes.body, encryptedMessage.attributes.type);
+      const decrypted = JSON.parse(await _64ToS(message));
+      return decrypted;
     },
     store: async function() {
       const state = await NativeModules.Bridge.getState();
-      return state;
+      return JSON.parse(state);
     },
     loaded: async function() {
       return store !== null;
@@ -131,9 +106,13 @@ const engine = (function() {
         };
       }
 
-      console.log(attributes);
+      const result = await NativeModules.Bridge.processPreKeyBundle(Number(deviceId), JSON.stringify(attributes));
 
-      await NativeModules.Bridge.processPreKeyBundle(Number(deviceId), JSON.stringify(attributes));
+      if (result === true) {
+        return {status: "ok"}
+      } else {
+        return {status: "error"}
+      }
     },
     generateDeviceInfo: async function() {
       // identity key and registration id

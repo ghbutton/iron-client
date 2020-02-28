@@ -1,5 +1,5 @@
-import React, {Component, useEffect} from 'react';
-import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, {Component, useEffect} from "react";
+import {Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 
 export default function LoginVerificationScreen({navigation, route}) {
   const [email, setEmail] = React.useState("");
@@ -8,7 +8,7 @@ export default function LoginVerificationScreen({navigation, route}) {
 
   const handleCodeChange = (newCode) => {
     setCode(newCode);
-  }
+  };
 
   const handleSubmit = async () => {
     const {status, resp} = await window.controller.login(email, code);
@@ -18,7 +18,7 @@ export default function LoginVerificationScreen({navigation, route}) {
     } else {
       setError(resp.message);
     }
-  }
+  };
 
   useEffect(() => {
     const navEmail = route.params.email;
@@ -58,40 +58,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 45,
-    backgroundColor: '#F5FCFF',
+    backgroundColor: "#F5FCFF",
   },
   header: {
     fontSize: 25,
-    textAlign: 'center',
+    textAlign: "center",
     margin: 10,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   inputContainer: {
-    paddingTop: 15
+    paddingTop: 15,
   },
   textInput: {
-    borderColor: '#CCCCCC',
+    borderColor: "#CCCCCC",
     borderTopWidth: 1,
     borderBottomWidth: 1,
     height: 50,
     fontSize: 25,
     paddingLeft: 20,
-    paddingRight: 20
+    paddingRight: 20,
   },
   saveButton: {
     borderWidth: 1,
-    borderColor: '#007BFF',
-    backgroundColor: '#007BFF',
+    borderColor: "#007BFF",
+    backgroundColor: "#007BFF",
     padding: 15,
-    margin: 5
+    margin: 5,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 20,
-    textAlign: 'center'
+    textAlign: "center",
   },
   rootError: {
-    color: 'red',
+    color: "red",
     fontSize: 20,
   },
 });

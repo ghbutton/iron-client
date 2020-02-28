@@ -120,7 +120,7 @@ const engine = (function() {
       return keys;
     },
 
-    decryptMessage: async function(deviceId, senderDeviceId, encryptedMessage) {
+    decryptMessage: async function(senderDeviceId, encryptedMessage) {
       const addressString = await utility.addressString(senderDeviceId);
       const address = new libsignal.SignalProtocolAddress(addressString, senderDeviceId);
       const sessionCipher = new libsignal.SessionCipher(store, address);
