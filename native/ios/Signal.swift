@@ -331,7 +331,7 @@ class Bridge: NSObject {
     let publicKey = Data(base64Encoded: package.payload.identityKey.publicKey)!
 
     let identityStore = (_store!.identityKeyStore as! TestIdentityStore)
-    identityStore.identity = KeyPair(publicKey: publicKey, privateKey: privateKey)
+    identityStore.identity = KeyPair.init(publicKey: publicKey, privateKey: privateKey)
     (_store!.identityKeyStore as! TestIdentityStore).registrationId = UInt32(package.payload.registrationId)
 
     let signedPreKeyStore = (_store!.signedPreKeyStore as! TestSignedPrekeyStore)
