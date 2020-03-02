@@ -9,5 +9,5 @@ $ cd ..
 
 # Running iOS
 $ yarn start
-$ #use xcode to launch
+$ #use xcode to launch, add SignalProtocol framework to project
 
