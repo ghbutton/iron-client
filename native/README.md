@@ -1,14 +1,13 @@
-# WIP not functional
+# iOS is WIP
 
 # Install ios
+$ yarn install
 $ cd ios
-$ git clone git@github.com:christophhagen/libsignal-protocol-swift.git
+$ pod install
+$ git clone git@github.com:ghbutton/libsignal-protocol-swift.git
 $ cd ..
 
 # Running iOS
 $ yarn start
-$ cd ios
-$ pod install
-$ cd ..
-## use xcode to launch
+$ #use xcode to launch
 
