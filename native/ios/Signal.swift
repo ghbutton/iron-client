@@ -123,7 +123,11 @@ class Bridge: NSObject {
     let signedKeyStore = (_store!.signedPreKeyStore as! TestSignedPrekeyStore)
     let signedKeys64 = signedKeyStore.keys.map{ key in SignedPreKey(data: key.value.base64EncodedString(), id: key.key)}
     let sessionStore = (_store!.sessionStore as! TestSessionStore)
-    let sessions = sessionStore.sessions.keys.map{ key in BridgeSession(deviceId: key.deviceId, name: key.name, data: sessionStore.sessions[key]!.base64EncodedString(), record: sessionStore.records[key]?.base64EncodedString()) }
+    let sessions = sessionStore.sessions.keys.map{ key in
+      BridgeSession(deviceId: key.deviceId, name: key.name, data: sessionStore.sessions[key]!.base64EncodedString(), record: sessionStore.records[key]?.base64EncodedString())
+      
+    }
+  
 
     let package = Package(version: 1, payload: StoreData(preKeys: preKeyStrings64, identityKey: IdentityKey(publicKey: publicKey64, privateKey: privateKey64), registrationId: _registrationId, currentSignedPreKey: signedKeyStore.currentKeyId, currentPreKey: preKeyStore.currentKeyId, signedPreKeys: signedKeys64, sessions: sessions))
     let jsonData = try! JSONEncoder().encode(package)
@@ -226,7 +230,8 @@ class Bridge: NSObject {
     let preKeyBundle = try! JSONDecoder().decode(BridgePreKeyBundle.self, from: payload.data(using: .utf8)!)
     let deviceId = Int(deviceId)
     let name = addressName(deviceId)
-    let address = SignalAddress(name: name, deviceId: Int32(deviceId))
+    let address = SignalAddress.init(name: name, deviceId: Int32(deviceId))
+    
     let preKeyId = preKeyBundle.preKey?.keyId ?? 0
 
     let retrievedBundle = SessionPreKeyBundle(registrationId: preKeyBundle.registrationId, deviceId: Int32(deviceId), preKeyId: preKeyId, preKey: Data(base64Encoded: preKeyBundle.preKey!.publicKey)!, signedPreKeyId: preKeyBundle.signedPreKey.keyId, signedPreKey: Data(base64Encoded: preKeyBundle.signedPreKey.publicKey)!, signature: Data(base64Encoded: preKeyBundle.signedPreKey.signature)!, identityKey: Data(base64Encoded: preKeyBundle.identityKey.publicKey)!)
@@ -247,7 +252,7 @@ class Bridge: NSObject {
     print("DECRYPT PAYLOAD")
 
     let name = addressName(senderDeviceId)
-    let remoteAddress = SignalAddress(name: name, deviceId: Int32(senderDeviceId))
+    let remoteAddress = SignalAddress.init(name: name, deviceId: Int32(senderDeviceId))
     let ownSessionCipher = SessionCipher(for: remoteAddress, in: _store!)
 
 
@@ -270,7 +275,7 @@ class Bridge: NSObject {
     ) -> Void {
     print("HAS SESSION")
     let name = addressName(deviceId)
-    let address = SignalAddress(name: name, deviceId: Int32(deviceId))
+    let address = SignalAddress.init(name: name, deviceId: Int32(deviceId))
     let sessionStore = (_store!.sessionStore as! TestSessionStore)
     resolver(sessionStore.containsSession(for: address))
   }
@@ -286,7 +291,7 @@ class Bridge: NSObject {
 
     let deviceId = Int32(deviceId)
     let name = addressName(Int(deviceId))
-    let address = SignalAddress(name: name, deviceId: deviceId)
+    let address = SignalAddress.init(name: name, deviceId: deviceId)
 
     /* Create the session cipher and encrypt the message */
     let cipher = SessionCipher(for: address, in: _store!)
@@ -297,8 +302,7 @@ class Bridge: NSObject {
       type = 3;
     }
     let message = EncryptedMessage(body: encryptedMessage.message.base64EncodedString(), type: type)
-//    }
-//    let group = EncryptedMessageGroup(messages: messages)
+
     let jsonData = try! JSONEncoder().encode(message)
     let jsonString = String(data: jsonData, encoding: .utf8)!
     resolver(jsonString)

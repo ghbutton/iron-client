@@ -19,20 +19,10 @@ const engine = (function() {
     return new TextEncoder("utf-8").encode(string);
   }
 
-  async function _addressToSessionKey(addressString, deviceId) {
-    // Function of the store library
-    return `session${addressString}.${deviceId}`;
-  }
-
-
   async function _64ToS(base64) {
     const buff = new Buffer(base64, "base64");
     const string = buff.toString();
     return string;
-  }
-
-  async function _addressString(deviceId) {
-    return `${deviceId}`;
   }
 
   // TODO remove if unused
