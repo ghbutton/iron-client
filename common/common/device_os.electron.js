@@ -17,7 +17,7 @@ const deviceOS = (function() {
         resolve(stdout? stdout : stderr);
       });
     });
-  };
+  }
 
   return {
     deviceName: async function() {

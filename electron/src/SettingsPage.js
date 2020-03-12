@@ -18,7 +18,7 @@ class SettingsPage extends Component {
     if (window.confirm("Are you sure you want to wipe all data from this device?")) {
       await window.controller.clearData();
       // TODO have a central place for routes;
-      this.props.history.push("/login");
+      this.props.history.push("/loading");
     }
   }
 

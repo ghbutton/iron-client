@@ -26,8 +26,9 @@ class LoginVerificationPage extends Component {
 
     if (status === "ok") {
       this.setState({verification: ""});
-      console.log("Reloading page");
-      window.location.reload();
+      console.log("Resetting page");
+      this.props.history.push({pathname: "/loading"});
+      await window.controller.reset();
     } else {
       this.setState({errorMessage: resp.message});
     }

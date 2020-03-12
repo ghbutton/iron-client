@@ -14,7 +14,7 @@ export default function LoginVerificationScreen({navigation, route}) {
     const {status, resp} = await window.controller.login(email, code);
 
     if (status === "ok") {
-      console.log("Logging in");
+      window.controller.reset();
     } else {
       setError(resp.message);
     }

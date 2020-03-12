@@ -62,7 +62,7 @@ function UserEditForm(props) {
 
       <input type="submit" className="btn btn-primary" value="Submit" />
     </form>
-  )
+  );
 }
 
 export default withRouter(UserEditForm);

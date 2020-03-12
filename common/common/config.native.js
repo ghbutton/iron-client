@@ -1,23 +1,24 @@
 const isDev = __DEV__;
 const API_VERSION = 5;
 
-let config = (function() {
+const config = (function() {
   return {
     isDev: function() {
       return isDev;
     },
     wsProtocol: function() {
       if (isDev) {
-        return `ws`;
+        return "ws";
       } else {
-        return `wss`;
+        return "wss";
       }
     },
     wsUrl: function() {
       if (isDev) {
-        return `localhost`;
+        return "localhost";
+//        return "192.168.5.16";
       } else {
-        return `www.ironnotice.com`;
+        return "www.ironnotice.com";
       }
     },
     wsPort: function() {
@@ -33,7 +34,7 @@ let config = (function() {
     apiVersion: function() {
       return API_VERSION;
     },
-  }
-})()
+  };
+})();
 
 export default config;

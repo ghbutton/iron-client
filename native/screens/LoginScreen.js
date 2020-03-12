@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     paddingLeft: 20,
     paddingRight: 20,
+    color: "#000000",
   },
   saveButton: {
     borderWidth: 1,

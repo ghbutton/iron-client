@@ -27,10 +27,6 @@ const callbacks = (function() {
       logger.debug("Callback - Loaded with user");
       engine.dispatch("loaded_with_user", {});
     },
-    loggedIn: function() {
-      logger.debug("Callback - Logged in");
-      engine.dispatch("logged_in", {});
-    },
   };
 })();
 

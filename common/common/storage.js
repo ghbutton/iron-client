@@ -53,6 +53,9 @@ const storage = (function() {
     init: async function() {
       return engine.init();
     },
+    reset: async function() {
+      // do nothing
+    },
     saveMessages: async function(deviceId, messages) {
       const key = await messagesKey(deviceId);
       return engine.setItem(key, JSON.stringify(messages));

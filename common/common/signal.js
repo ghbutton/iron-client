@@ -48,7 +48,7 @@ export default (function() {
       return engine.store();
     },
     infoLoaded: async function() {
-      return engine.loaded()
+      return engine.loaded();
     },
     loadDeviceInfoFromDisk: async function(deviceId) {
       logger.info("Loading signal device info from disk");
@@ -71,7 +71,7 @@ export default (function() {
       if (deviceId === senderDeviceId) {
         throw new Error("We should never send a message the same device");
       }
-      const message = await engine.decryptMessage(senderDeviceId, encryptedMessage)
+      const message = await engine.decryptMessage(senderDeviceId, encryptedMessage);
       delete encryptedMessage.attributes.body;
 
       encryptedMessage.attributes.decryptedBody = message;

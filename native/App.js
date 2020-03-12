@@ -4,11 +4,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NativeEventEmitter, NativeModules} from 'react-native';
 const { EventManager } = NativeModules;
 
-import ChatsScreen from './components/ChatsScreen.js';
-import LoadingScreen from './components/LoadingScreen.js';
-import LoginScreen from './components/LoginScreen.js';
-import LoginVerificationScreen from './components/LoginVerificationScreen.js';
-import MessagesScreen from './components/MessagesScreen.js';
+import ChatsScreen from './screens/ChatsScreen.js';
+import LoadingScreen from './screens/LoadingScreen.js';
+import LoginScreen from './screens/LoginScreen.js';
+import LoginVerificationScreen from './screens/LoginVerificationScreen.js';
+import MessagesScreen from './screens/MessagesScreen.js';
 
 const Stack = createStackNavigator();
 
@@ -26,12 +26,10 @@ export default function App() {
   useEffect(() => {
     const eventEmitter = new NativeEventEmitter(EventManager);
     const listenerNoUser = eventEmitter.addListener('loaded_no_user', loadedNoUser);
-    const listenerLoggedIn = eventEmitter.addListener('logged_in', loggedIn);
     const listenerWithUser = eventEmitter.addListener('loaded_with_user', loggedIn);
 
     return function cleanup() {
       listenerNoUser.remove();
-      listenerLoggedIn.remove();
       listenerWithUser.remove();
     };
   });
@@ -41,21 +39,21 @@ export default function App() {
       case "loading":
         return (
           <Stack.Navigator initialRouteName="LoadingScreen">
-            <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+            <Stack.Screen name="LoadingScreen" options={{ title: "Loading" }} component={LoadingScreen} />
           </Stack.Navigator>
         );
       case "logged_out":
         return(
           <Stack.Navigator initialRouteName="LoginScreen">
-            <Stack.Screen name="LoginScreen" component={LoginScreen} />
-            <Stack.Screen name="LoginVerificationScreen" component={LoginVerificationScreen} />
+            <Stack.Screen name="LoginScreen" options={{ title: "Login" }} component={LoginScreen} />
+            <Stack.Screen name="LoginVerificationScreen" options={{ title: "Login Verification" }} component={LoginVerificationScreen} />
           </Stack.Navigator>
         );
       case "logged_in":
         return(
           <Stack.Navigator initialRouteName="ChatsScreen">
-            <Stack.Screen name="ChatsScreen" component={ChatsScreen} />
-            <Stack.Screen name="MessagesScreen" component={MessagesScreen} />
+            <Stack.Screen name="ChatsScreen" options={{ title: "Chats" }} component={ChatsScreen} />
+            <Stack.Screen name="MessagesScreen" options={{ title: "Messages" }} component={MessagesScreen} />
           </Stack.Navigator>
         );
 

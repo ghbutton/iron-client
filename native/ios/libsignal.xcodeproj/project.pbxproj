@@ -19,7 +19,8 @@
 		344ECC864617FCAAD5DC33EF /* libPods-libsignal-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 182F7E7171C29785DB49C86F /* libPods-libsignal-tvOSTests.a */; };
 		5F563E8DC80DED09FCD200A5 /* libPods-libsignalTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 05214E24F2B33C7DFB313FBA /* libPods-libsignalTests.a */; };
 		7A6A3CBFEBE996F39D9E0DBF /* libPods-libsignal-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD477C4CDBFE8844A4A1191 /* libPods-libsignal-tvOS.a */; };
-		85C2A585240CF8E700C83CD1 /* SignalProtocol.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; };
+		85452886240EB51A000DBE2E /* SignalProtocol.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; };
+		85452887240EB51A000DBE2E /* SignalProtocol.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		85D4A4E3240C076400CEC579 /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E2240C076400CEC579 /* Bridge.m */; };
 		85D4A4E6240C077100CEC579 /* EventManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E5240C077100CEC579 /* EventManager.m */; };
 		85D4A4EF240C093A00CEC579 /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4ED240C093A00CEC579 /* Signal.swift */; };
@@ -43,6 +44,20 @@
 			remoteInfo = "libsignal-tvOS";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		85452888240EB51A000DBE2E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				85452887240EB51A000DBE2E /* SignalProtocol.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
@@ -95,7 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				85C2A585240CF8E700C83CD1 /* SignalProtocol.framework in Frameworks */,
+				85452886240EB51A000DBE2E /* SignalProtocol.framework in Frameworks */,
 				C760FE8803822DD0593B0133 /* libPods-libsignal.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -251,6 +266,7 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				85452888240EB51A000DBE2E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -311,9 +327,11 @@
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = ZWT8NFRJC9;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = ZWT8NFRJC9;
 						LastSwiftMigration = 1130;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
@@ -612,6 +630,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -637,6 +656,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				INFOPLIST_FILE = libsignalTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -659,6 +679,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				INFOPLIST_FILE = libsignal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -682,6 +703,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				INFOPLIST_FILE = libsignal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (

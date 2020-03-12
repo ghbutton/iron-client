@@ -8,7 +8,7 @@ import storage from "./storage.js";
 import utility from "./utility.js";
 
 const applicationState = (function() {
-  const state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []};
+  let state = null;
 
   async function addDedup(list, object) {
     let isDup = false;
@@ -43,6 +43,9 @@ const applicationState = (function() {
   }
 
   return {
+    init: async function() {
+      state = {connectedUsers: [], messages: [], lastRead: {}, downloads: []};
+    },
     insertUser: async function(user) {
       return insertObject("users", user);
     },
@@ -165,7 +168,7 @@ const applicationState = (function() {
     },
     inspectState: async function() {
       return state;
-    }
+    },
   };
 })();
 
@@ -252,8 +255,8 @@ const worker = (function() {
       }
     },
     getMessages: async function() {
-      needToGetMessages = true;
       // Messages will be handled by the worker thread, just set the flag
+      needToGetMessages = true;
     },
   };
 })();
@@ -262,6 +265,7 @@ const controller = (function() {
   let [userId, userSessionToken, deviceId, deviceSecret, initialized] = [null, null, null, null, null, false];
 
   async function resetState() {
+    logger.info("Resetting controller state");
     [userId, userSessionToken, deviceId, deviceSecret, initialized] = [null, null, null, null, null, false];
   }
 
@@ -312,18 +316,18 @@ const controller = (function() {
 
   async function _receiveMessagesCallback(response) {
     worker.getMessages();
-  };
+  }
 
   async function _receiveConnectionsCallback(response) {
     callbacks.newConnection();
-  };
+  }
 
   async function _receiveMessagePackagesCallback(response) {
     const messagePackage = response.payload.data[0];
 
     _markDelivered(messagePackage.attributes.idempotency_key);
     callbacks.newMessage();
-  };
+  }
 
   async function _buildSession(recipientDeviceId, myDeviceId) {
     logger.info(`No session for device id ${recipientDeviceId}`);
@@ -374,6 +378,7 @@ const controller = (function() {
     init: async function() {
       logger.debug("Init");
       await storage.init();
+      await applicationState.init();
 
       [userId, userSessionToken] = await storage.loadCurrentSession();
 
@@ -394,6 +399,10 @@ const controller = (function() {
       }
 
       return null;
+    },
+    resetComponents: async function() {
+      await storage.reset();
+      await applicationState.init();
     },
     connectToServer: async function() {
       logger.info("Connect to server");
@@ -466,7 +475,8 @@ const controller = (function() {
           const device = await api.createDevice(userId, userSessionToken, name, osName, 2000);
           await storage.saveDevice(userId, device);
           deviceId = device.id;
-          await api.reconnect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
+          await api.disconnect();
+          await api.connect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
         }
 
         if (userId && deviceId) {
@@ -485,6 +495,9 @@ const controller = (function() {
         }
       };
       await api.connect(userId, userSessionToken, deviceId, deviceSecret, _onSocketOpen);
+    },
+    disconnectFromServer: async function() {
+      await api.disconnect();
     },
     inspectSignalStore: async function() {
       // Debugging only
@@ -674,8 +687,7 @@ const controller = (function() {
       const {status, resp} = await api.login(email, code, 2000);
 
       if (status === "ok" && resp.payload) {
-        storage.saveSession(resp.payload.data[0]);
-        callbacks.loggedIn();
+        await storage.saveSession(resp.payload.data[0]);
       }
 
       return {status, resp};
@@ -824,10 +836,17 @@ const controller = (function() {
     },
     clearData: async function() {
       await storage.clearData();
-      resetState();
+      return this.reset();
     },
     getVersion: async function() {
       return window.app.getVersion();
+    },
+    reset: async function() {
+      await this.disconnectFromServer();
+      await this.resetComponents();
+      await resetState();
+      await this.init();
+      await this.connectToServer();
     },
   };
 })();

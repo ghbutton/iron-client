@@ -1,11 +1,11 @@
-import { NativeModules } from 'react-native'
+import {NativeModules} from "react-native";
 import utility from "./utility.js";
 import logger from "./logger.js";
 
 const Buffer = require("buffer").Buffer;
 
 const engine = (function() {
-  let [store] = [null];
+  const [store] = [null];
 
   async function _bToS(binary) {
     return window.util.toString(binary);
@@ -99,9 +99,9 @@ const engine = (function() {
       const result = await NativeModules.Bridge.processPreKeyBundle(Number(deviceId), JSON.stringify(attributes));
 
       if (result === true) {
-        return {status: "ok"}
+        return {status: "ok"};
       } else {
-        return {status: "error"}
+        return {status: "error"};
       }
     },
     generateDeviceInfo: async function() {
@@ -150,7 +150,7 @@ const engine = (function() {
 
       return {encrypted, hmacExported, sIv, signature, aesExported};
     },
-    aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}){
+    aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
       const hmacKey = await window.crypto.subtle.importKey("raw", await _64ToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
       const verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _64ToB(signature), await _64ToB(encrypted));
@@ -166,13 +166,13 @@ const engine = (function() {
     },
     loadFromDisk: async function(payload) {
       const success = await NativeModules.Bridge.loadFromDisk(payload);
-        if (success) {
-          return true;
-        } else {
-          throw new Error("Could not load react native data");
-        }
-    }
-  }
+      if (success) {
+        return true;
+      } else {
+        throw new Error("Could not load react native data");
+      }
+    },
+  };
 })();
 
 export default engine;

@@ -1,8 +1,8 @@
-import utility from "./utility.js"
-import config from "./config.js"
-const RNFS = require('react-native-fs');
+import utility from "./utility.js";
+import config from "./config.js";
+const RNFS = require("react-native-fs");
 
-let basePath = config.basePath();
+const basePath = config.basePath();
 const UTF8 = "utf8";
 
 export default (function() {
@@ -21,8 +21,8 @@ export default (function() {
     },
     clearAllData: async function() {
       const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
-      for(let file of files) {
-        await RNFS.unlink(RNFS.DocumentDirectoryPath + `/${file.name}`)
+      for (const file of files) {
+        await RNFS.unlink(RNFS.DocumentDirectoryPath + `/${file.name}`);
       }
     },
     init: async function() {
@@ -33,11 +33,11 @@ export default (function() {
         return await RNFS.readFile(RNFS.DocumentDirectoryPath + `/${key}`, UTF8);
       } catch (err) {
         if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
-          return null
+          return null;
         } else {
-          throw(err);
+          throw (err);
         }
       }
     },
-  }
-})()
+  };
+})();

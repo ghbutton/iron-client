@@ -5,8 +5,8 @@ const engine = (function() {
 
       // Dispatch the event.
       window.dispatchEvent(event);
-    }
-  }
+    },
+  };
 })();
 
 export default engine;

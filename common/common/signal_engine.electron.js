@@ -215,7 +215,7 @@ const engine = (function() {
 
       return {encrypted, hmacExported, sIv, signature, aesExported};
     },
-    aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}){
+    aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
       const hmacKey = await window.crypto.subtle.importKey("raw", await _64ToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
       const verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _64ToB(signature), await _64ToB(encrypted));
@@ -255,16 +255,16 @@ const engine = (function() {
       }
 
       for (const key of Object.keys(payload.signedKeys)) {
-        const value = {pubKey: await __64ToB(payload.signedKeys[key].pubKey), privKey: await __64ToB(payload.signedKeys[key].privKey)}
+        const value = {pubKey: await __64ToB(payload.signedKeys[key].pubKey), privKey: await __64ToB(payload.signedKeys[key].privKey)};
         store.put(key, value);
       }
 
       for (const key of Object.keys(payload.preKeys)) {
-        const value = {pubKey: await __64ToB(payload.preKeys[key].pubKey), privKey: await __64ToB(payload.preKeys[key].privKey)}
+        const value = {pubKey: await __64ToB(payload.preKeys[key].pubKey), privKey: await __64ToB(payload.preKeys[key].privKey)};
         store.put(key, value);
       }
-    }
-  }
+    },
+  };
 })();
 
 export default engine;

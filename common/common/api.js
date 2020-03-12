@@ -8,7 +8,11 @@ const Socket = socket.socket();
 const api = (function() {
   let [socket, apiChannel, loginChannel, userChannel, userDeviceChannel] = [null, null, null, null, null];
   let [apiChannelReady, loginChannelReady, userChannelReady, userDeviceChannelReady] = [false, false, false, false];
-  const [failedToJoin] = [false];
+
+  async function _resetState() {
+    [socket, apiChannel, loginChannel, userChannel, userDeviceChannel] = [null, null, null, null, null];
+    [apiChannelReady, loginChannelReady, userChannelReady, userDeviceChannelReady] = [false, false, false, false];
+  }
 
   async function _sendPush(channel, topic, payload, timeout = 10000) {
     let [ready, results] = [false, null];
@@ -37,7 +41,7 @@ const api = (function() {
     return results;
   }
 
-  async function hasBinding(channel, event) {
+  async function _hasBinding(channel, event) {
     for (let i = 0; i < channel.bindings.length; i++) {
       if (channel.bindings[i].event === event) {
         return true;
@@ -47,11 +51,11 @@ const api = (function() {
   }
 
   async function _waitForLoginChannel(_timeout) {
-    await utility.pollForCondition(() => loginChannelReady || failedToJoin, _timeout);
+    await utility.pollForCondition(() => loginChannelReady, _timeout);
   }
 
   async function _waitForApiChannel(_timeout) {
-    await utility.pollForCondition(() => apiChannelReady || failedToJoin, _timeout);
+    await utility.pollForCondition(() => apiChannelReady, _timeout);
   }
 
   return {
@@ -98,13 +102,13 @@ const api = (function() {
       });
       socket.connect();
     },
-    reconnect: async function(...args) {
-      logger.info("Reconnecting to the API");
-      await socket.disconnect();
+    disconnect: async function(...args) {
+      logger.info("Disconnecting to the API");
       for (let i = 0; i < socket.channels.length; i++) {
         await socket.channels[i].leave();
       }
-      return this.connect(...args);
+      await socket.disconnect();
+      await _resetState();
     },
     joinChannel: async function(type, onOk, onError, onTimeout) {
       let channel = null;
@@ -164,7 +168,7 @@ const api = (function() {
       }
     },
     userDeviceChannelReceiveMessages: async function(receiveMessagesCallback) {
-      if (!await hasBinding(userDeviceChannel, "POST:messages")) {
+      if (!await _hasBinding(userDeviceChannel, "POST:messages")) {
         logger.info("Setting up receive messages");
         userDeviceChannel.on("POST:messages", async (response) => {
           receiveMessagesCallback(response);
@@ -172,7 +176,7 @@ const api = (function() {
       }
     },
     userDeviceChannelReceiveMessagePackages: async function(receiveMessagePackagesCallback) {
-      if (!await hasBinding(userDeviceChannel, "POST:message_packages")) {
+      if (!await _hasBinding(userDeviceChannel, "POST:message_packages")) {
         logger.info("Setting up receive message packages");
         userDeviceChannel.on("POST:message_packages", async (response) => {
           receiveMessagePackagesCallback(response);
@@ -180,7 +184,7 @@ const api = (function() {
       }
     },
     userChannelReceiveConnections: async function(receiveConnectionsCallback) {
-      if (!await hasBinding(userChannel, "POST:connections")) {
+      if (!await _hasBinding(userChannel, "POST:connections")) {
         logger.info("Setting up receive conections");
         userChannel.on("POST:connections", async (response) => {
           receiveConnectionsCallback(response);
@@ -261,7 +265,7 @@ const api = (function() {
     },
     failedToJoin: async function(timeout) {
       await _waitForApiChannel(timeout);
-      return !!(socket) && failedToJoin;
+      return !!(socket);
     },
     getUserById: async function(userId, timeout) {
       await _waitForApiChannel(timeout);
@@ -432,6 +436,10 @@ const api = (function() {
     },
     connectedUsers: async function(timeout, userId) {
       await _waitForApiChannel(timeout);
+
+      if (!userId) {
+        throw new Error(`Cannot get connected users for an invalid userId ${userId}`);
+      }
 
       const connections = [];
 

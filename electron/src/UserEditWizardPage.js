@@ -6,7 +6,7 @@ function UserEditWizardPage(props) {
     <div className="userEditWizardPage container">
       <h1>Edit User</h1>
       <UserEditForm onSuccessLink={"/chats"} />
-   </div>
+    </div>
   );
 }
 

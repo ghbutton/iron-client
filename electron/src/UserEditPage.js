@@ -8,7 +8,7 @@ function UserEditPage(props) {
       <Link className="btn btn-outline-primary" to={"/settings"}>{"< Back"}</Link>
       <h1>Edit User</h1>
       <UserEditForm onSuccessLink={"/settings"} />
-   </div>
+    </div>
   );
 }
 
