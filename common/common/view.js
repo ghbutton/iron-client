@@ -58,9 +58,11 @@ const view = (function() {
         osDisplayName = "OS X";
       } else if (device.attributes.os_name === "Windows_NT") {
         osDisplayName = "Windows";
+      } else if (device.attributes.os_name === "iOS") {
+        osDisplayName = "iOS";
       }
 
-      if (!device.attributes.os_name) {
+      if (!osDisplayName) {
         return "Unknown";
       } else {
         return `${osDisplayName} - ${device.attributes.name} ${device.id === deviceId ? "(this)" : ""}`;

@@ -1,7 +1,6 @@
 import React from "react";
 import {Image, StyleSheet, View} from "react-native";
-import {NativeEventEmitter, NativeModules} from "react-native";
-const {EventManager} = NativeModules;
+
 const logo = require("../static/images/icon.png");
 const styles = StyleSheet.create({
   container: {

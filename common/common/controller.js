@@ -647,6 +647,10 @@ const controller = (function() {
         return this.getUserById(userId);
       }
     },
+    currentUserHasName: async function() {
+      const currentUser = await window.controller.currentUser();
+      return !(currentUser && (currentUser.attributes.name === "" || currentUser.attributes.name == null));
+    },
     notLoggedIn: async function() {
       await utility.pollForCondition(() => initialized, 5000);
       return userId === null;
@@ -839,7 +843,7 @@ const controller = (function() {
       return this.reset();
     },
     getVersion: async function() {
-      return window.app.getVersion();
+      return deviceOS.getClientVersion();
     },
     reset: async function() {
       await this.disconnectFromServer();
@@ -847,6 +851,9 @@ const controller = (function() {
       await resetState();
       await this.init();
       await this.connectToServer();
+    },
+    emitLoggedIn: async function() {
+      return callbacks.loadedWithUser();
     },
   };
 })();

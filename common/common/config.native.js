@@ -1,6 +1,9 @@
 const isDev = __DEV__;
 const API_VERSION = 5;
 
+import DeviceInfo from 'react-native-device-info';
+
+
 const config = (function() {
   return {
     isDev: function() {

@@ -4,7 +4,7 @@ import UserEditForm from "./UserEditForm";
 function UserEditWizardPage(props) {
   return (
     <div className="userEditWizardPage container">
-      <h1>Edit User</h1>
+      <h1>Update User</h1>
       <UserEditForm onSuccessLink={"/chats"} />
     </div>
   );

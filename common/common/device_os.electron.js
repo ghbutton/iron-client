@@ -37,6 +37,9 @@ const deviceOS = (function() {
     osName: async function() {
       return os.type();
     },
+    getClientVersion: function() {
+      return window.app.getVersion();
+    },
   };
 })();
 

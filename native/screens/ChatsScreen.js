@@ -1,11 +1,11 @@
-import React, {Component, useEffect} from "react";
+import React, {Component, useState, useEffect} from "react";
 import {AppState, Button, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 
 export default function ChatsScreen(props) {
-  const [connectedUsers, setConnectedUsers] = React.useState([]);
-  const [hasUnreadMessages, setHasUnreadMessages] = React.useState({});
-  const [userDisplay, setUserDisplay] = React.useState({});
-  const [connectionsLoaded, setConnectionsLoaded] = React.useState(false);
+  const [connectedUsers, setConnectedUsers] = useState([]);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState({});
+  const [userDisplay, setUserDisplay] = useState({});
+  const [connectionsLoaded, setConnectionsLoaded] = useState(false);
 
   const handleNewMessage = () => {
     console.log("NEW MESSAGE");

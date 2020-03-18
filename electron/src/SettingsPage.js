@@ -8,7 +8,7 @@ import UserAvatar from "./UserAvatar";
 class SettingsPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {currentUser: null, deviceId: null, devices: [], loggedIn: true, version: ""};
+    this.state = {currentUser: null, deviceId: null, devices: [], version: ""};
 
     this.clearData = this.clearData.bind(this);
     this.updateDownloadDirectory = this.updateDownloadDirectory.bind(this);
@@ -30,7 +30,7 @@ class SettingsPage extends Component {
   }
 
   render() {
-    const {currentUser, deviceId, devices, downloadDirectory, loggedIn, version} = this.state;
+    const {currentUser, deviceId, devices, downloadDirectory, version} = this.state;
 
     return (
       <div className="SettingsPage">
@@ -48,7 +48,7 @@ class SettingsPage extends Component {
             </div>
           }
           {
-            loggedIn &&
+            currentUser &&
                 <div>
                   <h2 className="sectionHeader">Download directory</h2>
                   <p>Path: {downloadDirectory}</p>
@@ -74,15 +74,13 @@ class SettingsPage extends Component {
   }
 
   async componentDidMount() {
-    const loggedIn = !(await window.controller.notLoggedIn());
-
     const currentUser = await window.controller.currentUser();
     const devices = await window.controller.getDevices();
     const deviceId = await window.controller.getDeviceId();
     const downloadDirectory = await window.controller.downloadDirectory();
     const version = await window.controller.getVersion();
 
-    this.setState({currentUser, devices, deviceId, downloadDirectory, loggedIn, version});
+    this.setState({currentUser, devices, deviceId, downloadDirectory, version});
   }
 }
 
