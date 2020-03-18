@@ -1,14 +1,22 @@
-import React, {useEffect, useState} from "react";
-import {Alert, Button, FlatList, Image, StyleSheet, Text, View} from "react-native";
-import {Typography} from "../styles";
+import React, {useCallback, useEffect, useState} from "react";
+import {Alert, FlatList, StyleSheet, Text, View} from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function SettingsScreen() {
+import {Typography} from "../styles";
+import UserAvatar from "../components/UserAvatar";
+import Button from "../components/Button";
+
+export default function SettingsScreen({ navigation }) {
   const [user, setUser] = useState(null);
   const [devices, setDevices] = useState([]);
   const [deviceId, setDeviceId] = useState(null);
   const [version, setVersion] = useState(null);
 
-  const clearData = async () => {
+  const handleEditUser = () => {
+    navigation.navigate('UpdateUserScreen')
+  }
+
+  const handleClearData = async () => {
     Alert.alert(
       "Clear data",
       "Clearing this device of all data?",
@@ -28,25 +36,34 @@ export default function SettingsScreen() {
     )
   }
 
-  useEffect(() => {
-    async function loadData() {
-      setUser(await window.controller.currentUser());
-      setDevices(await window.controller.getDevices());
-      setDeviceId(await window.controller.getDeviceId());
-      setVersion(await window.controller.getVersion());
-    }
+  const loadData = async function() {
+    console.debug("Loading setting screen data");
+    setUser(await window.controller.currentUser());
+    setDevices(await window.controller.getDevices());
+    setDeviceId(await window.controller.getDeviceId());
+    setVersion(await window.controller.getVersion());
+  }
 
-    loadData();
-  }, []);
+  useFocusEffect(
+    // Nesting usecallback here to prevent an infinite loop
+    // See: https://reactnavigation.org/docs/use-focus-effect/#how-is-usefocuseffect-different-from-adding-a-listener-for-focus-event
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   return (
     <View>
-      {user && (
+      {(user) && (
         <View>
           <Text style={Typography.header2}>Personal</Text>
+          <UserAvatar user={user} />
           <Text>Name: {user.attributes.name}</Text>
           <Text>Email: {user.attributes.email}</Text>
-          <Text>TODO edit user</Text>
+          <Button
+            title="Edit"
+            onPress={handleEditUser}
+          />
         </View>
       )}
       { devices.length > 0 && (
@@ -63,8 +80,8 @@ export default function SettingsScreen() {
         <Text style={Typography.header2}>Private Data</Text>
         <Button
           title="Clear data"
-          color="#e50000"
-          onPress={clearData}
+          onPress={handleClearData}
+          danger
         />
       </View>
       { version && (

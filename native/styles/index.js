@@ -1,5 +1,6 @@
 // styles/index.js
 
+import * as Button from './button'
 import * as Typography from './typography'
 
-export { Typography }
+export { Button, Typography }

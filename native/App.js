@@ -12,6 +12,7 @@ import LoginVerificationScreen from './screens/LoginVerificationScreen.js';
 import NewUserWizardScreen from './screens/NewUserWizardScreen.js';
 import MessagesScreen from './screens/MessagesScreen.js';
 import SettingsScreen from './screens/SettingsScreen.js';
+import UpdateUserScreen from './screens/UpdateUserScreen.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,6 +62,7 @@ export default function App() {
     return (
       <Stack.Navigator initialRouteName="SettingsScreen">
         <Stack.Screen name="SettingsScreen" options={{ title: "Settings" }} component={SettingsScreen} />
+        <Stack.Screen name="UpdateUserScreen" options={{ title: "Update User" }} component={UpdateUserScreen} />
       </Stack.Navigator>
     )
   }

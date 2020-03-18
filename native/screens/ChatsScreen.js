@@ -1,5 +1,5 @@
 import React, {Component, useState, useEffect} from "react";
-import {AppState, Button, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {AppState, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 
 export default function ChatsScreen(props) {
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -40,8 +40,7 @@ export default function ChatsScreen(props) {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Chats</Text>
+    <View>
       { (connectionsLoaded && connectedUsers.length === 0) ?
         <Text>No chats.</Text> :
             <FlatList
@@ -58,17 +57,6 @@ export default function ChatsScreen(props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 45,
-    backgroundColor: "#F5FCFF",
-  },
-  header: {
-    fontSize: 25,
-    textAlign: "center",
-    margin: 10,
-    fontWeight: "bold",
-  },
   inputContainer: {
     paddingTop: 15,
   },
