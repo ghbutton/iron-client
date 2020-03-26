@@ -201,7 +201,7 @@ const engine = (function() {
             length: 256, // can be  128, 192, or 256
           },
           true, // whether the key is extractable (i.e. can be used in exportKey)
-          ["encrypt", "decrypt"] // can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
+          ["encrypt", "decrypt"], // can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
       );
       const aesExported = await _bTo64(await window.crypto.subtle.exportKey("raw", aesKey));
       const iv = window.crypto.getRandomValues(new Uint8Array(16));

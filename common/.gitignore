@@ -22,3 +22,8 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 common-*.tar
 
+# node.js
+#
+node_modules/
+npm-debug.log
+yarn-error.log

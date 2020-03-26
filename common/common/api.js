@@ -27,7 +27,7 @@ const api = (function() {
         () => {
           results = {status: "error", resp: JSON.parse("{\"message\": \"Server timeout, try again later\"}")};
           ready = true;
-        }
+        },
     );
 
     while (true) {
@@ -80,7 +80,7 @@ const api = (function() {
               device_id: deviceId || "",
               device_secret: deviceSecret || "",
             },
-          }
+          },
       );
 
       userDeviceChannel = socket.channel(`device:connect:${deviceId}`, {});
@@ -89,7 +89,7 @@ const api = (function() {
       loginChannel = socket.channel("login:connect", {});
 
       socket.onOpen(() =>
-        onSocketOpen()
+        onSocketOpen(),
       );
       socket.onError( (err) => console.log(err));
       socket.onClose( () => {
@@ -420,7 +420,7 @@ const api = (function() {
                 "receiver_user_id": receiverUserId,
                 "idempotency_key": idempotencyKey,
               },
-            }
+            },
         );
       }
 

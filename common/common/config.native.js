@@ -1,7 +1,7 @@
 const isDev = __DEV__;
 const API_VERSION = 5;
 
-import DeviceInfo from 'react-native-device-info';
+import DeviceInfo from "react-native-device-info";
 
 
 const config = (function() {
@@ -19,7 +19,7 @@ const config = (function() {
     wsUrl: function() {
       if (isDev) {
         return "localhost";
-//        return "192.168.5.16";
+        //        return "192.168.5.16";
       } else {
         return "www.ironnotice.com";
       }

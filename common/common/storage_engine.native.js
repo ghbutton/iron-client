@@ -1,4 +1,3 @@
-import utility from "./utility.js";
 import config from "./config.js";
 const RNFS = require("react-native-fs");
 

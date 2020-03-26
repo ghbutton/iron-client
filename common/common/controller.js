@@ -765,8 +765,8 @@ const controller = (function() {
       return await Promise.all(
           filenames.map(
               (filename) =>
-                _uploadFile(filename, recipientUserId)
-          )
+                _uploadFile(filename, recipientUserId),
+          ),
       );
     },
     // Only used by Electron
@@ -868,9 +868,9 @@ const controller = (function() {
       return callbacks.loadedWithUser();
     },
     isEmail: async function(email) {
-      var re = /\S+@\S+\.\S+/;
+      const re = /\S+@\S+\.\S+/;
       return re.test(email);
-    }
+    },
   };
 })();
 

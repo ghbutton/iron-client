@@ -37,7 +37,7 @@ class ChatsPage extends Component {
     }
 
     this.setState({hasUnreadMessages});
-  };
+  }
 
   render() {
     const {connectedUsers, hasUnreadMessages, userDisplay, connectionsLoaded} = this.state;

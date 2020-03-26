@@ -11,7 +11,7 @@ const deviceOS = (function() {
     },
     getClientVersion: function() {
       //      return `${DeviceInfo.getVersion()}-${DeviceInfo.getBuildNumber()}`;
-      return pkg.version
+      return pkg.version;
     },
   };
 })();
