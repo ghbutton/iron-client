@@ -1,8 +1,10 @@
 import React, {Component, useEffect, useState} from "react";
 import {Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
-import ImagePicker from 'react-native-image-picker';
+import ImagePicker from "react-native-image-picker";
+import {Container, Header, Content, Form, Item, Input} from "native-base";
+
 import UserAvatar from "./UserAvatar";
-import Button from "./Button";
+import Button from "./TextButton";
 
 export default function UpdateUserForm({successCallback}) {
   const [name, setName] = useState("");
@@ -23,28 +25,28 @@ export default function UpdateUserForm({successCallback}) {
   };
 
   const options = {
-    title: 'Update Image',
+    title: "Update Image",
     storageOptions: {
       skipBackup: true,
-      path: 'images',
+      path: "images",
     },
   };
 
-  const handleUpdatePhoto = async(event) => {
+  const handleUpdatePhoto = async (event) => {
     ImagePicker.showImagePicker(options, (response) => {
-      console.log('Response = ', response);
+      console.log("Response = ", response);
 
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        console.log("User cancelled image picker");
       } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
+        console.log("ImagePicker Error: ", response.error);
       } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
+        console.log("User tapped custom button: ", response.customButton);
       } else {
         // TODO resize before uploading to server
         // https://github.com/bamlab/react-native-image-resizer
-        console.debug("Got an updated photo")
-        if(response.type === "image/jpeg") {
+        console.debug("Got an updated photo");
+        if (response.type === "image/jpeg") {
           setAvatar({binary: response.data, extname: ".jpg"});
           setPhotoUploaded(true);
         } else if (response.type === "image/png") {
@@ -66,7 +68,7 @@ export default function UpdateUserForm({successCallback}) {
     setUser(currentUser);
     setName(currentUser.attributes.name || "");
     setEmail(currentUser.attributes.email);
-  }
+  };
 
   useEffect(() => {
     getData();
@@ -75,27 +77,18 @@ export default function UpdateUserForm({successCallback}) {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Update Information</Text>
-      <View style={styles.inputContainer}>
+      <Form>
         { error !== "" ? <Text style={styles.rootError}>Error: {error}</Text> : null }
         <UserAvatar user={user} />
-        <TextInput
-          style={styles.textInput}
-          placeholder="Email Address"
-          maxLength={50}
-          value={email}
-          editable={false}
-        />
-        <TextInput
-          style={styles.textInput}
-          placeholder="Name"
-          maxLength={50}
-          onBlur={Keyboard.dismiss}
-          value={name}
-          onChangeText={handleNameChange}
-        />
+        <Item>
+          <Input placeholder="Email Address" disabled={true} value={email} />
+        </Item>
+        <Item last>
+          <Input placeholder="Name" value={name} onChangeText={handleNameChange} />
+        </Item>
         <Button light onPress={handleUpdatePhoto} title={ photoUploaded ? "Ready for submission" : "Update Photo" } disabled={ photoUploaded } />
         <Button primary onPress={handleSubmit} title={"Submit"} />
-      </View>
+      </Form>
     </View>
   );
 }

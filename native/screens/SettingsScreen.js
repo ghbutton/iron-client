@@ -1,40 +1,40 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Alert, FlatList, StyleSheet, Text, View} from "react-native";
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from "@react-navigation/native";
 
 import {Typography} from "../styles";
 import UserAvatar from "../components/UserAvatar";
-import Button from "../components/Button";
+import Button from "../components/TextButton";
 
-export default function SettingsScreen({ navigation }) {
+export default function SettingsScreen({navigation}) {
   const [user, setUser] = useState(null);
   const [devices, setDevices] = useState([]);
   const [deviceId, setDeviceId] = useState(null);
   const [version, setVersion] = useState(null);
 
   const handleEditUser = () => {
-    navigation.navigate('UpdateUserScreen')
-  }
+    navigation.navigate("UpdateUserScreen");
+  };
 
   const handleClearData = async () => {
     Alert.alert(
-      "Clear data",
-      "Clearing this device of all data?",
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: async () => {
-            await window.controller.clearData()
+        "Clear data",
+        "Clearing this device of all data?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
           },
-          style: 'destructive',
-        },
-      ]
-    )
-  }
+          {
+            text: "OK",
+            onPress: async () => {
+              await window.controller.clearData();
+            },
+            style: "destructive",
+          },
+        ],
+    );
+  };
 
   const loadData = async function() {
     console.debug("Loading setting screen data");
@@ -42,14 +42,14 @@ export default function SettingsScreen({ navigation }) {
     setDevices(await window.controller.getDevices());
     setDeviceId(await window.controller.getDeviceId());
     setVersion(await window.controller.getVersion());
-  }
+  };
 
   useFocusEffect(
-    // Nesting usecallback here to prevent an infinite loop
-    // See: https://reactnavigation.org/docs/use-focus-effect/#how-is-usefocuseffect-different-from-adding-a-listener-for-focus-event
-    useCallback(() => {
-      loadData();
-    }, [])
+      // Nesting usecallback here to prevent an infinite loop
+      // See: https://reactnavigation.org/docs/use-focus-effect/#how-is-usefocuseffect-different-from-adding-a-listener-for-focus-event
+      useCallback(() => {
+        loadData();
+      }, []),
   );
 
   return (

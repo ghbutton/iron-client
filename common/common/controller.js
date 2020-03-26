@@ -664,6 +664,15 @@ const controller = (function() {
         return null;
       }
     },
+    getUserByEmail: async function(email) {
+      const {status, resp} = await api.getUserByEmail(email, 2000);
+      if (status === "ok") {
+        await applicationState.insertUser(resp);
+        return resp;
+      } else {
+        return null;
+      }
+    },
     getOrganizationMembershipByUserId: async function(userId) {
       const {status, resp} = await api.getOrganizationMembershipByUserId(userId, 2000);
       if (status === "ok") {
@@ -729,6 +738,9 @@ const controller = (function() {
     },
     createNewInvitation: async function(name, email) {
       return api.sendInvitation(name, email, 2000);
+    },
+    createNewConnection: async function(user) {
+      return api.createConnection(user, 2000);
     },
     readAvatar: async function(filename) {
       const base64 = await fileSystem.readBase64(filename);
@@ -855,6 +867,10 @@ const controller = (function() {
     emitLoggedIn: async function() {
       return callbacks.loadedWithUser();
     },
+    isEmail: async function(email) {
+      var re = /\S+@\S+\.\S+/;
+      return re.test(email);
+    }
   };
 })();
 

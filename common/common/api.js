@@ -241,6 +241,22 @@ const api = (function() {
 
       return _sendPush(apiChannel, "POST:pre_keys", {data: {attributes: {public_key: publicKey, key_id: keyId}, type: "pre_key"}});
     },
+    createConnection: async function(user, timeout) {
+      await _waitForApiChannel(timeout);
+
+      const payload = {
+        "payload": {
+          "data": {
+            "type": "connection",
+            "attributes": {
+              "user_id": user.id,
+            },
+          },
+        },
+      };
+
+      return _sendPush(apiChannel, "POST:connections", payload);
+    },
     sendInvitation: async function(name, email, timeout) {
       await _waitForApiChannel(timeout);
 
@@ -271,6 +287,16 @@ const api = (function() {
       await _waitForApiChannel(timeout);
 
       const {status, resp} = await _sendPush(apiChannel, "GET:users", {id: userId});
+      if (status === "ok") {
+        return {status: "ok", resp: resp.payload.data[0]};
+      } else {
+        return {status, resp};
+      }
+    },
+    getUserByEmail: async function(email, timeout) {
+      await _waitForApiChannel(timeout);
+
+      const {status, resp} = await _sendPush(apiChannel, "GET:users", {email: email});
       if (status === "ok") {
         return {status: "ok", resp: resp.payload.data[0]};
       } else {

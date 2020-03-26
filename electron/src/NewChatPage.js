@@ -31,7 +31,7 @@ class NewChatPage extends Component {
         </div>
         <br/>
 
-        <form onSubmit={this.handleSubmit}>
+        <form>
           <input type="text" placeholder="Current contacts" name="email" onChange={this.handleChange} required/>
         </form>
 

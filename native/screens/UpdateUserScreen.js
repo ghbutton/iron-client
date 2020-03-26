@@ -4,10 +4,10 @@ import UpdateUserForm from "../components/UpdateUserForm";
 export default function UpdateUserScreen({navigation}) {
   const successCallback = () => {
     console.debug("Update user screen success");
-    navigation.goBack()
-  }
+    navigation.goBack();
+  };
 
-  return(
+  return (
     <UpdateUserForm successCallback={successCallback} />
-  )
+  );
 }
