@@ -4,7 +4,7 @@ import {useFocusEffect} from "@react-navigation/native";
 
 import {Typography} from "../styles";
 import UserAvatar from "../components/UserAvatar";
-import Button from "../components/TextButton";
+import TextButton from "../components/TextButton";
 
 export default function SettingsScreen({navigation}) {
   const [user, setUser] = useState(null);
@@ -60,7 +60,7 @@ export default function SettingsScreen({navigation}) {
           <UserAvatar user={user} />
           <Text>Name: {user.attributes.name}</Text>
           <Text>Email: {user.attributes.email}</Text>
-          <Button
+          <TextButton
             title="Edit"
             onPress={handleEditUser}
           />
@@ -78,7 +78,7 @@ export default function SettingsScreen({navigation}) {
       )}
       <View>
         <Text style={Typography.header2}>Private Data</Text>
-        <Button
+        <TextButton
           title="Clear data"
           onPress={handleClearData}
           danger

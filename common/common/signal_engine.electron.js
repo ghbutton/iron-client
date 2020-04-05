@@ -21,9 +21,36 @@ const engine = (function() {
     return `${deviceId}`;
   }
 
+  async function _checkAes256Key(key) {
+    // Make sure the library doesn't change out from under us and use some new values we dont expect
+    // TODO should I check key length?
+    if (key.alg !== "A256CBC" || key.kty !== "oct") {
+      throw new Error("File encryption incorrect, please try again later");
+    }
+  }
+
+  async function _checkHS256Key(key) {
+    // TODO should I check key length?
+    if (key.alg !== "HS256" || key.kty !== "oct") {
+      throw new Error("File encryption incorrect, please try again later");
+    }
+  }
+
   async function _64ToB(string) {
     const buff = new Buffer(string, "base64");
     return buff.buffer;
+  }
+
+  async function _64To64Url(string) {
+    return string.replace('+', '-').replace('/', '_').replace(/=+$/, '');
+  }
+
+  async function _64UrlTo64(string) {
+    string = string.replace('-', '+').replace('_', '/');
+    while (string.length % 4 !== 0) {
+      string += '=';
+    }
+    return string;
   }
 
   async function _bTo64(binary) {
@@ -195,36 +222,62 @@ const engine = (function() {
       return (await _addressToSessionKey(addressString, deviceId) in store.store);
     },
     aesEncrypt: async function(data) {
+
+      // 256 bits aesKey
       const aesKey = await window.crypto.subtle.generateKey(
           {
             name: "AES-CBC",
-            length: 256, // can be  128, 192, or 256
+            length: 256, // can be  128, 192, or 256 (this is bit size)
           },
           true, // whether the key is extractable (i.e. can be used in exportKey)
           ["encrypt", "decrypt"], // can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
       );
-      const aesExported = await _bTo64(await window.crypto.subtle.exportKey("raw", aesKey));
+      const aesKeyObj = await window.crypto.subtle.exportKey("jwk", aesKey);
+      await _checkAes256Key(aesKeyObj);
+
+      // Want to use base 64 not base64url
+      const aesExported = await _64UrlTo64(aesKeyObj.k);
       const iv = window.crypto.getRandomValues(new Uint8Array(16));
       const sIv = await _bTo64(iv);
       const bEncrypted = await window.crypto.subtle.encrypt( {name: "AES-CBC", iv: iv}, aesKey, await _64ToB(data));
       const encrypted = await _bTo64(bEncrypted);
 
+      // 512 bits hmacKey
       const hmacKey = await window.crypto.subtle.generateKey({name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
-      const hmacExported = await _bTo64(await window.crypto.subtle.exportKey("raw", hmacKey));
+      const hmacKeyObj = await window.crypto.subtle.exportKey("jwk", hmacKey);
+      await _checkHS256Key(hmacKeyObj);
+
+      const hmacExported = await _64UrlTo64(hmacKeyObj.k);
       const signature = await _bTo64(await window.crypto.subtle.sign({name: "HMAC"}, hmacKey, bEncrypted));
 
       return {encrypted, hmacExported, sIv, signature, aesExported};
     },
     aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
-      const hmacKey = await window.crypto.subtle.importKey("raw", await _64ToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
+      const hmacKeyObj = {
+        alg: "HS256",
+        ext: true,
+        k: await _64To64Url(hmacExported),
+        key_ops: ["sign", "verify"],
+        kty: "oct"
+      }
+
+      const hmacKey = await window.crypto.subtle.importKey("jwk", hmacKeyObj, {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
       const verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _64ToB(signature), await _64ToB(encrypted));
 
       if (!verified) {
         throw new Error("Error, file not verified.");
       }
 
-      const aesKey = await window.crypto.subtle.importKey("raw", await _64ToB(aesExported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
+      const aesKeyObj = {
+        alg: "A256CBC",
+        ext: true,
+        k: await _64To64Url(aesExported),
+        key_ops: ["encrypt", "decrypt"],
+        kty: "oct"
+      }
+
+      const aesKey = await window.crypto.subtle.importKey("jwk", aesKeyObj, {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
       const decrypted = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: await _64ToB(sIv)}, aesKey, await _64ToB(encrypted));
       const sDecrypted = await _bTo64(decrypted);
       return sDecrypted;

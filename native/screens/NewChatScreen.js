@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {TouchableHighlight, View} from "react-native";
 import {Form, Item, Input, Text} from "native-base";
-import Button from "../components/TextButton";
+import TextButton from "../components/TextButton";
 
 export default function NewChatScreen({navigation}) {
   const [search, setSearch] = useState("");
@@ -55,13 +55,13 @@ export default function NewChatScreen({navigation}) {
       inviteUser = (
         <View>
           <Text>Connect to user: </Text>
-          <Button title={searchedUser.attributes.email} onPress={handleConnectToUser} />
+          <TextButton title={searchedUser.attributes.email} onPress={handleConnectToUser} />
         </View>);
     } else {
       inviteUser = (
         <View>
           <Text>Invite by email: </Text>
-          <Button title={search} onPress={handleInvite} />
+          <TextButton title={search} onPress={handleInvite} />
         </View>
       );
     }

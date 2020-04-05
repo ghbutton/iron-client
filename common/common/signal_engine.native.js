@@ -1,22 +1,15 @@
 import {NativeModules} from "react-native";
 import utility from "./utility.js";
 import logger from "./logger.js";
+import RNSimpleCrypto from "react-native-simple-crypto";
 
 const Buffer = require("buffer").Buffer;
 
 const engine = (function() {
   const [store] = [null];
 
-  async function _bToS(binary) {
-    return window.util.toString(binary);
-  }
-
-  async function _sToB(string) {
-    return window.util.toArrayBuffer(string);
-  }
-
-  async function _sToUtf8(string) {
-    return new TextEncoder("utf-8").encode(string);
+  async function _hTo64(hexString) {
+    return Buffer.from(hexString, 'hex').toString('base64')
   }
 
   async function _64ToS(base64) {
@@ -26,10 +19,15 @@ const engine = (function() {
   }
 
   // TODO remove if unused
+  async function _64ToUtf8(string) {
+    var buff = Buffer.from(string, 'base64');
+    return buff.toString("utf8");
+  }
+
+  // TODO remove if unused
   async function _64ToB(string) {
-    const buff = new Buffer(string, "base64");
-    const ascii = buff.toString();
-    return window.util.toArrayBuffer(ascii);
+    var buff = Buffer.from(string, 'base64');
+    return buff.buffer;
   }
 
   async function _utf8ToS(buffer) {
@@ -41,10 +39,8 @@ const engine = (function() {
   }
 
   async function _bTo64(binary) {
-    const string = window.util.toString(binary);
-    const buff = new Buffer(string, "binary");
-    const base64data = buff.toString("base64");
-    return base64data;
+    const buffer = Buffer.from(binary);
+    return buffer.toString('base64');
   }
 
 
@@ -130,39 +126,38 @@ const engine = (function() {
       return NativeModules.Bridge.hasSession(Number(deviceId));
     },
     aesEncrypt: async function(data) {
-      const aesKey = await window.crypto.subtle.generateKey(
-          {
-            name: "AES-CBC",
-            length: 256, // can be  128, 192, or 256
-          },
-          true, // whether the key is extractable (i.e. can be used in exportKey)
-          ["encrypt", "decrypt"], // can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
-      );
-      const aesExported = await _bTo64(await window.crypto.subtle.exportKey("raw", aesKey));
-      const iv = window.crypto.getRandomValues(new Uint8Array(16));
-      const sIv = await _bTo64(iv);
-      const bEncrypted = await window.crypto.subtle.encrypt( {name: "AES-CBC", iv: iv}, aesKey, await _sToB(data));
-      const encrypted = await _bTo64(bEncrypted);
+      // 32 bytes is 256 bits
+      const key = await RNSimpleCrypto.utils.randomBytes(32);
 
-      const hmacKey = await window.crypto.subtle.generateKey({name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
-      const hmacExported = await _bTo64(await window.crypto.subtle.exportKey("raw", hmacKey));
-      const signature = await _bTo64(await window.crypto.subtle.sign({name: "HMAC"}, hmacKey, bEncrypted));
+      const iv = await RNSimpleCrypto.utils.randomBytes(16);
+      const cipher = await RNSimpleCrypto.AES.encrypt(await _64ToB(data), key, iv);
 
-      return {encrypted, hmacExported, sIv, signature, aesExported};
+      // 64 bytes is 512 bits
+      const hmacKey = await RNSimpleCrypto.utils.randomBytes(64);
+
+      // HMAC here takes a UTF8 string
+      const signature = await RNSimpleCrypto.HMAC.hmac256(cipher, hmacKey);
+
+      return {encrypted: await _bTo64(cipher), hmacExported: await _bTo64(hmacKey), sIv: await _bTo64(iv), signature: await _bTo64(signature), aesExported: await _bTo64(key)};
     },
     aesDecrypt: async function({encrypted, hmacExported, sIv, signature, aesExported}) {
       // Return string values
-      const hmacKey = await window.crypto.subtle.importKey("raw", await _64ToB(hmacExported), {name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign", "verify"]);
-      const verified = await window.crypto.subtle.verify({name: "HMAC"}, hmacKey, await _64ToB(signature), await _64ToB(encrypted));
+      const hmacKey = await _64ToB(hmacExported);
+      const cipher = await _64ToB(encrypted);
 
-      if (!verified) {
+      // HMAC here takes a UTF8 string
+      const calculatedSignature = await RNSimpleCrypto.HMAC.hmac256(cipher, hmacKey);
+
+      if (await _bTo64(calculatedSignature) !== signature) {
         throw new Error("Error, file not verified.");
       }
 
-      const aesKey = await window.crypto.subtle.importKey("raw", await _64ToB(aesExported), {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
-      const decrypted = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: await _64ToB(sIv)}, aesKey, await _64ToB(encrypted));
-      const sDecrypted = await _bToS(decrypted);
-      return sDecrypted;
+      const aesKey = await _64ToB(aesExported);
+      const iv = await _64ToB(sIv);
+
+      const decrypted = await RNSimpleCrypto.AES.decrypt(cipher, aesKey, iv);
+
+      return await _bTo64(decrypted);
     },
     loadFromDisk: async function(payload) {
       const success = await NativeModules.Bridge.loadFromDisk(payload);

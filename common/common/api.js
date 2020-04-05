@@ -445,7 +445,7 @@ const api = (function() {
         },
       };
 
-      const {status, resp} = await _sendPush(apiChannel, "POST:file_uploads", payload, 60000);
+      const {status, resp} = await _sendPush(apiChannel, "POST:file_uploads", payload, 120000);
       if (status === "ok") {
         return resp.payload.data[0];
       } else {

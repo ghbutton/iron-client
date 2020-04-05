@@ -4,7 +4,7 @@ import ImagePicker from "react-native-image-picker";
 import {Container, Header, Content, Form, Item, Input} from "native-base";
 
 import UserAvatar from "./UserAvatar";
-import Button from "./TextButton";
+import TextButton from "./TextButton";
 
 export default function UpdateUserForm({successCallback}) {
   const [name, setName] = useState("");
@@ -32,7 +32,7 @@ export default function UpdateUserForm({successCallback}) {
     },
   };
 
-  const handleUpdatePhoto = async (event) => {
+  const handleImage = async (event) => {
     ImagePicker.showImagePicker(options, (response) => {
       console.log("Response = ", response);
 
@@ -47,6 +47,7 @@ export default function UpdateUserForm({successCallback}) {
         // https://github.com/bamlab/react-native-image-resizer
         console.debug("Got an updated photo");
         if (response.type === "image/jpeg") {
+          // Maybe switch to use window.controller.readAvatar()  ??
           setAvatar({binary: response.data, extname: ".jpg"});
           setPhotoUploaded(true);
         } else if (response.type === "image/png") {
@@ -86,8 +87,8 @@ export default function UpdateUserForm({successCallback}) {
         <Item last>
           <Input placeholder="Name" value={name} onChangeText={handleNameChange} />
         </Item>
-        <Button light onPress={handleUpdatePhoto} title={ photoUploaded ? "Ready for submission" : "Update Photo" } disabled={ photoUploaded } />
-        <Button primary onPress={handleSubmit} title={"Submit"} />
+        <TextButton light onPress={handleImage} title={ photoUploaded ? "Ready for submission" : "Update Photo" } disabled={ photoUploaded } />
+        <TextButton primary onPress={handleSubmit} title={"Submit"} />
       </Form>
     </View>
   );

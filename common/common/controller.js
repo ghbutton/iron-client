@@ -339,6 +339,8 @@ const controller = (function() {
       await signal.buildSession(recipientDeviceId, identityKey, signedPreKey, preKey, myDeviceId);
       return {status: "ok"};
     } else {
+      console.log("ERROR");
+      console.log(statusIdentity);
       return {status: "error"};
     }
   }
@@ -763,14 +765,14 @@ const controller = (function() {
       if (filenames === []) return;
 
       return await Promise.all(
-          filenames.map(
-              (filename) =>
-                _uploadFile(filename, recipientUserId),
-          ),
+        filenames.map(
+          (filename) =>
+            _uploadFile(filename, recipientUserId),
+        ),
       );
     },
-    // Only used by Electron
     downloadDirectory: async function() {
+      // Electron only
       const downloadDirectory = await storage.loadDownloadDirectory();
       if (!downloadDirectory) {
         const defaultDirectory = await fileSystem.defaultDownloadDirectory();

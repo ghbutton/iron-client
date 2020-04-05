@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {View} from "react-native";
 import {Form, Item, Input, Label} from "native-base";
 
-import Button from "../components/TextButton";
+import TextButton from "../components/TextButton";
 
 export default function InvitationScreen({navigation, route}) {
   const email = route.params.email;
@@ -31,7 +31,7 @@ export default function InvitationScreen({navigation, route}) {
           <Label>Email</Label>
           <Input value={email} disabled />
         </Item>
-        <Button title="Submit" onPress={handleSubmit} full />
+        <TextButton title="Submit" onPress={handleSubmit} full />
       </Form>
     </View>
   );

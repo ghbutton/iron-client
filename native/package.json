@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "lint": "eslint *.js ./screens ./styles ./components",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@react-native-community/masked-view": "^0.1.6",
@@ -24,17 +24,20 @@
     "react-native-image-picker": "^2.3.1",
     "react-native-reanimated": "^1.7.0",
     "react-native-safe-area-context": "^0.7.3",
-    "react-native-screens": "^2.2.0"
+    "react-native-screens": "^2.2.0",
+    "react-native-simple-crypto": "https://github.com/ghbutton/react-native-simple-crypto.git",
+    "react-native-vector-icons": "^6.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.0",
-    "@babel/runtime": "^7.5.0",
-    "@react-native-community/eslint-config": "^0.0.3",
-    "babel-jest": "^24.1.0",
-    "eslint": "^6.8.0",
+    "@babel/core": "^7.6.2",
+    "@babel/runtime": "^7.6.2",
+    "@react-native-community/eslint-config": "^0.0.5",
+    "babel-jest": "^24.9.0",
+    "eslint": "^6.4.0",
     "eslint-config-google": "^0.14.0",
-    "jest": "^24.1.0",
-    "metro-react-native-babel-preset": "0.54.1",
+    "jest": "^24.9.0",
+    "metro-react-native-babel-preset": "0.56.0",
+    "react-native-clean-project": "^3.3.0",
     "react-test-renderer": "16.8.6"
   },
   "jest": {

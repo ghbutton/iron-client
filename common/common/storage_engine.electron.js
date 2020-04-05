@@ -37,7 +37,7 @@ export default (function() {
         folders.shift();
 
         const first = folders.shift();
-        currentPath= `/${first}`;
+        currentPath = `/${first}`;
       } else {
         currentPath = `${folders.shift()}`;
       }

@@ -1,8 +1,9 @@
 import React, {Component, useEffect} from "react";
 import {Keyboard, KeyboardAvoidingView, NativeEventEmitter, NativeModules, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
 import {useHeaderHeight} from "@react-navigation/stack";
-import {Input, Item, Form} from "native-base";
-import Button from "../components/TextButton";
+import {Button, Icon, Input, Item, Form} from "native-base";
+import TextButton from "../components/TextButton";
+import ImagePicker from "react-native-image-picker";
 
 const {EventManager} = NativeModules;
 
@@ -39,7 +40,7 @@ export default function MessagesScreen({navigation, route}) {
   const [userMessages, setUserMessages] = React.useState([]);
   const [downloads, setDownloads] = React.useState([]);
   const [now, setNow] = React.useState(new Date());
-  const [userId, setUserId] = React.useState(null);
+  const [currentUserId, setCurrentUserId] = React.useState(null);
   const [deviceId, setDeviceId] = React.useState(null);
 
   const headerHeight = useHeaderHeight();
@@ -48,6 +49,38 @@ export default function MessagesScreen({navigation, route}) {
 
   const handleMessageChange = (newMessage) => {
     setMessageString(newMessage);
+  };
+
+  const options = {
+    // dont read data here, will read data later
+    noData: true,
+    storageOptions: {
+      skipBackup: true,
+      path: "images",
+    },
+    title: "Send Image",
+  };
+
+  const handleImage = async (event) => {
+    ImagePicker.showImagePicker(options, async (response) => {
+      console.log("Response = ", response);
+
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.error) {
+        console.log("ImagePicker Error: ", response.error);
+      } else if (response.customButton) {
+        console.log("User tapped custom button: ", response.customButton);
+      } else {
+        console.debug("Got an updated photo");
+        console.log(response);
+        if (response.type === "image/jpeg" || response.type === "image/png") {
+          const results = await controller.uploadFiles(connectedUserIdRef.current, [response.uri]);
+        } else {
+          // Show some kind of error
+        }
+      }
+    });
   };
 
   const handleSubmit = async () => {
@@ -66,10 +99,10 @@ export default function MessagesScreen({navigation, route}) {
   const init = async () => {
     const newUserMessages = await window.controller.getMessages(connectedUserIdRef.current);
     const newDownloads = await window.controller.getDownloads();
-    const newUserId = window.controller.currentUserId();
+    const currentUserId = window.controller.currentUserId();
     const newDeviceId = window.controller.currentDeviceId();
 
-    setUserId(newUserId);
+    setCurrentUserId(currentUserId);
 
     setUserMessages(newUserMessages);
     setDownloads(newDownloads);
@@ -111,8 +144,8 @@ export default function MessagesScreen({navigation, route}) {
     const timestamp = window.view.messageTimestamp(message);
     const timestampDisplay = window.view.messageDisplayTimestamp(timestamp);
 
-    const fromMe = window.view.currentUsersMessage(message, userId);
-    const messageState = window.view.messageState(message, userId);
+    const fromMe = window.view.currentUsersMessage(message, currentUserId);
+    const messageState = window.view.messageState(message, currentUserId);
     const fromMeSpace = (fromMe && !lastMessageFromMe) || (!fromMe && lastMessageFromMe);
 
     if (fromMeSpace) {
@@ -152,7 +185,8 @@ export default function MessagesScreen({navigation, route}) {
       <View style={styles.bottom} >
         <View style={styles.inputContainer}>
           <Input placeholder="Message" onChangeText={handleMessageChange} onBlur={Keyboard.dismiss} value={messageString} />
-          <Button title="Send" onPress={handleSubmit} />
+          <Button onPress={handleImage}><Icon name="image" /></Button>
+          <Button onPress={handleSubmit}><Icon name='send' /></Button>
         </View>
       </View>
     </KeyboardAvoidingView>

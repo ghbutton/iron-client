@@ -9,6 +9,12 @@ const config = (function() {
     isDev: function() {
       return isDev;
     },
+    isElectron: function() {
+      return true
+    },
+    isReactNative: function() {
+      return false
+    },
     wsProtocol: function() {
       if (isDev) {
         return process.env.REACT_APP_IRON_WS_PROTOCOL;

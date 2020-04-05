@@ -9,6 +9,12 @@ const config = (function() {
     isDev: function() {
       return isDev;
     },
+    isElectron: function() {
+      return false
+    },
+    isReactNative: function() {
+      return true
+    },
     wsProtocol: function() {
       if (isDev) {
         return "ws";

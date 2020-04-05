@@ -1,7 +1,6 @@
-
 import React, {Component, useCallback, useEffect, useState} from "react";
 import {AppState, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
-import Button from "../components/TextButton";
+import TextButton from "../components/TextButton";
 import {useFocusEffect} from "@react-navigation/native";
 
 export default function ChatsScreen({navigation}) {
@@ -58,13 +57,13 @@ export default function ChatsScreen({navigation}) {
 
   return (
     <View>
-      <Button title="+" onPress={handleNewChat} right />
+      <TextButton title="+" onPress={handleNewChat} right />
       { (connectionsLoaded && connectedUsers.length === 0) ?
         <Text>No chats.</Text> :
             <FlatList
               data={connectedUsers}
               renderItem={ ({item: user}) =>
-                <TouchableOpacity style={styles.saveButton} onPress={() => handleConnectedUserPress(user.id)} >
+                <TouchableOpacity style={styles.chatOutter} onPress={() => handleConnectedUserPress(user.id)} >
                   <Text style={styles.saveButtonText}>{userDisplay[user.id]}</Text>
                 </TouchableOpacity>
               }
@@ -87,15 +86,16 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
   },
-  saveButton: {
-    borderWidth: 1,
-    borderColor: "#007BFF",
-    backgroundColor: "#007BFF",
+  chatOutter: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#CCCCCC",
+    backgroundColor: "#FFFFFF",
     padding: 15,
     margin: 5,
   },
   saveButtonText: {
-    color: "#FFFFFF",
+    color: "#000000",
     fontSize: 20,
     textAlign: "center",
   },
