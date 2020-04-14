@@ -1,4 +1,5 @@
 import api from "./api.js";
+import config from "./config.js";
 import callbacks from "./callbacks.js";
 import deviceOS from "./device_os.js";
 import logger from "./logger.js";
@@ -339,8 +340,6 @@ const controller = (function() {
       await signal.buildSession(recipientDeviceId, identityKey, signedPreKey, preKey, myDeviceId);
       return {status: "ok"};
     } else {
-      console.log("ERROR");
-      console.log(statusIdentity);
       return {status: "error"};
     }
   }
@@ -773,27 +772,30 @@ const controller = (function() {
     },
     downloadDirectory: async function() {
       // Electron only
-      const downloadDirectory = await storage.loadDownloadDirectory();
-      if (!downloadDirectory) {
-        const defaultDirectory = await fileSystem.defaultDownloadDirectory();
-        return defaultDirectory;
-      } else {
-        return downloadDirectory;
-      }
+      //      const downloadDirectory = await storage.loadDownloadDirectory();
+      //      if (!downloadDirectory) {
+      //        const defaultDirectory = config.defaultDownloadDirectory();
+      //        return defaultDirectory;
+      //      } else {
+      //        return downloadDirectory;
+      //      }
+      const defaultDirectory = config.defaultDownloadDirectory();
+      return defaultDirectory;
     },
-    updateDownloadDirectory: async function() {
-      const directories = await fileSystem.selectDirectory();
-      if (!directories) {
-        return;
-      }
-      const directory = directories[0];
-      const defaultDirectory = await fileSystem.defaultDownloadDirectory();
-      if (directory === defaultDirectory) {
-        await storage.deleteDownloadDirectory();
-      } else {
-        await storage.saveDownloadDirectory(directory);
-      }
-    },
+    //    updateDownloadDirectory: async function() {
+    //      // Electron only
+    //      const directories = await fileSystem.selectDirectory();
+    //      if (!directories) {
+    //        return;
+    //      }
+    //      const directory = directories[0];
+    //      const defaultDirectory = config.defaultDownloadDirectory();
+    //      if (directory === defaultDirectory) {
+    //        await storage.deleteDownloadDirectory();
+    //      } else {
+    //        await storage.saveDownloadDirectory(directory);
+    //      }
+    //    },
     getDownloads: async function() {
       return applicationState.downloads();
     },
@@ -817,7 +819,6 @@ const controller = (function() {
       const decrypted64 = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
       const directory = await this.downloadDirectory();
       const {type, path, basename: newBasename} = await fileSystem.fileDownloadPath(directory, basename);
-
 
       if (type === "ok") {
         await fileSystem.writeBase64(path, decrypted64);

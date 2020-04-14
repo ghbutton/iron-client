@@ -10,7 +10,9 @@ const fileSystem = (function() {
       const file = await RNFS.readFile(path, "base64");
       return file;
     },
-    writeBase64: async function(path, bytes) {
+    writeBase64: async function(path, base64) {
+      const file = await RNFS.writeFile(path, base64, "base64");
+      return file;
     },
     basename: async function(uri) {
       let filename = uri.substring(uri.lastIndexOf('/') + 1, uri.length)
@@ -31,6 +33,9 @@ const fileSystem = (function() {
     defaultDownloadDirectory: async function() {
     },
     fileDownloadPath: async function(directory, basename) {
+      // TODO dedup filesnames, make sure we aren't overwriting a file
+      //      const fullPath = `${directory}/${basename}`;
+      return {type: "ok", path: `${directory}/${basename}`, basename: basename};
     },
     downloadFinished: async function(path) {
     },

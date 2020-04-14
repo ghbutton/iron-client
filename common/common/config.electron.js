@@ -1,5 +1,3 @@
-import localStorage from "./local_storage.js";
-
 const isDev = (process.env.NODE_ENV === "development");
 const app = window.app;
 const API_VERSION = 5;
@@ -36,16 +34,21 @@ const config = (function() {
         return null;
       }
     },
-    basePath: function() {
+    privateDataPath: function() {
       if (isDev) {
-        if (localStorage.basePath()) {
-          return localStorage.basePath();
+        if (window.localStorage.getItem("privateDataPath")) {
+          // For debugging only, so you can have two electron instances on the same computer and
+          // they will use different storage paths
+          return `${window.localStorage.getItem("privateDataPath")}/storage`;
         } else {
           return "/tmp/iron/storage";
         }
       } else {
         return `${app.getPath("userData")}/storage`;
       }
+    },
+    defaultDownloadDirectory: function() {
+      return app.getPath("downloads");
     },
     apiVersion: function() {
       return API_VERSION;

@@ -1,5 +1,7 @@
 const isDev = __DEV__;
 const API_VERSION = 5;
+const IOS = "ios";
+const RNFS = require("react-native-fs");
 
 import DeviceInfo from "react-native-device-info";
 
@@ -37,8 +39,15 @@ const config = (function() {
         return null;
       }
     },
-    basePath: function() {
-      return "";
+    privateDataPath: function() {
+      if (Platform.OS === IOS) {
+        return `${RNFS.LibraryDirectoryPath}/Application Support/storage`;
+      } else {
+        throw "iOS only for now";
+      }
+    },
+    defaultDownloadDirectory: function() {
+      return `${RNFS.DocumentDirectoryPath}`;
     },
     apiVersion: function() {
       return API_VERSION;

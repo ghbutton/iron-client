@@ -15,8 +15,8 @@ const fileSystem = (function() {
     readBase64: async function(path) {
       return fs.readFileSync(path, {encoding: "base64"});
     },
-    writeBase64: async function(path, bytes) {
-      return fs.writeFileSync(path, bytes, {encoding: "base64"});
+    writeBase64: async function(path, base64) {
+      return fs.writeFileSync(path, base64, {encoding: "base64"});
     },
     basename: async function(path) {
       return fs_path.basename(path);
@@ -43,9 +43,6 @@ const fileSystem = (function() {
     },
     showSaveDialog: async function(filename) {
       return dialog.showSaveDialog(null, {defaultPath: filename});
-    },
-    defaultDownloadDirectory: async function() {
-      return app.getPath("downloads");
     },
     fileDownloadPath: async function(directory, basename) {
       const fullPath = `${directory}/${basename}`;

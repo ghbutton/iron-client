@@ -11,7 +11,6 @@ class SettingsPage extends Component {
     this.state = {currentUser: null, deviceId: null, devices: [], version: ""};
 
     this.clearData = this.clearData.bind(this);
-    this.updateDownloadDirectory = this.updateDownloadDirectory.bind(this);
   }
 
   async clearData() {
@@ -20,13 +19,6 @@ class SettingsPage extends Component {
       // TODO have a central place for routes;
       this.props.history.push("/loading");
     }
-  }
-
-  async updateDownloadDirectory() {
-    await window.controller.updateDownloadDirectory();
-    const downloadDirectory = await window.controller.downloadDirectory();
-
-    this.setState({downloadDirectory});
   }
 
   render() {
@@ -52,7 +44,6 @@ class SettingsPage extends Component {
                 <div>
                   <h2 className="sectionHeader">Download directory</h2>
                   <p>Path: {downloadDirectory}</p>
-                  <button className="btn btn-primary" onClick={this.updateDownloadDirectory}>{"Update"}</button>
                 </div>
           }
           <h2 className="sectionHeader">Devices</h2>

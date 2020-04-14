@@ -12,22 +12,22 @@ const {EventManager} = NativeModules;
 // PLING.volume = 0.75;
 
 // The bubbles that appear on the left or the right for the messages.
-function MessageBubble(props) {
+function MessageBubble({direction, text, onPress}) {
   // These spacers make the message bubble stay to the left or the right, depending on who is speaking, even if the message is multiple lines.
-  const leftSpacer = props.direction === "left" ? null : <View style={{width: 70}}/>;
-  const rightSpacer = props.direction === "left" ? <View style={{width: 70}}/> : null;
+  const leftSpacer = direction === "left" ? null : <View style={{width: 70}}/>;
+  const rightSpacer = direction === "left" ? <View style={{width: 70}}/> : null;
 
-  const bubbleStyles = props.direction === "left" ? [styles.messageBubble, styles.messageBubbleLeft] : [styles.messageBubble, styles.messageBubbleRight];
+  const bubbleStyles = direction === "left" ? [styles.messageBubble, styles.messageBubbleLeft] : [styles.messageBubble, styles.messageBubbleRight];
 
-  const bubbleTextStyle = props.direction === "left" ? styles.messageBubbleTextLeft : styles.messageBubbleTextRight;
+  const bubbleTextStyle = direction === "left" ? styles.messageBubbleTextLeft : styles.messageBubbleTextRight;
+
+  const body = onPress ? (<TouchableOpacity onPress={onPress}><Text style={bubbleTextStyle}>{text}</Text></TouchableOpacity>) : (<Text style={bubbleTextStyle}>{text}</Text>);
 
   return (
     <View style={{justifyContent: "space-between", flexDirection: "row"}}>
       {leftSpacer}
       <View style={bubbleStyles}>
-        <Text style={bubbleTextStyle}>
-          {props.text}
-        </Text>
+        {body}
       </View>
       {rightSpacer}
     </View>
@@ -90,6 +90,14 @@ export default function MessagesScreen({navigation, route}) {
     }
   };
 
+  const handleDownload = (message) => {
+    return async function() {
+      console.log("DOWNLOAD");
+      console.log(message);
+      window.controller.downloadFile(message);
+    }
+  }
+
   const handleNewMessage = async () => {
     const newUserMessages = await window.controller.getMessages(connectedUserIdRef.current);
 
@@ -134,9 +142,10 @@ export default function MessagesScreen({navigation, route}) {
   let lastMessageFromMe = true;
   const messages = userMessages.map((message, index) => {
     let body = null;
+    let hasLink = window.view.messageHasLink(message);
 
-    if (window.view.messageHasLink(message)) {
-      body = <Text style={styles.saveButtonText}>Download - {window.view.messageDisplay(message)}</Text>;
+    if (hasLink) {
+      body = `Download - ${window.view.messageDisplay(message)}`;
     } else {
       body = window.view.messageDisplay(message);
     }
@@ -166,7 +175,7 @@ export default function MessagesScreen({navigation, route}) {
     const direction = fromMe ? "right" : "left";
 
     return (
-      <MessageBubble key={message.id} direction={direction} text={body}/>
+      <MessageBubble key={message.id} direction={direction} text={body} onPress={ hasLink && handleDownload(message)}/>
     );
   });
 

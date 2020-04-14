@@ -1,7 +1,7 @@
 import config from "./config.js";
 
 const fs = window.fs;
-const basePath = config.basePath();
+const privateDataPath = config.privateDataPath();
 
 export default (function() {
   async function createDirectory(currentPath) {
@@ -12,10 +12,10 @@ export default (function() {
 
   return {
     setItem: async function(key, value) {
-      return fs.writeFileSync(`${basePath}/${key}`, value);
+      return fs.writeFileSync(`${privateDataPath}/${key}`, value);
     },
     deleteItem: async function(key) {
-      const currentPath = `${basePath}/${key}`;
+      const currentPath = `${privateDataPath}/${key}`;
       if (fs.existsSync(currentPath)) {
         return fs.unlinkSync(currentPath);
       } else {
@@ -23,14 +23,14 @@ export default (function() {
       }
     },
     clearAllData: async function() {
-      const files = fs.readdirSync(basePath);
+      const files = fs.readdirSync(privateDataPath);
 
       for (const file of files) {
-        fs.unlinkSync(`${basePath}/${file}`);
+        fs.unlinkSync(`${privateDataPath}/${file}`);
       }
     },
     init: async function() {
-      const folders = basePath.split("/");
+      const folders = privateDataPath.split("/");
       let currentPath = "";
       if (folders[0] === "") {
         // Remove the leading slash
@@ -50,7 +50,7 @@ export default (function() {
     },
     getItem: async function(key) {
       return new Promise(function(resolve, reject) {
-        fs.readFile(`${basePath}/${key}`, (err, data) => {
+        fs.readFile(`${privateDataPath}/${key}`, (err, data) => {
           if (err) {
             if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
               resolve(null);

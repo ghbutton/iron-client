@@ -1,8 +1,8 @@
 import config from "./config.js";
 const RNFS = require("react-native-fs");
 
-const basePath = config.basePath();
 const UTF8 = "utf8";
+const privateDataPath = config.privateDataPath();
 
 export default (function() {
   async function createDirectory(currentPath) {
@@ -13,23 +13,23 @@ export default (function() {
 
   return {
     setItem: async function(key, value) {
-      RNFS.writeFile(RNFS.DocumentDirectoryPath + `/${key}`, value, UTF8);
+      RNFS.writeFile(`${privateDataPath}/${key}`, value, UTF8);
     },
     deleteItem: async function(key) {
       // TODO
     },
     clearAllData: async function() {
-      const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+      const files = await RNFS.readDir(privateDataPath);
       for (const file of files) {
-        await RNFS.unlink(RNFS.DocumentDirectoryPath + `/${file.name}`);
+        await RNFS.unlink(`${privateDataPath}/${file.name}`);
       }
     },
     init: async function() {
-      // Do nothing
+      await RNFS.mkdir(`${privateDataPath}`);
     },
     getItem: async function(key) {
       try {
-        return await RNFS.readFile(RNFS.DocumentDirectoryPath + `/${key}`, UTF8);
+        return await RNFS.readFile(`${privateDataPath}/${key}`, UTF8);
       } catch (err) {
         if (err.toString().startsWith("Error: ENOENT: no such file or directory, open")) {
           return null;
