@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:libsignal.xcodeproj">
+      location = "group:/Users/garybutton/Personal/iron-client/native/ios/ironnotice.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">

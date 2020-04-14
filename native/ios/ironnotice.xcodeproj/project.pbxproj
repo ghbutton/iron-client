@@ -12,20 +12,20 @@
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		1699B2BF9746FF383D68118D /* libPods-libsignal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C30DFC0E864434FD94CEDE4C /* libPods-libsignal.a */; };
-		1B62D0243FEB46417CD7012F /* libPods-libsignalTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 337F7D86ABB310477EBFD012 /* libPods-libsignalTests.a */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* libsignalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* libsignalTests.m */; };
-		3E2BBFB95F815F77F6F5E6E7 /* libPods-libsignal-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E7F769EF1588FC008111510 /* libPods-libsignal-tvOSTests.a */; };
+		2F141345B31E06A0B8EF4301 /* libPods-ironnotice-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41AEB9B110D9C925B5F81F46 /* libPods-ironnotice-tvOS.a */; };
+		34CD32C5B247F9899E52DBAE /* libPods-ironnoticeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 820DCB8C6D9D82DD4C480596 /* libPods-ironnoticeTests.a */; };
+		3B5D37665B4DDCF4C5EFE663 /* libPods-ironnotice-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4527042AE22146B81CD706EE /* libPods-ironnotice-tvOSTests.a */; };
 		85452886240EB51A000DBE2E /* SignalProtocol.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; };
 		85452887240EB51A000DBE2E /* SignalProtocol.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		85D4A4E3240C076400CEC579 /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E2240C076400CEC579 /* Bridge.m */; };
 		85D4A4E6240C077100CEC579 /* EventManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E5240C077100CEC579 /* EventManager.m */; };
 		85D4A4EF240C093A00CEC579 /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4ED240C093A00CEC579 /* Signal.swift */; };
 		85D4A4F0240C093A00CEC579 /* SignalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4EE240C093A00CEC579 /* SignalStorage.swift */; };
-		A4133047C5E46A87EB2320A5 /* libPods-libsignal-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B177C3FBDEBE873385ECB8 /* libPods-libsignal-tvOS.a */; };
+		D3FBAF69C6F637B0134BE29E /* libPods-ironnotice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 782F0E27D9B1EA11B2BF7907 /* libPods-ironnotice.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,38 +61,46 @@
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
-		00E356EE1AD99517003FC87E /* libsignalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libsignalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356EE1AD99517003FC87E /* ironnoticeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ironnoticeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* libsignalTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = libsignalTests.m; sourceTree = "<group>"; };
+		07602A37D10DCCAB4269D442 /* Pods-ironnotice-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnotice-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-ironnotice-tvOS/Pods-ironnotice-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		116E03E60CE539BDA7D79BF5 /* Pods-libsignal-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-libsignal-tvOSTests/Pods-libsignal-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* libsignal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = libsignal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* ironnotice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ironnotice.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = libsignal/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = libsignal/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = libsignal/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = libsignal/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = libsignal/main.m; sourceTree = "<group>"; };
-		2D02E47B1E0B4A5D006451C7 /* libsignal-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "libsignal-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D02E4901E0B4A5D006451C7 /* libsignal-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "libsignal-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D02E47B1E0B4A5D006451C7 /* ironnotice-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ironnotice-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D02E4901E0B4A5D006451C7 /* ironnotice-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ironnotice-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2EFF02A6F16020C3253B3DA3 /* Pods-libsignal-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-libsignal-tvOSTests/Pods-libsignal-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		337F7D86ABB310477EBFD012 /* libPods-libsignalTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-libsignalTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		33CFFBE5EA995A5A6E6E2A91 /* Pods-libsignal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal.release.xcconfig"; path = "Target Support Files/Pods-libsignal/Pods-libsignal.release.xcconfig"; sourceTree = "<group>"; };
+		41AEB9B110D9C925B5F81F46 /* libPods-ironnotice-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnotice-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4527042AE22146B81CD706EE /* libPods-ironnotice-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnotice-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		45F8374341257FEE5AB93AE7 /* Pods-ironnotice-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnotice-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-ironnotice-tvOSTests/Pods-ironnotice-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		4EC83DA0EBEB026FD4E0FA4B /* Pods-ironnotice-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnotice-tvOS.release.xcconfig"; path = "Target Support Files/Pods-ironnotice-tvOS/Pods-ironnotice-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		58B5CEA59EF821B1FA12859E /* Pods-libsignal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal.debug.xcconfig"; path = "Target Support Files/Pods-libsignal/Pods-libsignal.debug.xcconfig"; sourceTree = "<group>"; };
 		63EC8A89455C618426DFAC87 /* Pods-libsignal-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-libsignal-tvOS/Pods-libsignal-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		6E7F769EF1588FC008111510 /* libPods-libsignal-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-libsignal-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		782F0E27D9B1EA11B2BF7907 /* libPods-ironnotice.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnotice.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		820DCB8C6D9D82DD4C480596 /* libPods-ironnoticeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnoticeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SignalProtocol.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85D4A4E2240C076400CEC579 /* Bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Bridge.m; sourceTree = "<group>"; };
 		85D4A4E4240C077100CEC579 /* EventManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventManager.h; sourceTree = "<group>"; };
 		85D4A4E5240C077100CEC579 /* EventManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventManager.m; sourceTree = "<group>"; };
-		85D4A4E7240C077900CEC579 /* libsignal-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "libsignal-Bridging-Header.h"; sourceTree = "<group>"; };
-		85D4A4EC240C093900CEC579 /* libsignal-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "libsignal-Bridging-Header.h"; sourceTree = "<group>"; };
+		85D4A4E7240C077900CEC579 /* ironnotice-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ironnotice-Bridging-Header.h"; sourceTree = "<group>"; };
+		85D4A4EC240C093900CEC579 /* ironnotice-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ironnotice-Bridging-Header.h"; sourceTree = "<group>"; };
 		85D4A4ED240C093A00CEC579 /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
 		85D4A4EE240C093A00CEC579 /* SignalStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignalStorage.swift; sourceTree = "<group>"; };
 		8F5F3CC74DAF7237F411D62A /* Pods-libsignal-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal-tvOS.release.xcconfig"; path = "Target Support Files/Pods-libsignal-tvOS/Pods-libsignal-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		965100221A432F42D211996B /* Pods-libsignalTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignalTests.release.xcconfig"; path = "Target Support Files/Pods-libsignalTests/Pods-libsignalTests.release.xcconfig"; sourceTree = "<group>"; };
-		A6B177C3FBDEBE873385ECB8 /* libPods-libsignal-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-libsignal-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F9BA5909125AD4BAB438F94 /* Pods-ironnoticeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnoticeTests.release.xcconfig"; path = "Target Support Files/Pods-ironnoticeTests/Pods-ironnoticeTests.release.xcconfig"; sourceTree = "<group>"; };
+		A21E7FDC6DEDCD16FCFA2986 /* Pods-ironnotice.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnotice.debug.xcconfig"; path = "Target Support Files/Pods-ironnotice/Pods-ironnotice.debug.xcconfig"; sourceTree = "<group>"; };
+		A575C1CCD2B6C0D4A4E4B25A /* Pods-ironnotice-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnotice-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-ironnotice-tvOSTests/Pods-ironnotice-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B45655A859027BA1F19BDC3B /* Pods-ironnoticeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnoticeTests.debug.xcconfig"; path = "Target Support Files/Pods-ironnoticeTests/Pods-ironnoticeTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B53457BA701A4F7B99EF2E41 /* Pods-libsignalTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignalTests.debug.xcconfig"; path = "Target Support Files/Pods-libsignalTests/Pods-libsignalTests.debug.xcconfig"; sourceTree = "<group>"; };
-		C30DFC0E864434FD94CEDE4C /* libPods-libsignal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-libsignal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDA0D9EC697F59D2B82F5568 /* Pods-ironnotice.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ironnotice.release.xcconfig"; path = "Target Support Files/Pods-ironnotice/Pods-ironnotice.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
@@ -102,7 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B62D0243FEB46417CD7012F /* libPods-libsignalTests.a in Frameworks */,
+				34CD32C5B247F9899E52DBAE /* libPods-ironnoticeTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,7 +119,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				85452886240EB51A000DBE2E /* SignalProtocol.framework in Frameworks */,
-				1699B2BF9746FF383D68118D /* libPods-libsignal.a in Frameworks */,
+				D3FBAF69C6F637B0134BE29E /* libPods-ironnotice.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,7 +127,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A4133047C5E46A87EB2320A5 /* libPods-libsignal-tvOS.a in Frameworks */,
+				2F141345B31E06A0B8EF4301 /* libPods-ironnotice-tvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,7 +135,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3E2BBFB95F815F77F6F5E6E7 /* libPods-libsignal-tvOSTests.a in Frameworks */,
+				3B5D37665B4DDCF4C5EFE663 /* libPods-ironnotice-tvOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,7 +159,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* libsignal */ = {
+		13B07FAE1A68108700A75B9A /* ironnotice */ = {
 			isa = PBXGroup;
 			children = (
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
@@ -163,12 +171,12 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				85D4A4ED240C093A00CEC579 /* Signal.swift */,
 				85D4A4EE240C093A00CEC579 /* SignalStorage.swift */,
-				85D4A4E7240C077900CEC579 /* libsignal-Bridging-Header.h */,
+				85D4A4E7240C077900CEC579 /* ironnotice-Bridging-Header.h */,
 				85D4A4E4240C077100CEC579 /* EventManager.h */,
 				85D4A4E5240C077100CEC579 /* EventManager.m */,
 				85D4A4E2240C076400CEC579 /* Bridge.m */,
 			);
-			name = libsignal;
+			name = ironnotice;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -177,10 +185,10 @@
 				85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				C30DFC0E864434FD94CEDE4C /* libPods-libsignal.a */,
-				A6B177C3FBDEBE873385ECB8 /* libPods-libsignal-tvOS.a */,
-				6E7F769EF1588FC008111510 /* libPods-libsignal-tvOSTests.a */,
-				337F7D86ABB310477EBFD012 /* libPods-libsignalTests.a */,
+				782F0E27D9B1EA11B2BF7907 /* libPods-ironnotice.a */,
+				41AEB9B110D9C925B5F81F46 /* libPods-ironnotice-tvOS.a */,
+				4527042AE22146B81CD706EE /* libPods-ironnotice-tvOSTests.a */,
+				820DCB8C6D9D82DD4C480596 /* libPods-ironnoticeTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -196,6 +204,14 @@
 				116E03E60CE539BDA7D79BF5 /* Pods-libsignal-tvOSTests.release.xcconfig */,
 				B53457BA701A4F7B99EF2E41 /* Pods-libsignalTests.debug.xcconfig */,
 				965100221A432F42D211996B /* Pods-libsignalTests.release.xcconfig */,
+				A21E7FDC6DEDCD16FCFA2986 /* Pods-ironnotice.debug.xcconfig */,
+				CDA0D9EC697F59D2B82F5568 /* Pods-ironnotice.release.xcconfig */,
+				07602A37D10DCCAB4269D442 /* Pods-ironnotice-tvOS.debug.xcconfig */,
+				4EC83DA0EBEB026FD4E0FA4B /* Pods-ironnotice-tvOS.release.xcconfig */,
+				A575C1CCD2B6C0D4A4E4B25A /* Pods-ironnotice-tvOSTests.debug.xcconfig */,
+				45F8374341257FEE5AB93AE7 /* Pods-ironnotice-tvOSTests.release.xcconfig */,
+				B45655A859027BA1F19BDC3B /* Pods-ironnoticeTests.debug.xcconfig */,
+				9F9BA5909125AD4BAB438F94 /* Pods-ironnoticeTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -210,13 +226,13 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* libsignal */,
+				13B07FAE1A68108700A75B9A /* ironnotice */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* libsignalTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				33F00F9AFA8555E5D2F9994A /* Pods */,
-				85D4A4EC240C093900CEC579 /* libsignal-Bridging-Header.h */,
+				85D4A4EC240C093900CEC579 /* ironnotice-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -226,10 +242,10 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* libsignal.app */,
-				00E356EE1AD99517003FC87E /* libsignalTests.xctest */,
-				2D02E47B1E0B4A5D006451C7 /* libsignal-tvOS.app */,
-				2D02E4901E0B4A5D006451C7 /* libsignal-tvOSTests.xctest */,
+				13B07F961A680F5B00A75B9A /* ironnotice.app */,
+				00E356EE1AD99517003FC87E /* ironnoticeTests.xctest */,
+				2D02E47B1E0B4A5D006451C7 /* ironnotice-tvOS.app */,
+				2D02E4901E0B4A5D006451C7 /* ironnotice-tvOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -237,9 +253,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* libsignalTests */ = {
+		00E356ED1AD99517003FC87E /* ironnoticeTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "libsignalTests" */;
+			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ironnoticeTests" */;
 			buildPhases = (
 				FA0FAD2AFC8B7F8C8FACCD2D /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
@@ -251,14 +267,14 @@
 			dependencies = (
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
-			name = libsignalTests;
+			name = ironnoticeTests;
 			productName = libsignalTests;
-			productReference = 00E356EE1AD99517003FC87E /* libsignalTests.xctest */;
+			productReference = 00E356EE1AD99517003FC87E /* ironnoticeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		13B07F861A680F5B00A75B9A /* libsignal */ = {
+		13B07F861A680F5B00A75B9A /* ironnotice */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "libsignal" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ironnotice" */;
 			buildPhases = (
 				503733FDC009FBE60C09E997 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
@@ -273,14 +289,14 @@
 			);
 			dependencies = (
 			);
-			name = libsignal;
+			name = ironnotice;
 			productName = libsignal;
-			productReference = 13B07F961A680F5B00A75B9A /* libsignal.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* ironnotice.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E47A1E0B4A5D006451C7 /* libsignal-tvOS */ = {
+		2D02E47A1E0B4A5D006451C7 /* ironnotice-tvOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "libsignal-tvOS" */;
+			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "ironnotice-tvOS" */;
 			buildPhases = (
 				30BB0909D1336EE0DE6579C8 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F122414F3F0027D42C /* Start Packager */,
@@ -293,14 +309,14 @@
 			);
 			dependencies = (
 			);
-			name = "libsignal-tvOS";
+			name = "ironnotice-tvOS";
 			productName = "libsignal-tvOS";
-			productReference = 2D02E47B1E0B4A5D006451C7 /* libsignal-tvOS.app */;
+			productReference = 2D02E47B1E0B4A5D006451C7 /* ironnotice-tvOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E48F1E0B4A5D006451C7 /* libsignal-tvOSTests */ = {
+		2D02E48F1E0B4A5D006451C7 /* ironnotice-tvOSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "libsignal-tvOSTests" */;
+			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "ironnotice-tvOSTests" */;
 			buildPhases = (
 				A87A665AC4DF1827B42B0CF3 /* [CP] Check Pods Manifest.lock */,
 				2D02E48C1E0B4A5D006451C7 /* Sources */,
@@ -312,9 +328,9 @@
 			dependencies = (
 				2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */,
 			);
-			name = "libsignal-tvOSTests";
+			name = "ironnotice-tvOSTests";
 			productName = "libsignal-tvOSTests";
-			productReference = 2D02E4901E0B4A5D006451C7 /* libsignal-tvOSTests.xctest */;
+			productReference = 2D02E4901E0B4A5D006451C7 /* ironnotice-tvOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -346,7 +362,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "libsignal" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "ironnotice" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -359,10 +375,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* libsignal */,
-				00E356ED1AD99517003FC87E /* libsignalTests */,
-				2D02E47A1E0B4A5D006451C7 /* libsignal-tvOS */,
-				2D02E48F1E0B4A5D006451C7 /* libsignal-tvOSTests */,
+				13B07F861A680F5B00A75B9A /* ironnotice */,
+				00E356ED1AD99517003FC87E /* ironnoticeTests */,
+				2D02E47A1E0B4A5D006451C7 /* ironnotice-tvOS */,
+				2D02E48F1E0B4A5D006451C7 /* ironnotice-tvOSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -422,7 +438,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-libsignal/Pods-libsignal-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-ironnotice/Pods-ironnotice-resources.sh",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -461,7 +477,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-libsignal/Pods-libsignal-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ironnotice/Pods-ironnotice-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */ = {
@@ -493,7 +509,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-libsignal-tvOS-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ironnotice-tvOS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -515,7 +531,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-libsignal-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ironnotice-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -537,7 +553,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-libsignal-tvOSTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ironnotice-tvOSTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -559,7 +575,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-libsignalTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ironnoticeTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -650,12 +666,12 @@
 /* Begin PBXTargetDependency section */
 		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* libsignal */;
+			target = 13B07F861A680F5B00A75B9A /* ironnotice */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
 		2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2D02E47A1E0B4A5D006451C7 /* libsignal-tvOS */;
+			target = 2D02E47A1E0B4A5D006451C7 /* ironnotice-tvOS */;
 			targetProxy = 2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -675,7 +691,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B53457BA701A4F7B99EF2E41 /* Pods-libsignalTests.debug.xcconfig */;
+			baseConfigurationReference = B45655A859027BA1F19BDC3B /* Pods-ironnoticeTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -694,13 +710,13 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/libsignal.app/libsignal";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ironnotice.app/ironnotice";
 			};
 			name = Debug;
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 965100221A432F42D211996B /* Pods-libsignalTests.release.xcconfig */;
+			baseConfigurationReference = 9F9BA5909125AD4BAB438F94 /* Pods-ironnoticeTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -716,13 +732,13 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/libsignal.app/libsignal";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ironnotice.app/ironnotice";
 			};
 			name = Release;
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 58B5CEA59EF821B1FA12859E /* Pods-libsignal.debug.xcconfig */;
+			baseConfigurationReference = A21E7FDC6DEDCD16FCFA2986 /* Pods-ironnotice.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -737,8 +753,8 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = libsignal;
-				SWIFT_OBJC_BRIDGING_HEADER = "libsignal-Bridging-Header.h";
+				PRODUCT_NAME = ironnotice;
+				SWIFT_OBJC_BRIDGING_HEADER = "ironnotice-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -747,7 +763,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 33CFFBE5EA995A5A6E6E2A91 /* Pods-libsignal.release.xcconfig */;
+			baseConfigurationReference = CDA0D9EC697F59D2B82F5568 /* Pods-ironnotice.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -761,8 +777,8 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = libsignal;
-				SWIFT_OBJC_BRIDGING_HEADER = "libsignal-Bridging-Header.h";
+				PRODUCT_NAME = ironnotice;
+				SWIFT_OBJC_BRIDGING_HEADER = "ironnotice-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -771,7 +787,7 @@
 		};
 		2D02E4971E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 63EC8A89455C618426DFAC87 /* Pods-libsignal-tvOS.debug.xcconfig */;
+			baseConfigurationReference = 07602A37D10DCCAB4269D442 /* Pods-ironnotice-tvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -799,7 +815,7 @@
 		};
 		2D02E4981E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8F5F3CC74DAF7237F411D62A /* Pods-libsignal-tvOS.release.xcconfig */;
+			baseConfigurationReference = 4EC83DA0EBEB026FD4E0FA4B /* Pods-ironnotice-tvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -827,7 +843,7 @@
 		};
 		2D02E4991E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2EFF02A6F16020C3253B3DA3 /* Pods-libsignal-tvOSTests.debug.xcconfig */;
+			baseConfigurationReference = A575C1CCD2B6C0D4A4E4B25A /* Pods-ironnotice-tvOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -847,14 +863,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.libsignal-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/libsignal-tvOS.app/libsignal-tvOS";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ironnotice-tvOS.app/ironnotice-tvOS";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Debug;
 		};
 		2D02E49A1E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 116E03E60CE539BDA7D79BF5 /* Pods-libsignal-tvOSTests.release.xcconfig */;
+			baseConfigurationReference = 45F8374341257FEE5AB93AE7 /* Pods-ironnotice-tvOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -874,7 +890,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.libsignal-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/libsignal-tvOS.app/libsignal-tvOS";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ironnotice-tvOS.app/ironnotice-tvOS";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Release;
@@ -985,7 +1001,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "libsignalTests" */ = {
+		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ironnoticeTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
@@ -994,7 +1010,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "libsignal" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ironnotice" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -1003,7 +1019,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "libsignal-tvOS" */ = {
+		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "ironnotice-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D02E4971E0B4A5E006451C7 /* Debug */,
@@ -1012,7 +1028,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "libsignal-tvOSTests" */ = {
+		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "ironnotice-tvOSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D02E4991E0B4A5E006451C7 /* Debug */,
@@ -1021,7 +1037,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "libsignal" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "ironnotice" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

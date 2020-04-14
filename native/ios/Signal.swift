@@ -1,6 +1,6 @@
 //
 //  Bridge.swift
-//  libsignal
+//  ironnotice
 //
 //  Created by Gary Button on 2/11/19.
 //  Copyright © 2019 Facebook. All rights reserved.

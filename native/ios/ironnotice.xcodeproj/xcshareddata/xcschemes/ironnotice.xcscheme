@@ -29,9 +29,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "libsignal.app"
-               BlueprintName = "libsignal"
-               ReferencedContainer = "container:libsignal.xcodeproj">
+               BuildableName = "ironnotice.app"
+               BlueprintName = "ironnotice"
+               ReferencedContainer = "container:ironnotice.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -43,9 +43,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "libsignalTests.xctest"
-               BlueprintName = "libsignalTests"
-               ReferencedContainer = "container:libsignal.xcodeproj">
+               BuildableName = "ironnoticeTests.xctest"
+               BlueprintName = "ironnoticeTests"
+               ReferencedContainer = "container:ironnotice.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -73,9 +73,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "libsignal.app"
-            BlueprintName = "libsignal"
-            ReferencedContainer = "container:libsignal.xcodeproj">
+            BuildableName = "ironnotice.app"
+            BlueprintName = "ironnotice"
+            ReferencedContainer = "container:ironnotice.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -84,9 +84,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "libsignalTests.xctest"
-               BlueprintName = "libsignalTests"
-               ReferencedContainer = "container:libsignal.xcodeproj">
+               BuildableName = "ironnoticeTests.xctest"
+               BlueprintName = "ironnoticeTests"
+               ReferencedContainer = "container:ironnotice.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -106,9 +106,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "libsignal.app"
-            BlueprintName = "libsignal"
-            ReferencedContainer = "container:libsignal.xcodeproj">
+            BuildableName = "ironnotice.app"
+            BlueprintName = "ironnotice"
+            ReferencedContainer = "container:ironnotice.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -123,9 +123,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "libsignal.app"
-            BlueprintName = "libsignal"
-            ReferencedContainer = "container:libsignal.xcodeproj">
+            BuildableName = "ironnotice.app"
+            BlueprintName = "ironnotice"
+            ReferencedContainer = "container:ironnotice.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

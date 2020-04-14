@@ -6,7 +6,7 @@
  */
 
 #import "AppDelegate.h"
-#import "libsignal-Swift.h"
+#import "ironnotice-Swift.h"
 
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
