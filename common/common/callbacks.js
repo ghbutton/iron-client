@@ -3,6 +3,10 @@ import engine from "./callback_engine.js";
 
 const callbacks = (function() {
   return {
+    updateNumUnread: function(numUnread) {
+      logger.debug(`Callback - Update num unread ${numUnread}`);
+      engine.updateNumUnread(numUnread);
+    },
     newMessage: function() {
       logger.debug("Callback - New message event");
       engine.dispatch("new_message", {});

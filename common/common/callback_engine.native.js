@@ -4,6 +4,9 @@ const {EventManager} = NativeModules;
 
 const engine = (function() {
   return {
+    updateNumUnread: function(numUnread) {
+      // TODO set the badge for the app
+    },
     dispatch: function(name, opts) {
       const eventEmitter = new NativeEventEmitter(EventManager);
 

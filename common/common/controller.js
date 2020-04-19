@@ -364,6 +364,28 @@ const controller = (function() {
     return {status: "ok", devices: devices.concat(extraDevices)};
   }
 
+  async function _numUnread() {
+    const connectedUsers = await applicationState.connectedUsers();
+    let numUnread = 0;
+    for (let i = 0; i < connectedUsers.length; i++) {
+      const connectedUser = connectedUsers[i];
+      const lastRead = applicationState.userLastRead(connectedUser.id);
+      const messages = applicationState.connectedMessages(userId, connectedUser.id);
+
+      for (let i = 0; i < messages.length; i++) {
+        const message = messages[i];
+        if (message.attributes.inserted_at) {
+          const insertedAt = new Date(message.attributes.inserted_at).getTime() / 1000;
+          if (insertedAt > lastRead) {
+            numUnread = numUnread + 1;
+          }
+        }
+      }
+    }
+
+    return numUnread;
+  }
+
   async function _uploadFile(filename, recipientUserId) {
     logger.debug(`Sending file ${filename} to ${recipientUserId}`);
     const basename = await fileSystem.basename(filename);
@@ -594,13 +616,15 @@ const controller = (function() {
       // Dedup messages that we already have
       if (!await applicationState.hasMessage(encryptedMessage)) {
         const message = await signal.decryptMessage(deviceId, senderDeviceId, encryptedMessage);
-        // Needs to happen atomically
+        // START Needs to happen atomically
         await applicationState.addMessage(message);
         await storage.saveMessages(deviceId, applicationState.messages());
         // END
       }
 
       await api.messageDelivered(encryptedMessage.id);
+      const numUnread = await _numUnread();
+      callbacks.updateNumUnread(numUnread);
     },
     hasUnreadMessages: function(connectedUserId) {
       const lastRead = applicationState.userLastRead(connectedUserId);
@@ -633,6 +657,9 @@ const controller = (function() {
 
       await applicationState.updateLastRead(connectedUserId, lastRead);
       await storage.saveLastRead(deviceId, applicationState.lastRead());
+      const numUnread = await _numUnread();
+      console.log(numUnread);
+      callbacks.updateNumUnread(numUnread);
     },
     // TODO make async ??
     currentUserId: function() {
