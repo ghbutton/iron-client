@@ -41,9 +41,8 @@
       "scale" : "3x"
     },
     {
-      "size" : "1024x1024",
       "idiom" : "ios-marketing",
-      "filename" : "shield_1024.png",
+      "size" : "1024x1024",
       "scale" : "1x"
     }
   ],

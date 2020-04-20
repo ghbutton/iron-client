@@ -14,7 +14,7 @@ class SettingsPage extends Component {
   }
 
   async clearData() {
-    if (window.confirm("Are you sure you want to wipe all data from this device?")) {
+    if (window.confirm("CAUTION\nThis will delete all messages on this device and wipe your account if this is your only device.\nAre you sure?")) {
       await window.controller.clearData();
       // TODO have a central place for routes;
       this.props.history.push("/loading");
@@ -55,7 +55,7 @@ class SettingsPage extends Component {
             }
           </ul>
           <h2 className="sectionHeader">Private Data</h2>
-          <button className="btn btn-danger" onClick={this.clearData}>{"Clear data"}</button>
+          <button className="btn btn-danger" onClick={this.clearData}>{"Delete account"}</button>
           <h2 className="sectionHeader">Misc</h2>
           <p>Version: {version}</p>
         </div>

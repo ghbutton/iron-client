@@ -18,8 +18,8 @@ export default function SettingsScreen({navigation}) {
 
   const handleClearData = async () => {
     Alert.alert(
-        "Clear data",
-        "Clearing this device of all data?",
+        "Delete account",
+        "WARNING\nThis will delete all data off of this device and if this is your only device it will delete your account. Are you sure?",
         [
           {
             text: "Cancel",
@@ -79,7 +79,7 @@ export default function SettingsScreen({navigation}) {
       <View>
         <Text style={Typography.header2}>Private Data</Text>
         <TextButton
-          title="Clear data"
+          title="Delete account"
           onPress={handleClearData}
           danger
         />
