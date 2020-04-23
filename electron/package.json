@@ -1,6 +1,6 @@
 {
   "name": "Iron",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "private": true,
   "dependencies": {
     "bootstrap": "^4.3.1",
@@ -17,14 +17,11 @@
     "react-scripts": "3.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "electron": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron-pack": "yarn build --em.main=build/electron.js",
+    "build": "react-scripts build --em.main=build/electron.js",
     "dist": "electron-builder -mw",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "pack": "electron-builder --dir",
+    "start": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "main": "public/electron.js",
   "eslintConfig": {
@@ -39,7 +36,7 @@
   "devDependencies": {
     "concurrently": "^4.0.1",
     "electron": "^5.0.2",
-    "electron-builder": "^21.2.0",
+    "electron-builder": "^22.5.1",
     "electron-notarize": "^0.1.1",
     "eslint-config-google": "^0.12.0",
     "eslint-plugin-react": "^7.12.4",
