@@ -658,7 +658,6 @@ const controller = (function() {
       await applicationState.updateLastRead(connectedUserId, lastRead);
       await storage.saveLastRead(deviceId, applicationState.lastRead());
       const numUnread = await _numUnread();
-      console.log(numUnread);
       callbacks.updateNumUnread(numUnread);
     },
     // TODO make async ??
@@ -750,7 +749,6 @@ const controller = (function() {
       const connectedUsers = await this.getConnectedUsers();
       searchString = searchString.toLowerCase();
       searchString = searchString.replace(/\s+/g, "");
-
 
       const searchResults = [];
 
@@ -900,6 +898,9 @@ const controller = (function() {
     isEmail: async function(email) {
       const re = /\S+@\S+\.\S+/;
       return re.test(email);
+    },
+    isDev: function() {
+      return config.isDev();
     },
   };
 })();

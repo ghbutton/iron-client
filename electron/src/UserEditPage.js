@@ -5,7 +5,7 @@ import UserEditForm from "./UserEditForm";
 function UserEditPage(props) {
   return (
     <div className="userEditPage container">
-      <Link className="btn btn-outline-primary" to={"/settings"}>{"< Back"}</Link>
+      <button className="btn btn-outline-primary" onClick={() => {props.history.goBack()}}>{"< Back"}</button>
       <h1>Edit User</h1>
       <UserEditForm onSuccessLink={"/settings"} />
     </div>

@@ -2,8 +2,8 @@
 
 export const buttonText = {
   fontSize: 20,
-  textAlign: "center",
-  color: "#FFFFFF",
+  textAlign: 'center',
+  color: '#FFFFFF',
 };
 
 export const button = {
@@ -13,7 +13,7 @@ export const button = {
 };
 
 export const primaryButton = {
-  borderColor: "#007BFF",
-  backgroundColor: "#007BFF",
+  borderColor: '#007BFF',
+  backgroundColor: '#007BFF',
   ...button,
 };

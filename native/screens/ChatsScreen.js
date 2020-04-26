@@ -1,7 +1,16 @@
-import React, {Component, useCallback, useEffect, useState} from "react";
-import {AppState, FlatList, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
-import TextButton from "../components/TextButton";
-import {useFocusEffect} from "@react-navigation/native";
+import React, {Component, useCallback, useEffect, useState} from 'react';
+import {
+  AppState,
+  FlatList,
+  Keyboard,
+  Platform,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import TextButton from '../components/TextButton';
+import TextTouchableOpacity from '../components/TextTouchableOpacity';
+import {useFocusEffect} from '@react-navigation/native';
 
 export default function ChatsScreen({navigation}) {
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -10,26 +19,28 @@ export default function ChatsScreen({navigation}) {
   const [connectionsLoaded, setConnectionsLoaded] = useState(false);
 
   const handleNewMessage = () => {
-    console.log("NEW MESSAGE");
+    console.log('NEW MESSAGE');
   };
 
   const handleConnectedUserPress = (userId) => {
-    navigation.navigate("MessagesScreen", {userId: userId});
+    navigation.navigate('MessagesScreen', {userId: userId});
   };
 
   const handleNewChat = () => {
-    navigation.navigate("NewChatScreen");
+    navigation.navigate('NewChatScreen');
   };
 
   const loadData = async function() {
-    console.debug("Loading chats screen data");
+    console.debug('Loading chats screen data');
 
     const newConnectedUsers = await window.controller.getConnectedUsers();
     const [newHasUnreadMessages, newUserDisplay] = [{}, {}];
     for (let i = 0; i < newConnectedUsers.length; i++) {
       const user = newConnectedUsers[i];
       newUserDisplay[user.id] = window.view.userDisplay(user);
-      newHasUnreadMessages[user.id] = window.controller.hasUnreadMessages(user.id);
+      newHasUnreadMessages[user.id] = window.controller.hasUnreadMessages(
+        user.id,
+      );
     }
 
     setUserDisplay(newUserDisplay);
@@ -39,11 +50,11 @@ export default function ChatsScreen({navigation}) {
   };
 
   useFocusEffect(
-      // Nesting usecallback here to prevent an infinite loop
-      // See: https://reactnavigation.org/docs/use-focus-effect/#how-is-usefocuseffect-different-from-adding-a-listener-for-focus-event
-      useCallback(() => {
-        loadData();
-      }, []),
+    // Nesting usecallback here to prevent an infinite loop
+    // See: https://reactnavigation.org/docs/use-focus-effect/#how-is-usefocuseffect-different-from-adding-a-listener-for-focus-event
+    useCallback(() => {
+      loadData();
+    }, []),
   );
 
   useEffect(() => {
@@ -58,49 +69,17 @@ export default function ChatsScreen({navigation}) {
   return (
     <View>
       <TextButton title="+" onPress={handleNewChat} right />
-      { (connectionsLoaded && connectedUsers.length === 0) ?
-        <Text>No chats.</Text> :
-            <FlatList
-              data={connectedUsers}
-              renderItem={ ({item: user}) =>
-                <TouchableOpacity style={styles.chatOutter} onPress={() => handleConnectedUserPress(user.id)} >
-                  <Text style={styles.saveButtonText}>{userDisplay[user.id]}</Text>
-                </TouchableOpacity>
-              }
-            />
-      }
+      {connectionsLoaded && connectedUsers.length === 0 ? (
+        <Text>No chats.</Text>
+      ) : (
+        <FlatList
+          data={connectedUsers}
+          renderItem={({item: user}) => (
+            <TextTouchableOpacity onPress={() => handleConnectedUserPress(user.id)} title={userDisplay[user.id]} />
+          )}
+        />
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  inputContainer: {
-    paddingTop: 15,
-  },
-  textInput: {
-    borderColor: "#CCCCCC",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    height: 50,
-    fontSize: 25,
-    paddingLeft: 20,
-    paddingRight: 20,
-  },
-  chatOutter: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#CCCCCC",
-    backgroundColor: "#FFFFFF",
-    padding: 15,
-    margin: 5,
-  },
-  saveButtonText: {
-    color: "#000000",
-    fontSize: 20,
-    textAlign: "center",
-  },
-  rootError: {
-    color: "red",
-    fontSize: 20,
-  },
-});

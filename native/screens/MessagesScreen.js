@@ -1,9 +1,22 @@
-import React, {Component, useEffect} from "react";
-import {Keyboard, KeyboardAvoidingView, NativeEventEmitter, NativeModules, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
-import {useHeaderHeight} from "@react-navigation/stack";
-import {Button, Icon, Input, Item, Form} from "native-base";
-import TextButton from "../components/TextButton";
-import ImagePicker from "react-native-image-picker";
+import React, {Component, useEffect} from 'react';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import {useHeaderHeight} from '@react-navigation/stack';
+import {Button, Icon, Input, Item, Form} from 'native-base';
+import TextButton from '../components/TextButton';
+import ImagePicker from 'react-native-image-picker';
 
 const {EventManager} = NativeModules;
 
@@ -14,21 +27,32 @@ const {EventManager} = NativeModules;
 // The bubbles that appear on the left or the right for the messages.
 function MessageBubble({direction, text, onPress}) {
   // These spacers make the message bubble stay to the left or the right, depending on who is speaking, even if the message is multiple lines.
-  const leftSpacer = direction === "left" ? null : <View style={{width: 70}}/>;
-  const rightSpacer = direction === "left" ? <View style={{width: 70}}/> : null;
+  const leftSpacer = direction === 'left' ? null : <View style={{width: 70}} />;
+  const rightSpacer =
+    direction === 'left' ? <View style={{width: 70}} /> : null;
 
-  const bubbleStyles = direction === "left" ? [styles.messageBubble, styles.messageBubbleLeft] : [styles.messageBubble, styles.messageBubbleRight];
+  const bubbleStyles =
+    direction === 'left'
+      ? [styles.messageBubble, styles.messageBubbleLeft]
+      : [styles.messageBubble, styles.messageBubbleRight];
 
-  const bubbleTextStyle = direction === "left" ? styles.messageBubbleTextLeft : styles.messageBubbleTextRight;
+  const bubbleTextStyle =
+    direction === 'left'
+      ? styles.messageBubbleTextLeft
+      : styles.messageBubbleTextRight;
 
-  const body = onPress ? (<TouchableOpacity onPress={onPress}><Text style={bubbleTextStyle}>{text}</Text></TouchableOpacity>) : (<Text style={bubbleTextStyle}>{text}</Text>);
+  const body = onPress ? (
+    <TouchableOpacity onPress={onPress}>
+      <Text style={bubbleTextStyle}>{text}</Text>
+    </TouchableOpacity>
+  ) : (
+    <Text style={bubbleTextStyle}>{text}</Text>
+  );
 
   return (
-    <View style={{justifyContent: "space-between", flexDirection: "row"}}>
+    <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
       {leftSpacer}
-      <View style={bubbleStyles}>
-        {body}
-      </View>
+      <View style={bubbleStyles}>{body}</View>
       {rightSpacer}
     </View>
   );
@@ -36,7 +60,7 @@ function MessageBubble({direction, text, onPress}) {
 
 export default function MessagesScreen({navigation, route}) {
   const [connectedUser, setConnectedUser] = React.useState(null);
-  const [messageString, setMessageString] = React.useState("");
+  const [messageString, setMessageString] = React.useState('');
   const [userMessages, setUserMessages] = React.useState([]);
   const [downloads, setDownloads] = React.useState([]);
   const [now, setNow] = React.useState(new Date());
@@ -47,7 +71,7 @@ export default function MessagesScreen({navigation, route}) {
 
   const connectedUserIdRef = React.useRef(null);
 
-  const handleMessageChange = (newMessage) => {
+  const handleMessageChange = newMessage => {
     setMessageString(newMessage);
   };
 
@@ -56,26 +80,29 @@ export default function MessagesScreen({navigation, route}) {
     noData: true,
     storageOptions: {
       skipBackup: true,
-      path: "images",
+      path: 'images',
     },
-    title: "Send Image",
+    title: 'Send Image',
   };
 
-  const handleImage = async (event) => {
-    ImagePicker.showImagePicker(options, async (response) => {
-      console.log("Response = ", response);
+  const handleImage = async event => {
+    ImagePicker.showImagePicker(options, async response => {
+      console.log('Response = ', response);
 
       if (response.didCancel) {
-        console.log("User cancelled image picker");
+        console.log('User cancelled image picker');
       } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
+        console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
-        console.log("User tapped custom button: ", response.customButton);
+        console.log('User tapped custom button: ', response.customButton);
       } else {
-        console.debug("Got an updated photo");
+        console.debug('Got an updated photo');
         console.log(response);
-        if (response.type === "image/jpeg" || response.type === "image/png") {
-          const results = await controller.uploadFiles(connectedUserIdRef.current, [response.uri]);
+        if (response.type === 'image/jpeg' || response.type === 'image/png') {
+          const results = await window.controller.uploadFiles(
+            connectedUserIdRef.current,
+            [response.uri],
+          );
         } else {
           // Show some kind of error
         }
@@ -84,28 +111,35 @@ export default function MessagesScreen({navigation, route}) {
   };
 
   const handleSubmit = async () => {
-    if (messageString !== "") {
-      await window.controller.sendMessage(messageString, connectedUserIdRef.current);
-      setMessageString("");
+    if (messageString !== '') {
+      await window.controller.sendMessage(
+        messageString,
+        connectedUserIdRef.current,
+      );
+      setMessageString('');
     }
   };
 
-  const handleDownload = (message) => {
+  const handleDownload = message => {
     return async function() {
-      console.log("DOWNLOAD");
+      console.log('DOWNLOAD');
       console.log(message);
       window.controller.downloadFile(message);
-    }
-  }
+    };
+  };
 
   const handleNewMessage = async () => {
-    const newUserMessages = await window.controller.getMessages(connectedUserIdRef.current);
+    const newUserMessages = await window.controller.getMessages(
+      connectedUserIdRef.current,
+    );
 
     setUserMessages(newUserMessages);
   };
 
   const init = async () => {
-    const newUserMessages = await window.controller.getMessages(connectedUserIdRef.current);
+    const newUserMessages = await window.controller.getMessages(
+      connectedUserIdRef.current,
+    );
     const newDownloads = await window.controller.getDownloads();
     const currentUserId = window.controller.currentUserId();
     const newDeviceId = window.controller.currentDeviceId();
@@ -118,7 +152,9 @@ export default function MessagesScreen({navigation, route}) {
     window.controller.setLastRead(connectedUserIdRef.current);
 
     // Api call, slow
-    const newConnectedUser = await window.controller.getUserById(connectedUserIdRef.current);
+    const newConnectedUser = await window.controller.getUserById(
+      connectedUserIdRef.current,
+    );
     if (newConnectedUser) {
       setConnectedUser(newConnectedUser);
     }
@@ -131,12 +167,15 @@ export default function MessagesScreen({navigation, route}) {
 
     // TODO use a constants file for the callback names
     const eventEmitter = new NativeEventEmitter(EventManager);
-    const listenerNewMessage = eventEmitter.addListener("new_message", handleNewMessage);
+    const listenerNewMessage = eventEmitter.addListener(
+      'new_message',
+      handleNewMessage,
+    );
 
     return function cleanup() {
       listenerNewMessage.remove();
     };
-  }, []);
+  }, [route.params.userId]);
 
   let date = null;
   let lastMessageFromMe = true;
@@ -155,7 +194,8 @@ export default function MessagesScreen({navigation, route}) {
 
     const fromMe = window.view.currentUsersMessage(message, currentUserId);
     const messageState = window.view.messageState(message, currentUserId);
-    const fromMeSpace = (fromMe && !lastMessageFromMe) || (!fromMe && lastMessageFromMe);
+    const fromMeSpace =
+      (fromMe && !lastMessageFromMe) || (!fromMe && lastMessageFromMe);
 
     if (fromMeSpace) {
       lastMessageFromMe = fromMe;
@@ -165,37 +205,61 @@ export default function MessagesScreen({navigation, route}) {
 
     // TODO put this in view logic
     if (timestamp === null) {
-    } else if (date === null || timestamp.getFullYear() !== date.getFullYear() || timestamp.getMonth() !== date.getMonth() || timestamp.getDate() !== date.getDate()) {
+    } else if (
+      date === null ||
+      timestamp.getFullYear() !== date.getFullYear() ||
+      timestamp.getMonth() !== date.getMonth() ||
+      timestamp.getDate() !== date.getDate()
+    ) {
       date = timestamp;
       dateDisplay = window.view.timestampBreakDisplay(date);
     }
 
     // TODO handle unsent file error
-    const style = fromMe ? {alignSelf: "flex-end"} : {};
-    const direction = fromMe ? "right" : "left";
+    const style = fromMe ? {alignSelf: 'flex-end'} : {};
+    const direction = fromMe ? 'right' : 'left';
 
     return (
-      <MessageBubble key={message.id} direction={direction} text={body} onPress={ hasLink && handleDownload(message)}/>
+      <MessageBubble
+        key={message.id}
+        direction={direction}
+        text={body}
+        onPress={hasLink && handleDownload(message)}
+      />
     );
   });
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : null} keyboardVerticalOffset={headerHeight}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : null}
+      keyboardVerticalOffset={headerHeight}>
       {
-      // TODO replace title with the recipient's name
+        // TODO replace title with the recipient's name
       }
-      <Text style={styles.header}>{connectedUser === null ? "" : `${window.view.userDisplay(connectedUser)}`}</Text>
+      <Text style={styles.header}>
+        {connectedUser === null
+          ? ''
+          : `${window.view.userDisplay(connectedUser)}`}
+      </Text>
 
       <TouchableWithoutFeedback>
-        <ScrollView>
-          {messages}
-        </ScrollView>
+        <ScrollView>{messages}</ScrollView>
       </TouchableWithoutFeedback>
-      <View style={styles.bottom} >
+      <View style={styles.bottom}>
         <View style={styles.inputContainer}>
-          <Input placeholder="Message" onChangeText={handleMessageChange} onBlur={Keyboard.dismiss} value={messageString} />
-          <Button onPress={handleImage}><Icon name="image" /></Button>
-          <Button onPress={handleSubmit}><Icon name='send' /></Button>
+          <Input
+            placeholder="Message"
+            onChangeText={handleMessageChange}
+            onBlur={Keyboard.dismiss}
+            value={messageString}
+          />
+          <Button onPress={handleImage}>
+            <Icon name="image" />
+          </Button>
+          <Button onPress={handleSubmit}>
+            <Icon name="send" />
+          </Button>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -211,22 +275,22 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 25,
-    textAlign: "center",
+    textAlign: 'center',
     margin: 10,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   inputContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 15,
     paddingTop: 5,
     borderTopWidth: 1,
-    borderColor: "#CCCCCC",
+    borderColor: '#CCCCCC',
     borderBottomWidth: 1,
     paddingLeft: 20,
     paddingRight: 20,
   },
   rootError: {
-    color: "red",
+    color: 'red',
     fontSize: 20,
   },
 
@@ -238,23 +302,23 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    flexDirection: "row",
+    flexDirection: 'row',
     flex: 1,
   },
 
   messageBubbleLeft: {
-    backgroundColor: "#d5d8d4",
+    backgroundColor: '#d5d8d4',
   },
 
   messageBubbleTextLeft: {
-    color: "black",
+    color: 'black',
   },
 
   messageBubbleRight: {
-    backgroundColor: "#296394",
+    backgroundColor: '#296394',
   },
 
   messageBubbleTextRight: {
-    color: "white",
+    color: 'white',
   },
 });

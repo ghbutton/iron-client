@@ -1,34 +1,39 @@
-import React, {useState} from "react";
-import {TouchableHighlight, View} from "react-native";
-import {Form, Item, Input, Text} from "native-base";
-import TextButton from "../components/TextButton";
+import React, {useState} from 'react';
+import {Keyboard, TouchableHighlight, View} from 'react-native';
+import {Form, Item, Input, Label, Text} from 'native-base';
+
+import EmailInput from '../components/EmailInput';
+import TextButton from '../components/TextButton';
+import TextTouchableOpacity from '../components/TextTouchableOpacity';
 
 export default function NewChatScreen({navigation}) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
-  const [resultsReady, setResultsReady] = useState(false);
   const [searchedUser, setSearchedUser] = useState(null);
   const [isEmail, setIsEmail] = useState(false);
 
   const handleConnectToUser = async () => {
     const {status} = await window.controller.createNewConnection(searchedUser);
 
-    if (status === "ok") {
+    if (status === 'ok') {
       navigation.goBack();
     }
   };
 
   const handleInvite = async () => {
-    navigation.navigate("InvitationScreen", {email: search});
+    navigation.navigate('InvitationScreen', {email: search});
   };
 
-  const handleChange = async (searchString) => {
+  const handleUserChat = (user) => {
+      navigation.navigate('MessagesScreen', {userId: user.id});
+  }
+
+  const handleChange = async searchString => {
     setSearch(searchString);
 
     if (searchString.length > 3) {
       const users = await window.controller.connectedUsersSearch(searchString);
       setResults(users);
-      setResultsReady(true);
 
       if (await window.controller.isEmail(searchString)) {
         const user = await window.controller.getUserByEmail(searchString);
@@ -41,22 +46,25 @@ export default function NewChatScreen({navigation}) {
       }
     } else {
       setResults([]);
-      setResultsReady(false);
       setSearchedUser(null);
       setIsEmail(false);
     }
   };
 
   let inviteUser = null;
-  const resultBody = null;
+  let resultsBody = null;
 
   if (isEmail) {
     if (searchedUser) {
       inviteUser = (
         <View>
           <Text>Connect to user: </Text>
-          <TextButton title={searchedUser.attributes.email} onPress={handleConnectToUser} />
-        </View>);
+          <TextButton
+            title={searchedUser.attributes.email}
+            onPress={handleConnectToUser}
+          />
+        </View>
+      );
     } else {
       inviteUser = (
         <View>
@@ -67,20 +75,27 @@ export default function NewChatScreen({navigation}) {
     }
   }
 
-  if (results.length === 0) {
-  } else {
-    //    body = (<Text>Results!</Text>);
+  if (results.length > 0) {
+    resultsBody = results.map((user) => {
+      return (<TextTouchableOpacity key={user.id} title={window.view.userDisplay(user)} onPress={() => handleUserChat(user)} />);
+    });
   }
 
   return (
     <View>
       <Form>
         <Item>
-          <Input placeholder="Search by email or name" autoCapitalize="none" onChangeText={handleChange} />
+          <Label>Search</Label>
+          <EmailInput
+            placeholder="Email or name"
+            onBlur={Keyboard.dismiss}
+            autoFocus
+            onChangeText={handleChange}
+          />
         </Item>
       </Form>
       {inviteUser}
-      {resultBody}
+      {resultsBody}
     </View>
   );
 }

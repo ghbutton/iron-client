@@ -1,5 +1,5 @@
-import React from "react";
-import UpdateUserForm from "../components/UpdateUserForm";
+import React from 'react';
+import UpdateUserForm from '../components/UpdateUserForm';
 
 export default function NewUserWizardScreen() {
   const successCallback = () => {
@@ -8,8 +8,5 @@ export default function NewUserWizardScreen() {
     window.controller.emitLoggedIn();
   };
 
-  return (
-    <UpdateUserForm successCallback={successCallback} />
-  );
+  return <UpdateUserForm successCallback={successCallback} />;
 }
-

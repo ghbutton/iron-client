@@ -15,9 +15,9 @@ class LoadingPage extends Component {
 
   async handleLoggedIn() {
     if (await window.controller.currentUserHasName()) {
-      this.props.history.push("/user_edit_wizard");
-    } else {
       this.props.history.push("/chats");
+    } else {
+      this.props.history.push("/user_edit_wizard");
     }
   }
 

@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
+    "build:ios": "rm -r ./ios/assets/; react-native bundle --entry-file='index.js' --bundle-output='./ios/main.jsbundle' --dev=false --platform='ios' --assets-dest='./ios'",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint *.js **/*.js"
   },
   "dependencies": {
     "@react-native-community/masked-view": "^0.1.6",

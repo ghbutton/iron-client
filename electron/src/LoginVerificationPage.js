@@ -37,7 +37,7 @@ class LoginVerificationPage extends Component {
   render() {
     return (
       <div>
-        <Link to={"/login"} className="btn btn-outline-primary">{"< Back"}</Link>
+        <button onClick={() => {this.props.history.goBack()}} className="btn btn-outline-primary">{"< Back"}</button>
         <div className="centeredContainer">
           <h2>Verification Page</h2>
           <img src="./static/icon.png" height="100px" width="100px" alt=""/>
@@ -46,7 +46,7 @@ class LoginVerificationPage extends Component {
             <UserMessages warning={this.state.errorMessage} message={this.state.message} />
             <label><b>Email</b></label>
             <br/>
-            <input type="text" name="email" value={this.state.email} disabled/>
+            <input type="email" name="email" value={this.state.email} disabled/>
             <br/>
             <label><b>Verification Code</b></label>
             <br/>

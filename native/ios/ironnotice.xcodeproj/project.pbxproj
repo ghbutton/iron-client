@@ -19,8 +19,10 @@
 		2F141345B31E06A0B8EF4301 /* libPods-ironnotice-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 41AEB9B110D9C925B5F81F46 /* libPods-ironnotice-tvOS.a */; };
 		34CD32C5B247F9899E52DBAE /* libPods-ironnoticeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 820DCB8C6D9D82DD4C480596 /* libPods-ironnoticeTests.a */; };
 		3B5D37665B4DDCF4C5EFE663 /* libPods-ironnotice-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4527042AE22146B81CD706EE /* libPods-ironnotice-tvOSTests.a */; };
+		8529C132245503AD00028D7B /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 8529C131245503AD00028D7B /* assets */; };
 		85452886240EB51A000DBE2E /* SignalProtocol.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; };
 		85452887240EB51A000DBE2E /* SignalProtocol.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		859F9F4B24533FB20067119A /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
 		85D4A4E3240C076400CEC579 /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E2240C076400CEC579 /* Bridge.m */; };
 		85D4A4E6240C077100CEC579 /* EventManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E5240C077100CEC579 /* EventManager.m */; };
 		85D4A4EF240C093A00CEC579 /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4ED240C093A00CEC579 /* Signal.swift */; };
@@ -85,6 +87,7 @@
 		63EC8A89455C618426DFAC87 /* Pods-libsignal-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-libsignal-tvOS/Pods-libsignal-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		782F0E27D9B1EA11B2BF7907 /* libPods-ironnotice.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnotice.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		820DCB8C6D9D82DD4C480596 /* libPods-ironnoticeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnoticeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8529C131245503AD00028D7B /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SignalProtocol.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85D4A4E2240C076400CEC579 /* Bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Bridge.m; sourceTree = "<group>"; };
 		85D4A4E4240C077100CEC579 /* EventManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventManager.h; sourceTree = "<group>"; };
@@ -226,6 +229,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				8529C131245503AD00028D7B /* assets */,
 				13B07FAE1A68108700A75B9A /* ironnotice */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* libsignalTests */,
@@ -395,6 +399,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				859F9F4B24533FB20067119A /* main.jsbundle in Resources */,
+				8529C132245503AD00028D7B /* assets in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
@@ -742,7 +748,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				INFOPLIST_FILE = libsignal/Info.plist;
@@ -752,7 +758,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ironnotice.messenger;
 				PRODUCT_NAME = ironnotice;
 				SWIFT_OBJC_BRIDGING_HEADER = "ironnotice-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -767,7 +773,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				INFOPLIST_FILE = libsignal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -776,7 +782,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ironnotice.messenger;
 				PRODUCT_NAME = ironnotice;
 				SWIFT_OBJC_BRIDGING_HEADER = "ironnotice-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
