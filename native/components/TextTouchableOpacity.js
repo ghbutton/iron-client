@@ -8,8 +8,7 @@ export default function TextButton(props) {
     <TouchableOpacity
       style={styles.chatOutter}
       onPress={onPress}
-      {...otherProps}
-    >
+      {...otherProps}>
       <Text style={styles.saveButtonText}>{title}</Text>
     </TouchableOpacity>
   );

@@ -24,9 +24,9 @@ export default function NewChatScreen({navigation}) {
     navigation.navigate('InvitationScreen', {email: search});
   };
 
-  const handleUserChat = (user) => {
-      navigation.navigate('MessagesScreen', {userId: user.id});
-  }
+  const handleUserChat = user => {
+    navigation.navigate('MessagesScreen', {userId: user.id});
+  };
 
   const handleChange = async searchString => {
     setSearch(searchString);
@@ -76,8 +76,14 @@ export default function NewChatScreen({navigation}) {
   }
 
   if (results.length > 0) {
-    resultsBody = results.map((user) => {
-      return (<TextTouchableOpacity key={user.id} title={window.view.userDisplay(user)} onPress={() => handleUserChat(user)} />);
+    resultsBody = results.map(user => {
+      return (
+        <TextTouchableOpacity
+          key={user.id}
+          title={window.view.userDisplay(user)}
+          onPress={() => handleUserChat(user)}
+        />
+      );
     });
   }
 

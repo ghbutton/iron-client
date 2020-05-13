@@ -163,7 +163,8 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <TopLevel/>
+      <TopLevel />
       {navigator(state)}
-    </NavigationContainer>);
+    </NavigationContainer>
+  );
 }

@@ -23,7 +23,7 @@ export default function ChatsScreen({navigation}) {
     console.log('NEW MESSAGE');
   };
 
-  const handleConnectedUserPress = (userId) => {
+  const handleConnectedUserPress = userId => {
     navigation.navigate('MessagesScreen', {userId: userId});
   };
 
@@ -69,7 +69,7 @@ export default function ChatsScreen({navigation}) {
 
   return (
     <View>
-      <PushNotificationPrompt/>
+      <PushNotificationPrompt />
       <TextButton title="+" onPress={handleNewChat} right />
       {connectionsLoaded && connectedUsers.length === 0 ? (
         <Text>No chats.</Text>
@@ -77,11 +77,13 @@ export default function ChatsScreen({navigation}) {
         <FlatList
           data={connectedUsers}
           renderItem={({item: user}) => (
-            <TextTouchableOpacity onPress={() => handleConnectedUserPress(user.id)} title={userDisplay[user.id]} />
+            <TextTouchableOpacity
+              onPress={() => handleConnectedUserPress(user.id)}
+              title={userDisplay[user.id]}
+            />
           )}
         />
       )}
     </View>
   );
 }
-
