@@ -8,10 +8,10 @@ const config = (function() {
       return isDev;
     },
     isElectron: function() {
-      return true
+      return true;
     },
     isReactNative: function() {
-      return false
+      return false;
     },
     wsProtocol: function() {
       if (isDev) {

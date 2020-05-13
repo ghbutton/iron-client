@@ -52,21 +52,21 @@ const engine = (function() {
 
   return {
     encryptMessage: async function(toDeviceId, messagePayload) {
-      const response = JSON.parse(await NativeModules.Bridge.encryptPayload(messagePayload, Number(toDeviceId)));
+      const response = JSON.parse(await NativeModules.BridgeSignal.encryptPayload(messagePayload, Number(toDeviceId)));
       return response;
     },
     getState: async function(deviceId) {
-      const state = await NativeModules.Bridge.getState();
+      const state = await NativeModules.BridgeSignal.getState();
       return state;
     },
 
     decryptMessage: async function(senderDeviceId, encryptedMessage) {
-      const message = await NativeModules.Bridge.decryptMessage(Number(senderDeviceId), encryptedMessage.attributes.body, encryptedMessage.attributes.type);
+      const message = await NativeModules.BridgeSignal.decryptMessage(Number(senderDeviceId), encryptedMessage.attributes.body, encryptedMessage.attributes.type);
       const decrypted = JSON.parse(await _64ToS(message));
       return decrypted;
     },
     store: async function() {
-      const state = await NativeModules.Bridge.getState();
+      const state = await NativeModules.BridgeSignal.getState();
       return JSON.parse(state);
     },
     loaded: async function() {
@@ -92,7 +92,7 @@ const engine = (function() {
         };
       }
 
-      const result = await NativeModules.Bridge.processPreKeyBundle(Number(deviceId), JSON.stringify(attributes));
+      const result = await NativeModules.BridgeSignal.processPreKeyBundle(Number(deviceId), JSON.stringify(attributes));
 
       if (result === true) {
         return {status: "ok"};
@@ -102,28 +102,28 @@ const engine = (function() {
     },
     generateDeviceInfo: async function() {
       // identity key and registration id
-      await NativeModules.Bridge.initialize();
+      await NativeModules.BridgeSignal.initialize();
     },
     getIdentityPublicKey: async function() {
-      const publicKey = await NativeModules.Bridge.getIdentityPublicKey();
+      const publicKey = await NativeModules.BridgeSignal.getIdentityPublicKey();
       return publicKey;
     },
     generateSignedPreKey: async function(deviceId) {
       const timestamp = Date.now();
-      const {signature, keyId, publicKey} = JSON.parse(await NativeModules.Bridge.generateSignedPreKey(timestamp));
+      const {signature, keyId, publicKey} = JSON.parse(await NativeModules.BridgeSignal.generateSignedPreKey(timestamp));
       return {signature, keyId, publicKey};
     },
     generatePreKeys: async function(deviceId, number) {
-      const keys = JSON.parse(await NativeModules.Bridge.generatePreKeys(number));
+      const keys = JSON.parse(await NativeModules.BridgeSignal.generatePreKeys(number));
 
       return keys;
     },
     getRegistrationId: async function() {
-      const id = await NativeModules.Bridge.getRegistrationId();
+      const id = await NativeModules.BridgeSignal.getRegistrationId();
       return id;
     },
     hasSession: async function(deviceId) {
-      return NativeModules.Bridge.hasSession(Number(deviceId));
+      return NativeModules.BridgeSignal.hasSession(Number(deviceId));
     },
     aesEncrypt: async function(data) {
       // 32 bytes is 256 bits
@@ -160,7 +160,7 @@ const engine = (function() {
       return await _bTo64(decrypted);
     },
     loadFromDisk: async function(payload) {
-      const success = await NativeModules.Bridge.loadFromDisk(payload);
+      const success = await NativeModules.BridgeSignal.loadFromDisk(payload);
       if (success) {
         return true;
       } else {

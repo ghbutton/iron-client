@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "build:ios": "rm -r ./ios/assets/; react-native bundle --entry-file='index.js' --bundle-output='./ios/main.jsbundle' --dev=false --platform='ios' --assets-dest='./ios'",
+    "build:ios": "rm -r ./ios/assets/; react-native bundle --entry-file='index.js' --bundle-output='./ios/main.jsbundle' --dev=false --platform='ios' --assets-dest='./ios'; rm ./ios/assets/package.json",
     "test": "jest",
     "lint": "eslint *.js **/*.js"
   },
@@ -23,6 +23,7 @@
     "react-native-fs": "^2.16.6",
     "react-native-gesture-handler": "^1.6.0",
     "react-native-image-picker": "^2.3.1",
+    "react-native-notifications": "^3.2.0",
     "react-native-reanimated": "^1.7.0",
     "react-native-safe-area-context": "^0.7.3",
     "react-native-screens": "^2.2.0",

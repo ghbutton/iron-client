@@ -11,6 +11,7 @@ import {
 import TextButton from '../components/TextButton';
 import TextTouchableOpacity from '../components/TextTouchableOpacity';
 import {useFocusEffect} from '@react-navigation/native';
+import PushNotificationPrompt from '../components/PushNotificationPrompt';
 
 export default function ChatsScreen({navigation}) {
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -68,6 +69,7 @@ export default function ChatsScreen({navigation}) {
 
   return (
     <View>
+      <PushNotificationPrompt/>
       <TextButton title="+" onPress={handleNewChat} right />
       {connectionsLoaded && connectedUsers.length === 0 ? (
         <Text>No chats.</Text>

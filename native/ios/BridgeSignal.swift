@@ -1,5 +1,5 @@
 //
-//  Bridge.swift
+//  BridgeSignal.swift
 //  ironnotice
 //
 //  Created by Gary Button on 2/11/19.
@@ -15,8 +15,8 @@ enum SignalErrors: Error {
   case missingDeviceId
 }
 
-@objc(Bridge)
-class Bridge: NSObject {
+@objc(BridgeSignal)
+class BridgeSignal: NSObject {
   var _store: SignalStore!
 
   struct BridgeSession: Codable {
@@ -315,6 +315,18 @@ class Bridge: NSObject {
     rejecter reject: RCTPromiseRejectBlock
     ) -> Void {
     print("BRIDGE LOAD")
+    
+    #if targetEnvironment(simulator)
+
+    let device = "Simulator";
+
+    #else // TARGET_IPHONE_SIMULATOR
+
+    let device = "Device";
+
+    #endif // TARGET_IPHONE_SIMULATOR
+
+    print(device);
 
     let _myIdentityStore: TestIdentityStore = TestIdentityStore()
     let _myPreKeyStore: TestPreKeyStore = TestPreKeyStore()

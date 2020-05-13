@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 function NewChatPage(props) {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
-  const [resultsReady, setResultsReady] = useState(false);
+  //  const [resultsReady, setResultsReady] = useState(false);
   const [searchedUser, setSearchedUser] = useState(null);
   const [isEmail, setIsEmail] = useState(false);
 
@@ -27,7 +27,7 @@ function NewChatPage(props) {
     if (searchString.length > 3) {
       const users = await window.controller.connectedUsersSearch(searchString);
       setResults(users);
-      setResultsReady(true);
+      //      setResultsReady(true);
 
       if (await window.controller.isEmail(searchString)) {
         const user = await window.controller.getUserByEmail(searchString);
@@ -40,7 +40,7 @@ function NewChatPage(props) {
       }
     } else {
       setResults([]);
-      setResultsReady(false);
+      //      setResultsReady(false);
       setSearchedUser(null);
       setIsEmail(false);
     }
@@ -85,7 +85,7 @@ function NewChatPage(props) {
       <h1>New Chat</h1>
 
       <form>
-        <input type="text" placeholder="Current contacts" name="email" onChange={handleChange} required/>
+        <input type="text" placeholder="Email or name" name="search" onChange={handleChange} required/>
       </form>
 
       {inviteUser}

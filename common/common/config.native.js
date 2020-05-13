@@ -3,6 +3,7 @@ const API_VERSION = 5;
 const IOS = "ios";
 const RNFS = require("react-native-fs");
 
+import {NativeModules} from "react-native";
 import DeviceInfo from "react-native-device-info";
 
 
@@ -17,6 +18,9 @@ const config = (function() {
     isReactNative: function() {
       return true
     },
+    isIOS: function() {
+      return Platform.OS === IOS
+    },
     wsProtocol: function() {
       if (isDev) {
         return "ws";
@@ -27,7 +31,7 @@ const config = (function() {
     wsUrl: function() {
       if (isDev) {
         return "localhost";
-        //        return "192.168.5.16";
+//        return "192.168.5.16";
       } else {
         return "www.ironnotice.com";
       }
@@ -52,6 +56,9 @@ const config = (function() {
     apiVersion: function() {
       return API_VERSION;
     },
+    isSimulator: async function(){
+      return await NativeModules.BridgeUtils.isSimulator();
+    }
   };
 })();
 

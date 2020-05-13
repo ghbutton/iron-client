@@ -10,4 +10,7 @@
    <FileRef
       location = "group:libsignal-protocol-swift/libsignal-protocol-swift.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:ironnotice.xcodeproj">
+   </FileRef>
 </Workspace>

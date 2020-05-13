@@ -14,6 +14,17 @@ const api = (function() {
     [apiChannelReady, loginChannelReady, userChannelReady, userDeviceChannelReady] = [false, false, false, false];
   }
 
+  async function jsonApiPayload(type, attributes){
+    return {
+      payload: {
+        data: {
+          type: type,
+          attributes: attributes,
+        },
+      }
+    };
+  }
+
   async function _sendPush(channel, topic, payload, timeout = 10000) {
     let [ready, results] = [false, null];
 
@@ -91,7 +102,7 @@ const api = (function() {
       socket.onOpen(() =>
         onSocketOpen(),
       );
-      socket.onError( (err) => console.log(err));
+      socket.onError( (err) => logger.error(err));
       socket.onClose( () => {
         apiChannelReady = false;
         loginChannelReady = false;
@@ -194,90 +205,68 @@ const api = (function() {
     updateUser: async function(userId, attributes) {
       await _waitForApiChannel();
 
-      const payload = {
-        payload: {
-          data: {
-            type: "user",
-            attributes: attributes,
-          },
-        },
-      };
-
+      const payload = await jsonApiPayload("user", attributes)
       return _sendPush(apiChannel, `PATCH:users:${userId}`, payload);
     },
     messageDelivered: async function(messageId) {
       await _waitForApiChannel();
 
-      const payload = {
-        payload: {
-          data: {
-            type: "message",
-            attributes: {
-              delivered_at: "now",
-            },
-          },
-        },
-      };
+      const attributes = { delivered_at: "now" };
+      const payload = await jsonApiPayload("message", attributes);
 
       return _sendPush(apiChannel, `PATCH:messages:${messageId}`, payload);
     },
     sendVerificationCode: async function(email, timeout) {
       await _waitForLoginChannel(timeout);
+      const attributes = {email};
+      const payload = await jsonApiPayload("email_verification", attributes)
 
-      return _sendPush(loginChannel, "POST:email_verifications", {email: email});
+      return _sendPush(loginChannel, "POST:email_verifications", payload);
     },
     sendIdentityKey: async function(publicKey, registrationId, timeout) {
       await _waitForApiChannel(timeout);
 
-      return _sendPush(apiChannel, "POST:identity_keys", {data: {attributes: {public_key: publicKey, registration_id: registrationId}, type: "identity_key"}});
+      const attributes = {public_key: publicKey, registration_id: registrationId}
+      const payload = await jsonApiPayload("identity_key", attributes)
+      return _sendPush(apiChannel, "POST:identity_keys", payload);
     },
     sendSignedPreKey: async function(publicKey, keyId, signature, timeout) {
       await _waitForApiChannel(timeout);
 
-      return _sendPush(apiChannel, "POST:signed_pre_keys", {data: {attributes: {public_key: publicKey, key_id: keyId, signature}, type: "signed_pre_key"}});
+      const attributes = {public_key: publicKey, key_id: keyId, signature};
+      const payload = await jsonApiPayload("signed_pre_key", attributes);
+      return _sendPush(apiChannel, "POST:signed_pre_keys", payload);
     },
     sendPreKey: async function(publicKey, keyId, timeout) {
       await _waitForApiChannel(timeout);
 
-      return _sendPush(apiChannel, "POST:pre_keys", {data: {attributes: {public_key: publicKey, key_id: keyId}, type: "pre_key"}});
+      const attributes = {public_key: publicKey, key_id: keyId};
+      const payload =  await jsonApiPayload("pre_key", attributes);
+      return _sendPush(apiChannel, "POST:pre_keys", payload);
     },
     createConnection: async function(user, timeout) {
       await _waitForApiChannel(timeout);
 
-      const payload = {
-        "payload": {
-          "data": {
-            "type": "connection",
-            "attributes": {
-              "user_id": user.id,
-            },
-          },
-        },
-      };
+      const attributes = {user_id: user.id};
+      const payload =  await jsonApiPayload("connection", attributes);
 
       return _sendPush(apiChannel, "POST:connections", payload);
     },
     sendInvitation: async function(name, email, timeout) {
       await _waitForApiChannel(timeout);
 
-      const payload = {
-        "payload": {
-          "data": {
-            "type": "invitation",
-            "attributes": {
-              "name": name,
-              "email": email,
-            },
-          },
-        },
-      };
+      const attributes = {name, email};
+      const payload =  await jsonApiPayload("invitation", attributes);
 
       return _sendPush(apiChannel, "POST:invitations", payload);
     },
     login: async function(email, code, timeout) {
       await _waitForLoginChannel(timeout);
 
-      return _sendPush(loginChannel, "POST:sessions", {email: email, code: code});
+      const attributes = {email, code};
+      const payload =  await jsonApiPayload("session", attributes);
+
+      return _sendPush(loginChannel, "POST:sessions", payload);
     },
     failedToJoin: async function(timeout) {
       await _waitForApiChannel(timeout);
@@ -338,7 +327,10 @@ const api = (function() {
     createDevice: async function(userId, userSessionToken, name, osName, timeout) {
       await _waitForLoginChannel(timeout);
 
-      const {status, resp}= await _sendPush(loginChannel, "POST:devices", {user_session_token: userSessionToken, name: name, os_name: osName});
+      const attributes = {user_session_token: userSessionToken, name: name, os_name: osName};
+      const payload =  await jsonApiPayload("device", attributes);
+      const {status, resp}= await _sendPush(loginChannel, "POST:devices", payload);
+
       if (status === "ok") {
         return resp.payload.data[0];
       } else {
@@ -424,26 +416,14 @@ const api = (function() {
         );
       }
 
-      const payload = {
-        "payload": {
-          "data": messages,
-        },
-      };
+      const attributes = {messages}
+      const payload = await jsonApiPayload("messages", attributes);
 
       return _sendPush(apiChannel, "POST:messages", payload);
     },
     uploadFile: async function({encrypted, deviceId}) {
-      const payload = {
-        "payload": {
-          "data": {
-            "type": "file_upload",
-            "attributes": {
-              "device_id": deviceId,
-              "data": encrypted,
-            },
-          },
-        },
-      };
+      const attributes = { "device_id": deviceId, "data": encrypted }
+      const payload = await jsonApiPayload("file_upload", attributes);
 
       const {status, resp} = await _sendPush(apiChannel, "POST:file_uploads", payload, 120000);
       if (status === "ok") {
@@ -460,7 +440,7 @@ const api = (function() {
         return null;
       }
     },
-    connectedUsers: async function(timeout, userId) {
+    connectedUsers: async function(userId, timeout) {
       await _waitForApiChannel(timeout);
 
       if (!userId) {
@@ -492,6 +472,14 @@ const api = (function() {
         return null;
       }
     },
+    uploadNotificationToken: async (token, timeout) => {
+      await _waitForApiChannel(timeout);
+
+      const attributes = {token}
+      const payload = await jsonApiPayload("notification_token", attributes);
+
+      return _sendPush(apiChannel, "PUT:notification_tokens", payload);
+    }
   };
 })();
 

@@ -241,6 +241,10 @@ const worker = (function() {
         await controller.decryptMessage(encryptedMessage);
       }
       callbacks.newMessage();
+
+      // If we have gotten all of the messages set the number of unreceived to 0
+      callbacks.updateNumUnreceived(0);
+
       return {status: "ok"};
     } else {
       return {status: "ok"};
@@ -733,7 +737,7 @@ const controller = (function() {
       return {status, resp};
     },
     getConnectedUsers: async function() {
-      const [connections, connectedUsers] = await api.connectedUsers(2000, userId);
+      const [connections, connectedUsers] = await api.connectedUsers(userId, 2000);
       for (let i = 0; i < connections.length; i++) {
         await applicationState.insertConnection(connections[i]);
       }
@@ -902,6 +906,12 @@ const controller = (function() {
     isDev: function() {
       return config.isDev();
     },
+    isSimulator: async function() {
+      return config.isSimulator();
+    },
+    uploadNotificationToken(token) {
+      return api.uploadNotificationToken(token, 2000);
+    }
   };
 })();
 

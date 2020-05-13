@@ -1,5 +1,4 @@
 import React from "react";
-import {Link} from "react-router-dom";
 import UserEditForm from "./UserEditForm";
 
 function UserEditPage(props) {

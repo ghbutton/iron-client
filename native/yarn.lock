@@ -1097,9 +1097,9 @@
   integrity sha512-PpMoeXwPUoldCRKDuSi+zK5rT+sJTW6ri6RdGPkSKRzU77Q1d9IaR0O5IKvBj0XSdL3p+dcOa05gk35aGDffBQ==
 
 "@react-native-community/push-notification-ios@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.0.7.tgz#4b3b459fb3d6bdf0a9851efdd430fdc0bd7a05f9"
-  integrity sha512-qY+vdaWVif7ulcdDTd9KryDudbuWtPnT4H0mWGadE73lSNM9X6x131WArAl0+Oo1tqfmE1TKRSocSN7CG0Ou/Q==
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.2.0.tgz#3353598450a39c42d079603aad2d1c0f9c2c1729"
+  integrity sha512-B5qPb9P/6vvxGGQDePlK/q6NxoZPWSVFtKCQ9jlboP7gNZmf3AAyBhTzrb++s2NSXXogjkGi6vt9df1ipZiawQ==
   dependencies:
     invariant "^2.2.4"
 
@@ -5578,6 +5578,11 @@ react-native-keyboard-aware-scroll-view@0.9.1:
   dependencies:
     prop-types "^15.6.2"
     react-native-iphone-x-helper "^1.0.3"
+
+react-native-notifications@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-notifications/-/react-native-notifications-3.2.0.tgz#37be09942f205c25d10f11f2384e900573c3213f"
+  integrity sha512-TLzWbjTISXs1fhhtmtvQJ5bvDxquRHY1YXCy90U/XT2hJObla4Y+eSD41uyhQU2wgkseEfbqwCq0kd0Z+bfQ3w==
 
 react-native-reanimated@^1.7.0:
   version "1.7.0"

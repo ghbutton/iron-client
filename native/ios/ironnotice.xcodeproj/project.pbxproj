@@ -23,9 +23,10 @@
 		85452886240EB51A000DBE2E /* SignalProtocol.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; };
 		85452887240EB51A000DBE2E /* SignalProtocol.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		859F9F4B24533FB20067119A /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
+		85AA9CB9245F1D22008B3DB6 /* BridgeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AA9CB8245F1D22008B3DB6 /* BridgeUtils.swift */; };
 		85D4A4E3240C076400CEC579 /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E2240C076400CEC579 /* Bridge.m */; };
 		85D4A4E6240C077100CEC579 /* EventManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4E5240C077100CEC579 /* EventManager.m */; };
-		85D4A4EF240C093A00CEC579 /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4ED240C093A00CEC579 /* Signal.swift */; };
+		85D4A4EF240C093A00CEC579 /* BridgeSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4ED240C093A00CEC579 /* BridgeSignal.swift */; };
 		85D4A4F0240C093A00CEC579 /* SignalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D4A4EE240C093A00CEC579 /* SignalStorage.swift */; };
 		D3FBAF69C6F637B0134BE29E /* libPods-ironnotice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 782F0E27D9B1EA11B2BF7907 /* libPods-ironnotice.a */; };
 /* End PBXBuildFile section */
@@ -88,13 +89,15 @@
 		782F0E27D9B1EA11B2BF7907 /* libPods-ironnotice.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnotice.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		820DCB8C6D9D82DD4C480596 /* libPods-ironnoticeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ironnoticeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8529C131245503AD00028D7B /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
+		8529C1332458766800028D7B /* ironnotice.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ironnotice.entitlements; sourceTree = "<group>"; };
+		85AA9CB8245F1D22008B3DB6 /* BridgeUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeUtils.swift; sourceTree = "<group>"; };
 		85C2A584240CF8E700C83CD1 /* SignalProtocol.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SignalProtocol.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85D4A4E2240C076400CEC579 /* Bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Bridge.m; sourceTree = "<group>"; };
 		85D4A4E4240C077100CEC579 /* EventManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventManager.h; sourceTree = "<group>"; };
 		85D4A4E5240C077100CEC579 /* EventManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventManager.m; sourceTree = "<group>"; };
 		85D4A4E7240C077900CEC579 /* ironnotice-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ironnotice-Bridging-Header.h"; sourceTree = "<group>"; };
 		85D4A4EC240C093900CEC579 /* ironnotice-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ironnotice-Bridging-Header.h"; sourceTree = "<group>"; };
-		85D4A4ED240C093A00CEC579 /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
+		85D4A4ED240C093A00CEC579 /* BridgeSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BridgeSignal.swift; sourceTree = "<group>"; };
 		85D4A4EE240C093A00CEC579 /* SignalStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignalStorage.swift; sourceTree = "<group>"; };
 		8F5F3CC74DAF7237F411D62A /* Pods-libsignal-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignal-tvOS.release.xcconfig"; path = "Target Support Files/Pods-libsignal-tvOS/Pods-libsignal-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		965100221A432F42D211996B /* Pods-libsignalTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-libsignalTests.release.xcconfig"; path = "Target Support Files/Pods-libsignalTests/Pods-libsignalTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -165,19 +168,21 @@
 		13B07FAE1A68108700A75B9A /* ironnotice */ = {
 			isa = PBXGroup;
 			children = (
-				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
-				13B07FB51A68108700A75B9A /* Images.xcassets */,
-				13B07FB61A68108700A75B9A /* Info.plist */,
-				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
-				13B07FB71A68108700A75B9A /* main.m */,
-				85D4A4ED240C093A00CEC579 /* Signal.swift */,
-				85D4A4EE240C093A00CEC579 /* SignalStorage.swift */,
-				85D4A4E7240C077900CEC579 /* ironnotice-Bridging-Header.h */,
+				85D4A4E2240C076400CEC579 /* Bridge.m */,
+				85D4A4ED240C093A00CEC579 /* BridgeSignal.swift */,
+				85AA9CB8245F1D22008B3DB6 /* BridgeUtils.swift */,
 				85D4A4E4240C077100CEC579 /* EventManager.h */,
 				85D4A4E5240C077100CEC579 /* EventManager.m */,
-				85D4A4E2240C076400CEC579 /* Bridge.m */,
+				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
+				85D4A4E7240C077900CEC579 /* ironnotice-Bridging-Header.h */,
+				8529C1332458766800028D7B /* ironnotice.entitlements */,
+				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
+				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
+				13B07FB71A68108700A75B9A /* main.m */,
+				85D4A4EE240C093A00CEC579 /* SignalStorage.swift */,
 			);
 			name = ironnotice;
 			sourceTree = "<group>";
@@ -643,7 +648,8 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				85D4A4F0240C093A00CEC579 /* SignalStorage.swift in Sources */,
-				85D4A4EF240C093A00CEC579 /* Signal.swift in Sources */,
+				85D4A4EF240C093A00CEC579 /* BridgeSignal.swift in Sources */,
+				85AA9CB9245F1D22008B3DB6 /* BridgeUtils.swift in Sources */,
 				85D4A4E3240C076400CEC579 /* Bridge.m in Sources */,
 				85D4A4E6240C077100CEC579 /* EventManager.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
@@ -748,6 +754,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ironnotice.entitlements;
 				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = ZWT8NFRJC9;
@@ -773,6 +780,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ironnotice.entitlements;
 				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = ZWT8NFRJC9;
 				INFOPLIST_FILE = libsignal/Info.plist;

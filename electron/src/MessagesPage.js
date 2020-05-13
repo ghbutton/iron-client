@@ -5,7 +5,6 @@ import "emoji-mart/css/emoji-mart.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import {emojiIndex, Picker} from "emoji-mart";
 import React, {Component} from "react";
-import {Link} from "react-router-dom";
 
 import UserAvatar from "./UserAvatar";
 

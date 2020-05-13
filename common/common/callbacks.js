@@ -7,6 +7,10 @@ const callbacks = (function() {
       logger.debug(`Callback - Update num unread ${numUnread}`);
       engine.updateNumUnread(numUnread);
     },
+    updateNumUnreceived: function(numUnreceived) {
+      logger.debug(`Callback - Update num unreceived ${numUnreceived}`);
+      engine.updateNumUnreceived(numUnreceived);
+    },
     newMessage: function() {
       logger.debug("Callback - New message event");
       engine.dispatch("new_message", {});

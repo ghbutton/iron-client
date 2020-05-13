@@ -8,7 +8,7 @@
 
 #import "React/RCTBridgeModule.h"
 
-@interface RCT_EXTERN_MODULE(Bridge, NSObject)
+@interface RCT_EXTERN_MODULE(BridgeSignal, NSObject)
 
 RCT_EXTERN_METHOD(
                   initialize: (RCTPromiseResolveBlock)resolve
@@ -80,5 +80,16 @@ RCT_EXTERN_METHOD(
                   resolver: (RCTPromiseResolveBlock)resolve
                   rejecter: (RCTPromiseRejectBlock)reject
                   )
+
+@end
+
+// UTILS
+
+@interface RCT_EXTERN_MODULE(BridgeUtils, NSObject)
+
+RCT_EXTERN_METHOD(
+  isSimulator: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
 
 @end

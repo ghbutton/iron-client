@@ -16,6 +16,8 @@ import MessagesScreen from './screens/MessagesScreen.js';
 import SettingsScreen from './screens/SettingsScreen.js';
 import UpdateUserScreen from './screens/UpdateUserScreen.js';
 
+import TopLevel from './components/TopLevel.js';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -159,5 +161,9 @@ export default function App() {
     }
   };
 
-  return <NavigationContainer>{navigator(state)}</NavigationContainer>;
+  return (
+    <NavigationContainer>
+      <TopLevel/>
+      {navigator(state)}
+    </NavigationContainer>);
 }
