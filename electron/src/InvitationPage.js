@@ -1,14 +1,14 @@
 import React, {useState} from "react";
 
 function InvitationPage(props) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const email = props.match.params.email;
 
   const handleChange = async (event) => {
     if (event.target.name === "name") {
       setName(event.target.value);
     }
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,11 +17,13 @@ function InvitationPage(props) {
     if (status === "ok") {
       props.history.goBack();
     }
-  }
+  };
 
   return (
     <div className="newContactPage container">
-      <button className="btn btn-outline-primary" onClick={() => {props.history.goBack()}}>{"< Back"}</button>
+      <button className="btn btn-outline-primary" onClick={() => {
+        props.history.goBack();
+      }}>{"< Back"}</button>
       <h1>New Contact</h1>
 
       <form onSubmit={handleSubmit}>

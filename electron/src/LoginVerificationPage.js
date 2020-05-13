@@ -36,7 +36,9 @@ class LoginVerificationPage extends Component {
   render() {
     return (
       <div>
-        <button onClick={() => {this.props.history.goBack()}} className="btn btn-outline-primary">{"< Back"}</button>
+        <button onClick={() => {
+          this.props.history.goBack();
+        }} className="btn btn-outline-primary">{"< Back"}</button>
         <div className="centeredContainer">
           <h2>Verification Page</h2>
           <img src="./static/icon.png" height="100px" width="100px" alt=""/>

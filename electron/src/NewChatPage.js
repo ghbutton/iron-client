@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {Link} from "react-router-dom";
 
 function NewChatPage(props) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
   //  const [resultsReady, setResultsReady] = useState(false);
   const [searchedUser, setSearchedUser] = useState(null);
@@ -11,7 +11,7 @@ function NewChatPage(props) {
   const handleConnectToUser = async () => {
     const {status} = await window.controller.createNewConnection(searchedUser);
 
-    if (status === 'ok') {
+    if (status === "ok") {
       props.history.goBack();
     }
   };
@@ -44,7 +44,7 @@ function NewChatPage(props) {
       setSearchedUser(null);
       setIsEmail(false);
     }
-  }
+  };
 
   let inviteUser = null;
   let resultsBody = null;
@@ -81,7 +81,9 @@ function NewChatPage(props) {
 
   return (
     <div className="newChatPage container">
-      <button className="btn btn-outline-primary" onClick={() => {props.history.goBack()}}>{"< Back"}</button>
+      <button className="btn btn-outline-primary" onClick={() => {
+        props.history.goBack();
+      }}>{"< Back"}</button>
       <h1>New Chat</h1>
 
       <form>
