@@ -1,6 +1,6 @@
 {
   "name": "Iron",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "private": true,
   "dependencies": {
     "bootstrap": "^4.3.1",
