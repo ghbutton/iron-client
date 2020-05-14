@@ -1,5 +1,5 @@
 const isDev = __DEV__;
-const API_VERSION = 5;
+const API_VERSION = 6;
 const IOS = "ios";
 const RNFS = require("react-native-fs");
 

@@ -1,6 +1,6 @@
 const isDev = (process.env.NODE_ENV === "development");
 const app = window.app;
-const API_VERSION = 5;
+const API_VERSION = 6;
 
 const config = (function() {
   return {
