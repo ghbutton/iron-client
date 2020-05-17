@@ -1,8 +1,9 @@
 import React, {Component, useCallback, useEffect, useState} from 'react';
 import {
-  AppState,
   FlatList,
   Keyboard,
+  NativeEventEmitter,
+  NativeModules,
   Platform,
   Text,
   TextInput,
@@ -13,6 +14,8 @@ import TextTouchableOpacity from '../components/TextTouchableOpacity';
 import {useFocusEffect} from '@react-navigation/native';
 import PushNotificationPrompt from '../components/PushNotificationPrompt';
 
+const {EventManager} = NativeModules;
+
 export default function ChatsScreen({navigation}) {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [hasUnreadMessages, setHasUnreadMessages] = useState({});
@@ -21,6 +24,9 @@ export default function ChatsScreen({navigation}) {
 
   const handleNewMessage = () => {
     console.log('NEW MESSAGE');
+    const [newHasUnreadMessages, newUserDisplay] = userInfo(connectedUsers);
+    setUserDisplay(newUserDisplay);
+    setHasUnreadMessages(newHasUnreadMessages);
   };
 
   const handleConnectedUserPress = userId => {
@@ -31,10 +37,7 @@ export default function ChatsScreen({navigation}) {
     navigation.navigate('NewChatScreen');
   };
 
-  const loadData = async function() {
-    console.debug('Loading chats screen data');
-
-    const newConnectedUsers = await window.controller.getConnectedUsers();
+  const userInfo = (newConnectedUsers) => {
     const [newHasUnreadMessages, newUserDisplay] = [{}, {}];
     for (let i = 0; i < newConnectedUsers.length; i++) {
       const user = newConnectedUsers[i];
@@ -43,13 +46,32 @@ export default function ChatsScreen({navigation}) {
         user.id,
       );
     }
+    return [newHasUnreadMessages, newUserDisplay];
+  }
 
-    setUserDisplay(newUserDisplay);
+  const loadData = async function() {
+    console.debug('Loading chats screen data');
+
+    const newConnectedUsers = await window.controller.getConnectedUsers();
+    const [newHasUnreadMessages, newUserDisplay] = userInfo(newConnectedUsers);
+
     setConnectedUsers(newConnectedUsers);
+    setUserDisplay(newUserDisplay);
     setHasUnreadMessages(newHasUnreadMessages);
     setConnectionsLoaded(true);
   };
 
+  useEffect(() => {
+    const eventEmitter = new NativeEventEmitter(EventManager);
+    const listenerNewMessage = eventEmitter.addListener(
+      'new_message',
+      handleNewMessage,
+    );
+
+    return function cleanup() {
+      listenerNewMessage.remove();
+    };
+  });
   useFocusEffect(
     // Nesting usecallback here to prevent an infinite loop
     // See: https://reactnavigation.org/docs/use-focus-effect/#how-is-usefocuseffect-different-from-adding-a-listener-for-focus-event
@@ -57,15 +79,6 @@ export default function ChatsScreen({navigation}) {
       loadData();
     }, []),
   );
-
-  useEffect(() => {
-    // AppState.addEventListener("new_message", handleNewMessage);
-
-    return function cleanup() {
-      // you need to unbind the same listener that was binded.
-      //      AppState.removeEventListener("new_message", handleNewMessage);
-    };
-  }, []);
 
   return (
     <View>
@@ -76,10 +89,13 @@ export default function ChatsScreen({navigation}) {
       ) : (
         <FlatList
           data={connectedUsers}
+          extraData={hasUnreadMessages}
           renderItem={({item: user}) => (
             <TextTouchableOpacity
               onPress={() => handleConnectedUserPress(user.id)}
               title={userDisplay[user.id]}
+              badge={hasUnreadMessages[user.id] ? "!" : null}
+              badgeProps={{primary: true}}
             />
           )}
         />

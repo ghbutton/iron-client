@@ -7,7 +7,7 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[@"loaded_no_user", @"loaded_with_user", @"new_message"];
+  return @[@"loaded_no_user", @"loaded_with_user", @"new_message", @"force_upgrade"];
 }
 
 @end

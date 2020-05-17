@@ -3,6 +3,7 @@ import React, {useEffect} from 'react';
 import {Notifications} from 'react-native-notifications';
 
 const configure = () => {
+  // Handle notifications
   Notifications.events().registerNotificationReceivedForeground(
     (
       notification: Notification,

@@ -122,8 +122,6 @@ export default function MessagesScreen({navigation, route}) {
 
   const handleDownload = message => {
     return async function() {
-      console.log('DOWNLOAD');
-      console.log(message);
       window.controller.downloadFile(message);
     };
   };

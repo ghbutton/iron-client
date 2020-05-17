@@ -6,6 +6,7 @@ const {EventManager} = NativeModules;
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import ChatsScreen from './screens/ChatsScreen.js';
+import ForceUpgradeScreen from './screens/ForceUpgradeScreen.js';
 import InvitationScreen from './screens/InvitationScreen.js';
 import LoadingScreen from './screens/LoadingScreen.js';
 import LoginScreen from './screens/LoginScreen.js';
@@ -21,6 +22,7 @@ import TopLevel from './components/TopLevel.js';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+const forceUpgradeState = 'force_upgrade';
 const loggedInState = 'logged_in';
 const loggedOutState = 'logged_out';
 const loadingState = 'loading';
@@ -32,6 +34,10 @@ export default function App() {
 
   const loadedNoUser = event => {
     setState(loggedOutState);
+  };
+
+  const forceUpgrade = async event => {
+    setState(forceUpgradeState);
   };
 
   const loggedIn = async event => {
@@ -48,6 +54,10 @@ export default function App() {
     const listenerNoUser = eventEmitter.addListener(
       'loaded_no_user',
       loadedNoUser,
+    );
+    const listenerForceUpgrade = eventEmitter.addListener(
+      'force_upgrade',
+      forceUpgrade,
     );
     const listenerWithUser = eventEmitter.addListener(
       'loaded_with_user',
@@ -118,6 +128,14 @@ export default function App() {
 
   const navigator = state => {
     switch (state) {
+      case forceUpgradeState:
+        return (
+          <Stack.Navigator
+            initialRouteName="ForceUpgradeScreen"
+            screenOptions={{headerShown: false}}>
+            <Stack.Screen name="ForceUpgradeScreen" component={ForceUpgradeScreen} />
+          </Stack.Navigator>
+        )
       case loadingState:
         return (
           <Stack.Navigator
