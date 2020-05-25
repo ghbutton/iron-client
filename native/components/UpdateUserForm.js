@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
+import ImageResizer from 'react-native-image-resizer';
 import {Container, Header, Content, Form, Item, Input} from 'native-base';
 
 import UserAvatar from './UserAvatar';
@@ -41,14 +42,10 @@ export default function UpdateUserForm({successCallback}) {
 
   const options = {
     title: 'Update Image',
-    storageOptions: {
-      skipBackup: true,
-      path: 'images',
-    },
   };
 
-  const handleImage = async event => {
-    ImagePicker.showImagePicker(options, response => {
+  const handleImage = async (event) => {
+    ImagePicker.showImagePicker(options, async (response) => {
       console.log('Response = ', response);
 
       if (response.didCancel) {
@@ -58,17 +55,20 @@ export default function UpdateUserForm({successCallback}) {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        // TODO resize before uploading to server
-        // https://github.com/bamlab/react-native-image-resizer
-        console.debug('Got an updated photo');
-        if (response.type === 'image/jpeg') {
-          // Maybe switch to use window.controller.readAvatar()  ??
-          setAvatar({binary: response.data, extname: '.jpg'});
-          setPhotoUploaded(true);
-        } else if (response.type === 'image/png') {
-          setAvatar({binary: response.data, extname: '.png'});
-          setPhotoUploaded(true);
+        let format = null;
+        if (response.type === 'image/png') {
+          format = "PNG";
+        } else if (response.type === 'image/jpeg') {
+          format = "JPEG";
+        } else {
+          // TODO Show error to user
         }
+
+        // Server limit is 300x300 so we will set 600x600 and the server can downsize the rest
+        const resizedImage = await ImageResizer.createResizedImage(response.uri, 600, 600, format, 100);
+        const {status, bytes, extname} =  await window.controller.readAvatar(resizedImage.uri);
+        setAvatar({binary: bytes, extname});
+        setPhotoUploaded(true);
       }
     });
   };

@@ -75,13 +75,11 @@ export default function MessagesScreen({navigation, route}) {
     setMessageString(newMessage);
   };
 
+  // for iOS dont use `storageOptions` or it saves it in the
+  // Documents folder which shows up for the users in files
   const options = {
     // dont read data here, will read data later
     noData: true,
-    storageOptions: {
-      skipBackup: true,
-      path: 'images',
-    },
     title: 'Send Image',
   };
 

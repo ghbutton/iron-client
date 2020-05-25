@@ -18,7 +18,9 @@ const fileSystem = (function() {
       let filename = uri.substring(uri.lastIndexOf('/') + 1, uri.length)
       return filename;
     },
-    extname: async function(path) {
+    extname: async function(uri) {
+      let extname = uri.substring(uri.lastIndexOf('.') + 1, uri.length);
+      return `.${extname}`;
     },
     selectDirectory: async function() {
       // N/A, can't select a directory in RN

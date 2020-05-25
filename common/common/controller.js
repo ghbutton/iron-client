@@ -292,8 +292,7 @@ const controller = (function() {
       await _messageErrored(localFileMessage);
       return;
     }
-
-    await applicationState.addMessageMetadata(localFileMessage, {encrypted, hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id});
+    await applicationState.addMessageMetadata(localFileMessage, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id});
     await storage.saveMessages(deviceId, applicationState.messages());
   }
 
