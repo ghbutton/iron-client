@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import {useHeaderHeight} from '@react-navigation/stack';
-import {Button, Icon, Input, Item, Form} from 'native-base';
+import {Button, Icon, Input, Item, Form, Toast} from 'native-base';
 import TextButton from '../components/TextButton';
 import ImagePicker from 'react-native-image-picker';
 
@@ -121,6 +121,7 @@ export default function MessagesScreen({navigation, route}) {
   const handleDownload = message => {
     return async function() {
       window.controller.downloadFile(message);
+      Toast.show({text: `Downloaded to 'files'`});
     };
   };
 

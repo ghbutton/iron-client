@@ -4,6 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {NativeEventEmitter, NativeModules} from 'react-native';
 const {EventManager} = NativeModules;
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { Root } from "native-base";
 
 import ChatsScreen from './screens/ChatsScreen.js';
 import ForceUpgradeScreen from './screens/ForceUpgradeScreen.js';
@@ -181,8 +182,10 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <TopLevel />
-      {navigator(state)}
+      <Root>
+        <TopLevel />
+        {navigator(state)}
+      </Root>
     </NavigationContainer>
   );
 }
