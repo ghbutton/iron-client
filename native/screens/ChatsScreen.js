@@ -23,7 +23,6 @@ export default function ChatsScreen({navigation}) {
   const [connectionsLoaded, setConnectionsLoaded] = useState(false);
 
   const handleNewMessage = () => {
-    console.log('NEW MESSAGE');
     const [newHasUnreadMessages, newUserDisplay] = userInfo(connectedUsers);
     setUserDisplay(newUserDisplay);
     setHasUnreadMessages(newHasUnreadMessages);

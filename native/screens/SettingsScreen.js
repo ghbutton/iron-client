@@ -20,7 +20,7 @@ export default function SettingsScreen({navigation}) {
   const handleClearData = async () => {
     Alert.alert(
       'Delete account',
-      'WARNING\nThis will delete all data off of this device and if this is your only device it will delete your account. Are you sure?',
+      'WARNING\nThis will delete all data off of this device and log you out. Are you sure?',
       [
         {
           text: 'Cancel',

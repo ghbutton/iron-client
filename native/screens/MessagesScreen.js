@@ -1,4 +1,4 @@
-import React, {Component, useEffect} from 'react';
+import React, {Component, useEffect, useRef} from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -66,6 +66,7 @@ export default function MessagesScreen({navigation, route}) {
   const [now, setNow] = React.useState(new Date());
   const [currentUserId, setCurrentUserId] = React.useState(null);
   const [deviceId, setDeviceId] = React.useState(null);
+  const scrollViewRef = useRef(null);
 
   const headerHeight = useHeaderHeight();
 
@@ -160,6 +161,13 @@ export default function MessagesScreen({navigation, route}) {
   useEffect(() => {
     connectedUserIdRef.current = route.params.userId;
 
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        scrollViewRef.current.scrollToEnd();
+      }
+    );
+
     init();
 
     // TODO use a constants file for the callback names
@@ -171,6 +179,7 @@ export default function MessagesScreen({navigation, route}) {
 
     return function cleanup() {
       listenerNewMessage.remove();
+      keyboardDidShowListener.remove();
     };
   }, [route.params.userId]);
 
@@ -241,7 +250,7 @@ export default function MessagesScreen({navigation, route}) {
       </Text>
 
       <TouchableWithoutFeedback>
-        <ScrollView>{messages}</ScrollView>
+        <ScrollView ref={scrollViewRef} onContentSizeChange={() => {scrollViewRef.current.scrollToEnd();}}>{messages}</ScrollView>
       </TouchableWithoutFeedback>
       <View style={styles.bottom}>
         <View style={styles.inputContainer}>

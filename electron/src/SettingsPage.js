@@ -14,7 +14,7 @@ class SettingsPage extends Component {
   }
 
   async clearData() {
-    if (window.confirm("CAUTION\nThis will delete all messages on this device and wipe your account if this is your only device.\nAre you sure?")) {
+    if (window.confirm("CAUTION\nThis will delete all messages on this device and sign you out.\nAre you sure?")) {
       await window.controller.clearData();
       // TODO have a central place for routes;
       this.props.history.push("/loading");
