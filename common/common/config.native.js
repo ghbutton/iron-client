@@ -30,8 +30,8 @@ const config = (function() {
     },
     wsUrl: function() {
       if (isDev) {
-        return "localhost";
-//        return "192.168.5.16";
+        //        return "localhost";
+        return "192.168.5.21";
       } else {
         return "www.ironnotice.com";
       }

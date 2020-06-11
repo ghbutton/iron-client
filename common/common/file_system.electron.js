@@ -12,6 +12,10 @@ const fileSystem = (function() {
     openExternal(webpage) {
       shell.openExternal(webpage);
     },
+    fileSize: async function(path) {
+      const stats = fs.statSync(path);
+      return stats.size;
+    },
     readBase64: async function(path) {
       return fs.readFileSync(path, {encoding: "base64"});
     },

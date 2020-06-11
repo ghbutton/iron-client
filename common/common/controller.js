@@ -64,7 +64,7 @@ const applicationState = (function() {
 
       for (let i = 0; i < state.messages.length; i++) {
         const message = state.messages[i];
-        if (message.attributes.decryptedBody.type === signal.syncLocalMessageType() || message.attributes.decryptedBody.type === signal.syncLocalFileMessageType()) {
+        if (signal.syncLocalType(message.attributes.decryptedBody.type)) {
           if (message.relationships.receiver.data.id === connectedUserId.toString()) {
             connectedMessages.push(message);
           }
@@ -280,20 +280,42 @@ const controller = (function() {
     callbacks.newMessage();
   }
 
-  async function _uploadFileContent(localFileMessage) {
-    const {basename, filename} = localFileMessage.attributes.decryptedBody.data;
+  async function _uploadFileContent(localFileMessage, data64) {
+    const {basename} = localFileMessage.attributes.decryptedBody.data;
 
-    const data64 = await fileSystem.readBase64(filename);
     const {encrypted, hmacExported, sIv, signature, aesExported} = await signal.aesEncrypt(data64);
 
-    const fileUpload = await api.uploadFile({encrypted, deviceId});
+    // Split encrypted file into chunks and send those
+    // About 1MB chunk size
+    const chunkSize =  1333333;
+    const numChunks = Math.ceil(encrypted.length / chunkSize);
+    let hd = encrypted.substring(0, chunkSize);
+    let tail = encrypted.substring(chunkSize);
+    let index = 0;
 
-    if (!fileUpload) {
+    const filePackage = await api.uploadFilePackage({numChunks, deviceId});
+
+    if (!filePackage) {
       await _messageErrored(localFileMessage);
-      return;
+      return {status: "error", resp: "Upload error"};
     }
-    await applicationState.addMessageMetadata(localFileMessage, {hmacExported, sIv, signature, aesExported, basename, fileUploadId: fileUpload.id});
+
+    while (hd !== "") {
+      const fileChunk = await api.uploadFileChunk({data: hd, filePackageId: filePackage.id, index});
+
+      if (!fileChunk) {
+        await _messageErrored(localFileMessage);
+        return {status: "error", resp: "Upload error"};
+      }
+
+      index = index + 1;
+      hd = tail.substring(0, chunkSize);
+      tail = tail.substring(chunkSize);
+    }
+
+    await applicationState.addMessageMetadata(localFileMessage, {hmacExported, sIv, signature, aesExported, basename, filePackageId: filePackage.id});
     await storage.saveMessages(deviceId, applicationState.messages());
+    return {status: "ok"}
   }
 
   async function _markDelivered(idempotencyKey) {
@@ -391,13 +413,21 @@ const controller = (function() {
 
   async function _uploadFile(filename, recipientUserId) {
     logger.debug(`Sending file ${filename} to ${recipientUserId}`);
+    const numBytes = await fileSystem.fileSize(filename);
+
+    // 100 MB, 4 extra characters for padding
+    const fileLimit = 100000004;
+    if (numBytes > fileLimit) {
+      return {status: "error", resp: "File upload too big, 100MB limit"};
+    }
+
+    const data64 = await fileSystem.readBase64(filename);
     const basename = await fileSystem.basename(filename);
     const localFileMessage = await signal.localFileMessage({basename, filename}, userId, recipientUserId, deviceId);
     await applicationState.addMessage(localFileMessage);
     await storage.saveMessages(deviceId, applicationState.messages());
 
-    _uploadFileContent(localFileMessage);
-    return null;
+    return _uploadFileContent(localFileMessage, data64);
   }
 
   return {
@@ -556,11 +586,11 @@ const controller = (function() {
         }
       }
 
-      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = localFileMessage.meta.data;
+      const {hmacExported, sIv, signature, aesExported, basename, filePackageId} = localFileMessage.meta.data;
       const encryptedMessages = [];
 
       for (let i = 0; i < combinedDevices.length; i++) {
-        const encryptedMessage = await signal.encryptFileMessage(combinedDevices[i].id, {hmacExported, sIv, signature, aesExported, basename, fileUploadId}, deviceId);
+        const encryptedMessage = await signal.encryptFileMessage(combinedDevices[i].id, {hmacExported, sIv, signature, aesExported, basename, filePackageId}, deviceId);
         encryptedMessages.push(encryptedMessage);
       }
 
@@ -841,10 +871,31 @@ const controller = (function() {
       await storage.saveMessages(deviceId, applicationState.messages());
       callbacks.newDownload();
 
-      const {hmacExported, sIv, signature, aesExported, basename, fileUploadId} = message.attributes.decryptedBody.data;
-      const fileUpload = await api.downloadFile(fileUploadId);
+      const {hmacExported, sIv, signature, aesExported, basename} = message.attributes.decryptedBody.data;
+      let encrypted64 = "";
 
-      const decrypted64 = await signal.aesDecrypt({encrypted: fileUpload.attributes.data, hmacExported, sIv, signature, aesExported});
+      if (message.attributes.decryptedBody.version === 2) {
+        const {filePackageId} = message.attributes.decryptedBody.data;
+        const filePackage = await api.getFilePackage(filePackageId);
+        if (!filePackage) {
+          return {status: "error", message: "Could not download file"};
+        }
+
+        for(let i = 0; i < filePackage.attributes.num_chunks; i++) {
+          const fileChunk = await api.getFileChunk(filePackage.id, i);
+          if (!fileChunk) {
+            return {status: "error", message: "Could not download file"};
+          }
+
+          encrypted64 += fileChunk.attributes.data;
+        }
+      } else {
+      const {fileUploadId} = message.attributes.decryptedBody.data;
+        const fileUpload = await api.getFileUpload(fileUploadId);
+        encrypted64 = fileUpload.attributes.data;
+      }
+
+      const decrypted64 = await signal.aesDecrypt({encrypted: encrypted64, hmacExported, sIv, signature, aesExported});
       const directory = await this.downloadDirectory();
       const {type, path, basename: newBasename} = await fileSystem.fileDownloadPath(directory, basename);
 

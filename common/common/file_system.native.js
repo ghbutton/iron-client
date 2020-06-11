@@ -6,6 +6,10 @@ const fileSystem = (function() {
     },
     openExternal(webpage) {
     },
+    fileSize: async function(path) {
+      const stats = await RNFS.stat(path);
+      return stats.size;
+    },
     readBase64: async function(path) {
       const file = await RNFS.readFile(path, "base64");
       return file;

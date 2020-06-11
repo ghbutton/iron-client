@@ -5,11 +5,11 @@ import engine from "./signal_engine.js";
 // Rename to Crypto
 export default (function() {
   async function _messagePayload(messageString) {
-    return JSON.stringify({"type": "m", "version": "1", "data": messageString});
+    return JSON.stringify({"type": "m", "version": 1, "data": messageString});
   }
 
-  async function _fileMessagePayload({hmacExported, sIv, signature, aesExported, fileUploadId, basename}) {
-    return JSON.stringify({"type": "fm", "version": "1", "data": {hmacExported, sIv, signature, aesExported, fileUploadId, basename}});
+  async function _fileMessagePayload({hmacExported, sIv, signature, aesExported, filePackageId, basename}) {
+    return JSON.stringify({"type": "fm", "version": 2, "data": {hmacExported, sIv, signature, aesExported, filePackageId, basename}});
   }
 
   async function _sendPayload(toDeviceId, payload, myDeviceId) {
@@ -103,11 +103,8 @@ export default (function() {
     getRegistrationId: async function() {
       return engine.getRegistrationId();
     },
-    syncLocalMessageType: function() {
-      return "local_message_v1";
-    },
-    syncLocalFileMessageType: function() {
-      return "local_file_message_v1";
+    syncLocalType: function(type) {
+      return type === "local_message_v1" || type === "local_file_message_v1";
     },
     localFileMessage: async function({basename, filename}, userId, recipientUserId, deviceId) {
       const object = {"type": "local_file_message_v1", "data": {filename, basename}};

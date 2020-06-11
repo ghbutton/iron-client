@@ -432,7 +432,45 @@ const api = (function() {
         return null;
       }
     },
-    downloadFile: async function(fileUploadId) {
+    uploadFileChunk: async function({data, filePackageId, index}) {
+      const attributes = { "file_package_id": filePackageId, "index": index, "data": data}
+      const payload = await jsonApiPayload("file_chunk", attributes);
+
+      const {status, resp} = await _sendPush(apiChannel, "POST:file_chunks", payload);
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
+    },
+    uploadFilePackage: async function({numChunks, deviceId}) {
+      const attributes = { "device_id": deviceId, "num_chunks": numChunks }
+      const payload = await jsonApiPayload("file_package", attributes);
+
+      const {status, resp} = await _sendPush(apiChannel, "POST:file_packages", payload);
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
+    },
+    getFilePackage: async function(filePackageId) {
+      const {status, resp} = await _sendPush(apiChannel, "GET:file_packages", {"id": filePackageId});
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
+    },
+    getFileChunk: async function(filePackageId, index) {
+      const {status, resp} = await _sendPush(apiChannel, "GET:file_chunks", {"file_package_id": filePackageId, "index": index});
+      if (status === "ok") {
+        return resp.payload.data[0];
+      } else {
+        return null;
+      }
+    },
+    getFileUpload: async function(fileUploadId) {
       const {status, resp} = await _sendPush(apiChannel, "GET:file_uploads", {"id": fileUploadId});
       if (status === "ok") {
         return resp.payload.data[0];
